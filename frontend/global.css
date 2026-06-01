@@ -1,3 +1,21 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/*
+ * Estilos globales.
+ * Paleta de colores como variables CSS (fuente única de verdad).
+ * Se exponen como tokens semánticos en tailwind.config.js → bg-primary, text-ink, etc.
+ * Formato "R G B" para soportar modificadores de opacidad (ej. bg-secondary/20).
+ */
+@layer base {
+  :root {
+    --color-surface: 255 255 255; /* #FFFFFF */
+    --color-background: 249 250 252; /* #F9FAFC */
+    --color-accent: 231 244 253; /* #E7F4FD */
+    --color-primary: 249 206 21; /* #F9CE15 */
+    --color-secondary: 5 129 195; /* #0581C3 */
+    --color-muted: 111 112 111; /* #6F706F */
+    --color-ink: 62 61 59; /* #3E3D3B */
+  }
+}
