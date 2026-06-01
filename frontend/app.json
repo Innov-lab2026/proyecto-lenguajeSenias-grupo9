@@ -3,10 +3,9 @@
     "name": "frontend",
     "slug": "frontend",
     "version": "1.0.0",
-    "scheme": "lsa-app",
+    "scheme": "frontend",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "frontend",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
@@ -40,7 +39,8 @@
             "backgroundColor": "#000000"
           }
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true,
