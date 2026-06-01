@@ -48,7 +48,7 @@ export function Button({
       accessibilityRole="button"
       accessibilityState={{ disabled: isDisabled, busy: loading }}
       className={cn(
-        'h-14 w-full flex-row items-center justify-center rounded-xl px-4',
+        'h-14 w-full flex-row items-center justify-center gap-2 rounded-xl px-4',
         containerByVariant[variant],
         isDisabled && 'opacity-50',
         className,
