@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { Pressable, Text, View } from 'react-native'
 import type { LoginValues } from '@/src/schemas/auth'
 import { cn } from '@/src/utils/cn'
@@ -6,11 +5,14 @@ import { AuthForm, type AuthMode } from './AuthForm'
 import { GoogleButton } from './GoogleButton'
 
 interface AuthCardProps {
-  initialMode?: AuthMode
+  mode: AuthMode
+  onModeChange: (mode: AuthMode) => void
   onSubmit: (mode: AuthMode, values: LoginValues) => void
   submitting?: boolean
+  /** Error del backend a mostrar sobre el CTA. */
   serverError?: string | null
-  onModeChange?: (mode: AuthMode) => void
+  /** Mensaje informativo (ej. "revisá tu correo para confirmar tu cuenta"). */
+  infoMessage?: string | null
 }
 
 function Tab({
@@ -34,30 +36,30 @@ function Tab({
 
 /**
  * Tarjeta de autenticación con tabs (Crear Cuenta / Iniciar Sesión).
+ * Componente controlado: el `mode` lo maneja el consumidor.
  * Mobile-first: ocupa el ancho disponible y se limita a `max-w-md` centrada en web.
  */
 export function AuthCard({
-  initialMode = 'login',
+  mode,
+  onModeChange,
   onSubmit,
   submitting,
   serverError,
-  onModeChange,
+  infoMessage,
 }: AuthCardProps) {
-  const [mode, setMode] = useState<AuthMode>(initialMode)
-
-  const changeMode = (next: AuthMode) => {
-    if (next === mode) return
-    setMode(next)
-    onModeChange?.(next)
-  }
-
   return (
     <View className="w-full max-w-md self-center rounded-2xl bg-surface p-6 shadow-sm">
       {/* Tabs */}
       <View className="mb-6 flex-row gap-8">
-        <Tab label="Crear Cuenta" active={mode === 'register'} onPress={() => changeMode('register')} />
-        <Tab label="Iniciar Sesión" active={mode === 'login'} onPress={() => changeMode('login')} />
+        <Tab label="Crear Cuenta" active={mode === 'register'} onPress={() => onModeChange('register')} />
+        <Tab label="Iniciar Sesión" active={mode === 'login'} onPress={() => onModeChange('login')} />
       </View>
+
+      {infoMessage ? (
+        <View className="mb-4 rounded-xl bg-accent p-3">
+          <Text className="text-center text-sm text-secondary">{infoMessage}</Text>
+        </View>
+      ) : null}
 
       {/* Google */}
       <GoogleButton />
@@ -71,7 +73,7 @@ export function AuthCard({
         <View className="h-px flex-1 bg-muted/20" />
       </View>
 
-      {/* Formulario */}
+      {/* Formulario (se reinicia al cambiar de modo) */}
       <AuthForm
         key={mode}
         mode={mode}
