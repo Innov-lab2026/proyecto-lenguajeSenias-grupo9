@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { View } from 'react-native'
+import { KeyboardAvoidingView, Platform, ScrollView } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { AuthCard } from '@/src/components/features/auth/AuthCard'
 import type { AuthMode } from '@/src/components/features/auth/AuthForm'
@@ -43,16 +43,25 @@ export default function AuthScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
-      <View className="flex-1 justify-center px-5">
-        <AuthCard
-          mode={mode}
-          onModeChange={handleModeChange}
-          onSubmit={handleSubmit}
-          submitting={submitting}
-          serverError={serverError}
-          infoMessage={info}
-        />
-      </View>
+      <KeyboardAvoidingView
+        className="flex-1"
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <ScrollView
+          contentContainerClassName="flex-grow justify-center px-5 py-8"
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <AuthCard
+            mode={mode}
+            onModeChange={handleModeChange}
+            onSubmit={handleSubmit}
+            submitting={submitting}
+            serverError={serverError}
+            infoMessage={info}
+          />
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   )
 }

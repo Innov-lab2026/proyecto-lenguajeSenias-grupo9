@@ -20,6 +20,7 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(
         </Text>
         <TextInput
           ref={ref}
+          accessibilityLabel={label}
           placeholderTextColor="#6F706F"
           className={cn(
             'h-14 rounded-xl border bg-surface px-4 text-base text-ink',
