@@ -1,4 +1,4 @@
-import { Alert } from 'react-native'
+import { Alert, Platform } from 'react-native'
 import { Button } from '@/src/components/common/Button'
 import { GoogleIcon } from './GoogleIcon'
 
@@ -10,7 +10,14 @@ import { GoogleIcon } from './GoogleIcon'
 export function GoogleButton() {
   const onPress = () => {
     // TODO(backend): integrar OAuth (id_token/PKCE) + client IDs web/iOS/Android.
-    Alert.alert('Próximamente', 'El inicio de sesión con Google estará disponible pronto.')
+    const title = 'Próximamente'
+    const message = 'El inicio de sesión con Google estará disponible pronto.'
+    if (Platform.OS === 'web') {
+      // Alert.alert es no-op en web → usamos el alert del navegador.
+      ;(globalThis as { alert?: (msg: string) => void }).alert?.(`${title}\n\n${message}`)
+    } else {
+      Alert.alert(title, message)
+    }
   }
 
   return (

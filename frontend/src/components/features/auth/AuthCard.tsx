@@ -25,8 +25,13 @@ function Tab({
   onPress: () => void
 }) {
   return (
-    <Pressable onPress={onPress} className="items-center gap-1" accessibilityRole="tab">
-      <Text className={cn('text-base font-bold', active ? 'text-secondary' : 'text-muted')}>
+    <Pressable
+      onPress={onPress}
+      className="flex-1 items-center gap-2"
+      accessibilityRole="tab"
+      accessibilityState={{ selected: active }}
+    >
+      <Text className={cn('text-lg font-bold', active ? 'text-secondary' : 'text-muted')}>
         {label}
       </Text>
       <View className={cn('h-0.5 w-full rounded-full', active ? 'bg-secondary' : 'bg-transparent')} />
@@ -50,7 +55,7 @@ export function AuthCard({
   return (
     <View className="w-full max-w-md self-center rounded-2xl bg-surface p-6 shadow-sm">
       {/* Tabs */}
-      <View className="mb-6 flex-row gap-8">
+      <View className="mb-6 flex-row">
         <Tab label="Crear Cuenta" active={mode === 'register'} onPress={() => onModeChange('register')} />
         <Tab label="Iniciar Sesión" active={mode === 'login'} onPress={() => onModeChange('login')} />
       </View>
