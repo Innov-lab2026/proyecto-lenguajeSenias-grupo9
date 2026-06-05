@@ -7,6 +7,11 @@ module.exports = {
   presets: [require("nativewind/preset")],
   theme: {
     extend: {
+      fontFamily: {
+        // Cargadas con expo-font en app/_layout.tsx → usar como font-nunito / font-nunito-bold.
+        nunito: ["Nunito-Regular"],
+        "nunito-bold": ["Nunito-Bold"],
+      },
       colors: {
         // Tokens semánticos → leen las variables CSS de global.css.
         surface: "rgb(var(--color-surface) / <alpha-value>)",
