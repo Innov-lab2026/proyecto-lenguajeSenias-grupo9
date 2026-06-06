@@ -6,7 +6,23 @@ module.exports = {
   ],
   presets: [require("nativewind/preset")],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        // Cargadas con expo-font en app/_layout.tsx → usar como font-nunito / font-nunito-bold.
+        nunito: ["Nunito-Regular"],
+        "nunito-bold": ["Nunito-Bold"],
+      },
+      colors: {
+        // Tokens semánticos → leen las variables CSS de global.css.
+        surface: "rgb(var(--color-surface) / <alpha-value>)",
+        background: "rgb(var(--color-background) / <alpha-value>)",
+        accent: "rgb(var(--color-accent) / <alpha-value>)",
+        primary: "rgb(var(--color-primary) / <alpha-value>)",
+        secondary: "rgb(var(--color-secondary) / <alpha-value>)",
+        muted: "rgb(var(--color-muted) / <alpha-value>)",
+        ink: "rgb(var(--color-ink) / <alpha-value>)",
+      },
+    },
   },
   plugins: [],
 }
