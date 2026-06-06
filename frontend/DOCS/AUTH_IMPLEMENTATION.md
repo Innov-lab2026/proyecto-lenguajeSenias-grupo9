@@ -326,10 +326,20 @@ y diseño/responsive correctos.
 
 ---
 
-## 7. Pendiente (depende del backend)
+## 7. Pendiente
 
+### UI / diseño
+- Ajustar la **UI de login y registro** según los diseños definitivos.
+
+### Registro — nuevos campos (UI + lógica)
+- Agregar al formulario y al flujo de registro: **Nombre**, **Apellido**, **Fecha de nacimiento** y **Género**.
+- Implica actualizar: schema Zod (`schemas/auth.ts`), tipos (`types/auth.ts` / `types/user.ts`),
+  `AuthForm`, el service de registro y el contrato con el backend.
+- Reemplaza el workaround actual de `full_name` (hoy derivado del email en `services/auth.ts`).
+
+### Backend / integración
 - Apagar la capa mock y apuntar a los endpoints reales (`/api/auth/*`).
-- `full_name` opcional en registro (hoy el backend lo exige; el front envía sólo email + password).
+- Alinear el contrato de registro con los nuevos campos.
 - `GET /me` (restaurar/validar sesión), `POST /logout`, y **refresh token** (hoy la sesión dura ~1h).
 - Estrategia de **Google OAuth** (client IDs + flujo) y, si aplica, cookie httpOnly en web.
 - Formato de errores unificado para mapear mensajes en el formulario.
