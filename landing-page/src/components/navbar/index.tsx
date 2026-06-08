@@ -14,12 +14,12 @@ export default function Navbar() {
         Inicio
       </a>
 
-      <a href="#demo" className="header-link">
-        Demo
-      </a>
-
       <a href="#project" className="header-link">
         Proyecto
+      </a>
+
+      <a href="#demo" className="header-link">
+        Demo
       </a>
 
       <a href="#team" className="header-link">
