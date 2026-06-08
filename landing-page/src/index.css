@@ -41,6 +41,9 @@ html {
   --color-success: #FED75F;
   --color-success-hover: #F7BB18;
   --color-success-border: #FFC410;
+
+  /* Header */
+  --header-height: 140px;
 }
 
 body {

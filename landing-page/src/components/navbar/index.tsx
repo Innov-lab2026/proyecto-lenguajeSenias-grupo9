@@ -4,11 +4,13 @@ export default function Navbar() {
   return (
     <nav
       className="
-    flex
-    items-center
-    gap-4 md:gap-6 lg:gap-8
-    text-base lg:text-lg
-  "
+      flex
+      items-center
+      gap-4 md:gap-6 lg:gap-16
+      text-base lg:text-[28px]
+      text-foreground
+      font-semibold
+    "
     >
       <a href="#home" className="header-link">
         Inicio

@@ -2,8 +2,8 @@ export default function SectionLayout({ id, className, children }: { id: string;
     return (
         <section
             id={id}
-            className={`min-h-[calc(100vh-5rem)]
-                        scroll-mt-20
+            className={`min-h-[calc(100vh-var(--header-height))]
+                        scroll-mt-(--header-height)
                         ${className || ''}`}
         >
             {children}

@@ -4,16 +4,19 @@ export default function ButtonDownload() {
       className="
         flex items-center gap-2
         px-5 py-2.5
-        rounded-xl
+        bg-success hover:bg-success-hover
+        border-success-border
+        rounded-full
         border
-        text-base
-        font-medium
+        text-[26px]
+        font-bold
+        text-foreground
         transition-colors
         hover:cursor-pointer
       "
     >
       Descargar
-      <span aria-hidden="true">⌵</span>
+      <span aria-hidden="true" className="text-[16px]">⌵</span>
     </button>
   );
 }

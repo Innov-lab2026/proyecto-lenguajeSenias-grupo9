@@ -1,9 +1,9 @@
 import Navbar from "../components/navbar";
-import Title from "../components/tittle";
+import LogoText from "../components/logo-text";
 export default function Header() {
   return (
-    <header className="flex items-center justify-between bg-gray-800 text-white sticky top-0 z-50 h-20 px-10">
-      <Title />
+    <header className="flex bg-surface items-center justify-between sticky top-0 z-50 h-(--header-height) px-10">
+      <LogoText />
       <Navbar />
     </header>
   );
