@@ -1,7 +1,15 @@
+import SectionLayout from '../layout/SectionLayout'
+
 export default function Team() {
     return (
-        <section id="team" className="flex flex-col items-center justify-center gap-6 p-8 bg-gray-300 text-center h-screen">
-            <h1 className="text-4xl font-bold">Personas que hacen posbile LSA</h1>
-        </section>
-    )
+        <SectionLayout
+            id="team"
+            className="bg-gray-100">
+
+            <div className="flex flex-col items-center justify-center gap-6 p-8 text-center h-full">
+                <h1 className="text-4xl font-bold">Personas que hacen posible CarpiSeñas</h1>
+            </div>
+
+        </SectionLayout>
+    );
 }

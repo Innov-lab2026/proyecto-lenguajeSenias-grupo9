@@ -1,11 +1,11 @@
+import SectionLayout from '../layout/SectionLayout'
+
 export default function Project() {
     return (
-        <section
+        <SectionLayout
             id="project"
             className="
-                min-h-[calc(100vh-5rem)]
                 bg-gray-200
-                scroll-mt-20
                 "
         >
             <div className="max-w-6xl mx-auto px-6 lg:px-16 mb-15">
@@ -87,6 +87,6 @@ export default function Project() {
                     </article>
                 </div>
             </div>
-        </section>
+        </SectionLayout>
     )
 }

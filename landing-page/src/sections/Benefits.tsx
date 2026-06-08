@@ -1,20 +1,15 @@
-export default function Benefits() {
-  return (
-    <section
-      id="info"
-      className="
-         min-h-[calc(100vh-5rem)]
-        bg-gray-200
-        scroll-mt-20
-      "
-    >
-      <div className="max-w-6xl mx-auto px-6 lg:px-16 mb-15">
-        
-        <h1 className="text-4xl text-center font-medium mb-16">
-          ¿Por qué usar Carpiseñas?
-        </h1>
+import SectionLayout from '../layout/SectionLayout'
 
-      </div>
-    </section>
-  );
+export default function Benefits() {
+    return (
+        <SectionLayout
+            id="benefits"
+            className="bg-gray-300">
+
+            <div className="flex flex-col items-center justify-center gap-6 p-8 text-center h-full">
+                <h1 className="text-4xl font-bold">¿Por qué usar CarpiSeñas?</h1>
+            </div>
+
+        </SectionLayout>
+    );
 }
