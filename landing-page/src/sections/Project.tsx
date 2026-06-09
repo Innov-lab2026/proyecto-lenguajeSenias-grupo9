@@ -4,37 +4,21 @@ export default function Project() {
     return (
         <SectionLayout
             id="project"
-            className="
-                bg-gray-200
-                "
         >
-            <div className="max-w-6xl mx-auto px-6 lg:px-16 mb-15">
+            <div className="max-w-6xl mx-auto px-6 lg:px-16 my-10">
 
-                <h1 className="text-4xl text-center font-medium mb-16">
-                    ¿Qué es LSA App?
+                <h1 className="text-4xl text-center font-bold text-[56px] mb-16 pt-10">
+                    ¿Qué es CarpiSeñas?
                 </h1>
 
-                <div className="grid lg:grid-cols-2 gap-12 items-center">
-
-                    <article className="flex justify-center">
-                        <div className="w-64 h-64 bg-gray-300" />
-                    </article>
-
-                    <article className="max-w-md">
-                        <p className="text-lg leading-relaxed mb-8">
-                            Una app pensada para acercar el Lenguaje de Señas Argentina a
-                            personas oyentes de manera accesible, divertida e inclusiva.
-                        </p>
-
-                        <p className="text-lg leading-relaxed">
-                            Creemos en un mundo donde la comunicación no tenga barreras y el
-                            aprendizaje sea una experiencia significativa para todos.
-                        </p>
-                    </article>
-                </div>
+                <p className="text-center text-[30px] leading-relaxed max-w-5xl mx-auto">
+                    Carpiseñas es una App pensada para acercar el Lenguaje de 
+                    Señas Argentina a personas oyentes de manera accesible, 
+                    divertida e inclusiva.
+                </p>
             </div>
 
-            <div className="bg-gray-200 py-4">
+            <div className=" py-4">
                 <div className=" max-w-6xl mx-auto px-6 lg:px-16">
 
                     <article className="grid md:grid-cols-3 gap-10 ">
