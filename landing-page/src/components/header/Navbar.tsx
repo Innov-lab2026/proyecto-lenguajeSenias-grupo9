@@ -1,4 +1,4 @@
-import ButtonDownload from "../button-dowload";
+import ButtonSuccess from "../common/ButtonSuccess";
 
 export default function Navbar() {
   return (
@@ -8,7 +8,6 @@ export default function Navbar() {
       items-center
       gap-4 md:gap-6 lg:gap-16
       text-base lg:text-[28px]
-      text-foreground
       font-semibold
     "
     >
@@ -28,7 +27,7 @@ export default function Navbar() {
         Equipo
       </a>
 
-      <ButtonDownload />
+      <ButtonSuccess children="Descargar" span={true} />
     </nav>
   );
 }
