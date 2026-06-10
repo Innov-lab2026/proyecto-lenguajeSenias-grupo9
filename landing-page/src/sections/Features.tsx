@@ -3,15 +3,16 @@ import letraA from '../assets/images/letra-A.png'
 import manito from '../assets/images/manito.svg'
 
 import SectionLayout from '../layout/SectionLayout'
+import ButtonSuccess from '../components/common/ButtonSuccess';
 
 export default function Features() {
     return (
         <SectionLayout
             id="features">
 
-            <div className="flex flex-col items-center justify-center gap-6 pt-22 text-center h-full">
-                <h2 className="text-[56px] pb-12">Aprende paso a paso</h2>
-                <div className="flex flex-col md:flex-row gap-6">
+            <div className="flex flex-col items-center justify-center gap-12 my-22 text-center h-full">
+                <h2 className="text-[56px] mb-12">Aprende paso a paso</h2>
+                <div className="flex flex-col md:flex-row gap-15 mb-10">
                     <FeatureCard
                         title="Abecedarios LSA"
                         description="Aprende las letras del abecedario con ejercicios interactivos. Puedes hacerlo por letra o ingresando la palabra que te interese."
@@ -23,6 +24,8 @@ export default function Features() {
                         image={manito}
                         className="w-70" />
                 </div>
+                <p className="text-[35px]">Ingresa a la App para acceder a los módulos</p>
+                <ButtonSuccess children="Ir a la App" className="px-18"/>
             </div>
 
         </SectionLayout>
