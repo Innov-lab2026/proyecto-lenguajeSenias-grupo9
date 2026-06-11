@@ -59,7 +59,7 @@ export function Button({
       ) : (
         <>
           {leftIcon}
-          <Text className={cn('text-base font-bold', textByVariant[variant])}>{label}</Text>
+          <Text className={cn('font-nunito text-base font-bold', textByVariant[variant])}>{label}</Text>
         </>
       )}
     </Pressable>

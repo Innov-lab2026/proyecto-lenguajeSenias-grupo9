@@ -152,13 +152,16 @@ frontend/
 │   ├── components/
 │   │   ├── common/               ← primitivos reutilizables
 │   │   │   ├── Button.tsx
+│   │   │   ├── Checkbox.tsx
 │   │   │   └── TextField.tsx
 │   │   └── features/
 │   │       └── auth/             ← UI específica de auth
 │   │           ├── AuthCard.tsx       ← tarjeta con tabs
-│   │           ├── AuthForm.tsx       ← formulario (RHF + Zod)
+│   │           ├── LoginForm.tsx      ← form de login (RHF + Zod)
+│   │           ├── RegisterForm.tsx   ← form de registro (RHF + Zod)
 │   │           ├── GoogleButton.tsx   ← botón "Continuar con Google" (stub)
-│   │           └── GoogleIcon.tsx     ← logo de Google (expo-image)
+│   │           ├── GoogleIcon.tsx     ← logo de Google (expo-image)
+│   │           └── comingSoon.ts      ← aviso "Próximamente" cross-platform
 │   ├── hooks/
 │   │   └── features/
 │   │       └── auth/
@@ -179,9 +182,10 @@ frontend/
 │   │   ├── auth.ts               ← contratos request/response
 │   │   └── user.ts               ← modelo de usuario + normalización
 │   └── utils/
-│       └── cn.ts                 ← merge de clases de Tailwind
+│       ├── cn.ts                 ← merge de clases de Tailwind
+│       └── date.ts               ← máscara/parseo de fechas DD/MM/AAAA
 ├── assets/
-│   ├── fonts/                    ← Nunito-Regular.ttf, Nunito-Bold.ttf
+│   ├── fonts/                    ← Nunito-VariableFont_wght.ttf
 │   ├── icons/                    ← google.svg
 │   └── images/
 ├── DOCS/

@@ -1,13 +1,17 @@
 import { Pressable, Text, View } from 'react-native'
-import type { LoginValues } from '@/src/schemas/auth'
+import type { LoginValues, RegisterValues } from '@/src/schemas/auth'
 import { cn } from '@/src/utils/cn'
-import { AuthForm, type AuthMode } from './AuthForm'
+import { LoginForm } from './LoginForm'
+import { RegisterForm } from './RegisterForm'
 import { GoogleButton } from './GoogleButton'
+
+export type AuthMode = 'login' | 'register'
 
 interface AuthCardProps {
   mode: AuthMode
   onModeChange: (mode: AuthMode) => void
-  onSubmit: (mode: AuthMode, values: LoginValues) => void
+  onLogin: (values: LoginValues, rememberMe: boolean) => void
+  onRegister: (values: RegisterValues) => void
   submitting?: boolean
   /** Error del backend a mostrar sobre el CTA. */
   serverError?: string | null
@@ -31,7 +35,13 @@ function Tab({
       accessibilityRole="tab"
       accessibilityState={{ selected: active }}
     >
-      <Text className={cn('text-lg font-bold', active ? 'text-secondary' : 'text-muted')}>
+      {/* Tab activa en Nunito bold; inactiva en Nunito regular (según diseño). */}
+      <Text
+        className={cn(
+          'font-nunito text-lg',
+          active ? 'font-bold text-secondary' : 'font-normal text-muted',
+        )}
+      >
         {label}
       </Text>
       <View className={cn('h-0.5 w-full rounded-full', active ? 'bg-secondary' : 'bg-transparent')} />
@@ -47,7 +57,8 @@ function Tab({
 export function AuthCard({
   mode,
   onModeChange,
-  onSubmit,
+  onLogin,
+  onRegister,
   submitting,
   serverError,
   infoMessage,
@@ -62,7 +73,9 @@ export function AuthCard({
 
       {infoMessage ? (
         <View className="mb-4 rounded-xl bg-accent p-3">
-          <Text className="text-center text-sm text-secondary">{infoMessage}</Text>
+          <Text className="text-center font-nunito text-sm font-bold text-secondary">
+            {infoMessage}
+          </Text>
         </View>
       ) : null}
 
@@ -72,23 +85,21 @@ export function AuthCard({
       {/* Divisor */}
       <View className="my-5 flex-row items-center gap-3">
         <View className="h-px flex-1 bg-muted/20" />
-        <Text className="text-xs font-semibold uppercase tracking-wide text-muted">
+        <Text className="font-nunito text-xs font-bold uppercase tracking-wide text-muted">
           O utiliza tu email
         </Text>
         <View className="h-px flex-1 bg-muted/20" />
       </View>
 
-      {/* Formulario (se reinicia al cambiar de modo) */}
-      <AuthForm
-        key={mode}
-        mode={mode}
-        onSubmit={(values) => onSubmit(mode, values)}
-        submitting={submitting}
-        serverError={serverError}
-      />
+      {/* Formulario según el modo */}
+      {mode === 'login' ? (
+        <LoginForm onSubmit={onLogin} submitting={submitting} serverError={serverError} />
+      ) : (
+        <RegisterForm onSubmit={onRegister} submitting={submitting} serverError={serverError} />
+      )}
 
       {/* Footer términos */}
-      <Text className="mt-5 text-center text-xs text-muted">
+      <Text className="mt-5 text-center font-nunito text-xs font-bold text-muted">
         Al registrarte, confirmas tu aceptación de los Términos de Servicio de LSAprende!.
       </Text>
     </View>

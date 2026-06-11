@@ -7,6 +7,12 @@
  * Paleta de colores como variables CSS (fuente única de verdad).
  * Se exponen como tokens semánticos en tailwind.config.js → bg-primary, text-ink, etc.
  * Formato "R G B" para soportar modificadores de opacidad (ej. bg-secondary/20).
+ *
+ * Tipografía: Nunito (variable font, assets/fonts/Nunito-VariableFont_wght.ttf).
+ * NOTA: NativeWind no soporta @font-face con url() local ("Importing local resources
+ * in CSS is not supported yet"), así que la fuente se carga con expo-font en
+ * app/_layout.tsx (en web inyecta el @font-face automáticamente). Usar vía
+ * font-nunito (+ font-bold / font-normal), definido en tailwind.config.js.
  */
 @layer base {
   :root {
