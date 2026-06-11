@@ -1,4 +1,6 @@
 import { http } from './http'
+import { ddMmYyyyToIso } from '@/src/utils/date'
+import type { RegisterValues } from '@/src/schemas/auth'
 import type {
   LoginRequest,
   LoginResponse,
@@ -15,14 +17,21 @@ const USE_MOCK = process.env.EXPO_PUBLIC_USE_MOCK_AUTH === 'true'
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 /**
- * Workaround temporal: el backend actual exige `full_name`. La UI sólo envía
- * email + password (decisión de diseño), así que derivamos un nombre del email.
- * TODO(backend): hacer `full_name` opcional y quitar esto.
+ * Mapea los valores del formulario de registro al formato del endpoint.
+ * `full_name` se mantiene por compatibilidad con el backend actual.
  */
-function withFullNameFallback(payload: RegisterRequest): RegisterRequest {
-  if (payload.full_name) return payload
-  const derived = payload.email.split('@')[0]
-  return { ...payload, full_name: derived }
+export function toRegisterRequest(values: RegisterValues): RegisterRequest {
+  const firstName = values.firstName.trim()
+  const lastName = values.lastName.trim()
+  return {
+    email: values.email,
+    password: values.password,
+    first_name: firstName,
+    last_name: lastName,
+    birth_date: ddMmYyyyToIso(values.birthDate),
+    gender: values.gender,
+    full_name: `${firstName} ${lastName}`,
+  }
 }
 
 export async function login(payload: LoginRequest): Promise<LoginResponse> {
@@ -51,16 +60,14 @@ export async function register(payload: RegisterRequest): Promise<RegisterRespon
       user: {
         id: 'mock-user-id',
         email: payload.email,
-        user_metadata: { full_name: payload.email.split('@')[0] },
+        user_metadata: { full_name: payload.full_name },
       },
     }
   }
 
-  const { data } = await http.post<RegisterResponse>(
-    '/auth/register',
-    withFullNameFallback(payload),
-  )
+  const { data } = await http.post<RegisterResponse>('/auth/register', payload)
   return data
 }
 
 // TODO(backend): me() y logout() cuando existan los endpoints (/api/auth/me, /logout).
+// TODO(backend): recupero de contraseña (UI de referencia en local/desing/recover_password.png).

@@ -8,9 +8,9 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        // Cargadas con expo-font en app/_layout.tsx → usar como font-nunito / font-nunito-bold.
-        nunito: ["Nunito-Regular"],
-        "nunito-bold": ["Nunito-Bold"],
+        // Nunito variable: cargada con expo-font en app/_layout.tsx (nativo y web).
+        // El peso se controla con font-normal / font-bold.
+        nunito: ["Nunito"],
       },
       colors: {
         // Tokens semánticos → leen las variables CSS de global.css.

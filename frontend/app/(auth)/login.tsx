@@ -1,9 +1,8 @@
 import { useState } from 'react'
-import { KeyboardAvoidingView, Platform, ScrollView } from 'react-native'
+import { KeyboardAvoidingView, ScrollView } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { AuthCard } from '@/src/components/features/auth/AuthCard'
-import type { AuthMode } from '@/src/components/features/auth/AuthForm'
-import type { LoginValues } from '@/src/schemas/auth'
+import { AuthCard, type AuthMode } from '@/src/components/features/auth/AuthCard'
+import type { LoginValues, RegisterValues } from '@/src/schemas/auth'
 import { useLogin } from '@/src/hooks/features/auth/useLogin'
 import { useRegister } from '@/src/hooks/features/auth/useRegister'
 import { getApiErrorMessage } from '@/src/services/http'
@@ -26,12 +25,13 @@ export default function AuthScreen() {
     register.reset()
   }
 
-  const handleSubmit = (submittedMode: AuthMode, values: LoginValues) => {
+  const handleLogin = (values: LoginValues, rememberMe: boolean) => {
     setInfo(null)
-    if (submittedMode === 'login') {
-      login.mutate(values)
-      return
-    }
+    login.mutate({ payload: values, rememberMe })
+  }
+
+  const handleRegister = (values: RegisterValues) => {
+    setInfo(null)
     register.mutate(values, {
       onSuccess: (data) => {
         // Sin auto-login: volvemos a login y mostramos el aviso de confirmación.
@@ -43,10 +43,9 @@ export default function AuthScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background">
-      <KeyboardAvoidingView
-        className="flex-1"
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
+      {/* "padding" también en Android: con edge-to-edge (SDK 54) la ventana ya no
+          se redimensiona sola y el teclado tapaba los inputs inferiores. */}
+      <KeyboardAvoidingView className="flex-1" behavior="padding">
         <ScrollView
           contentContainerClassName="flex-grow justify-center px-5 py-8"
           keyboardShouldPersistTaps="handled"
@@ -55,7 +54,8 @@ export default function AuthScreen() {
           <AuthCard
             mode={mode}
             onModeChange={handleModeChange}
-            onSubmit={handleSubmit}
+            onLogin={handleLogin}
+            onRegister={handleRegister}
             submitting={submitting}
             serverError={serverError}
             infoMessage={info}

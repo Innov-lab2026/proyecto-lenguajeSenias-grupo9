@@ -15,8 +15,7 @@ const queryClient = new QueryClient()
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
-    'Nunito-Regular': require('../assets/fonts/Nunito-Regular.ttf'),
-    'Nunito-Bold': require('../assets/fonts/Nunito-Bold.ttf'),
+    Nunito: require('../assets/fonts/Nunito-VariableFont_wght.ttf'),
   })
 
   const status = useSessionStore((s) => s.status)
