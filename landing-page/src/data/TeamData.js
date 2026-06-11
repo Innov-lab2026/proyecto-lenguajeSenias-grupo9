@@ -1,7 +1,7 @@
 export const teamData = {
     data: {
         title: "Data Analytic",
-        description: "",
+        description: "Analizamos y procesamos los datos de señas para entrenar y mejorar el modelo de reconocimiento. Construimos datasets, métricas y visualizaciones que guían las decisiones del proyecto.",
         members: [
             { name: "Matias De Vivo", linkedin: "", github: "" },
             { name: "Inés Abarrategui", linkedin: "", github: "" },
@@ -10,7 +10,7 @@ export const teamData = {
     },
     uxui: {
         title: "Diseño UX/UI",
-        description: "",
+        description: "Diseñamos interfaces accesibles y responsivas enfocadas en usabilidad y aprendizaje visual. Realizamos research, wireframes y prototipos para optimizar la experiencia dentro de la plataforma LSA.",
         members: [
             { name: "Sol Diessler", linkedin: "", github: "" },
             { name: "Belén Coronel", linkedin: "", github: "" },
@@ -19,7 +19,7 @@ export const teamData = {
     },
     frontend: {
         title: "Frontend",
-        description: "",
+        description: "Desarrollamos la interfaz web y mobile de la plataforma con foco en accesibilidad y rendimiento. Integramos los módulos de aprendizaje y la práctica de señas en una experiencia fluida.",
         members: [
             { name: "Ezequiel Oliver", linkedin: "", github: "" },
             { name: "María Cerpa", linkedin: "", github: "" },
@@ -28,7 +28,7 @@ export const teamData = {
     },
     backend: {
         title: "Backend",
-        description: "",
+        description: "Construimos la API y los servicios que sostienen la plataforma. Gestionamos la autenticación, la base de datos y la integración con el modelo de reconocimiento de señas.",
         members: [
             { name: "Elisa Aroya", linkedin: "", github: "" },
             { name: "Araceli Fernández", linkedin: "", github: "" },
@@ -37,7 +37,7 @@ export const teamData = {
     },
     qa: {
         title: "Testing QA",
-        description: "",
+        description: "Verificamos la calidad de cada entrega mediante pruebas funcionales y de usabilidad. Diseñamos casos de prueba y reportamos hallazgos para asegurar una experiencia confiable.",
         members: [
             { name: "María Martin", linkedin: "", github: "" },
             { name: "Julian Salazar", linkedin: "", github: "" },
