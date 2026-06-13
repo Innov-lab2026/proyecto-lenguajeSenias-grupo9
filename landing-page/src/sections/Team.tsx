@@ -21,8 +21,7 @@ const teamIcons: Record<string, string> = {
 export default function Team() {
     return (
         <SectionLayout
-            id="team"
-            className="bg-gray-100">
+            id="team">
 
             <div className="flex flex-col items-center gap-6 p-8 text-center">
                 <h1 className="text-4xl font-bold mb-12">Personas que hacen posible CarpiSeñas</h1>

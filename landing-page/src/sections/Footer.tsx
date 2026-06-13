@@ -1,7 +1,8 @@
 export default function Footer() {
     return (
-        <footer className="flex flex-col items-center justify-center gap-4 p-4 bg-gray-800 text-white text-center">
-            <p className="text-sm">&copy; 2024 LSA APP. Todos los derechos reservados.</p>
+        <footer className="flex items-center justify-between gap-4 p-4 bg-surface rounded-t-full h-28 px-20">
+            <p className="font-bold text-[28px]">CarpiSeñas</p>
+            <p className="text-[12px]">&copy; 2026 Carpiseñas. Todos los derechos reservados.</p>
         </footer>
     )
 }

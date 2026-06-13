@@ -12,7 +12,7 @@ export default function Demo() {
                     <h2 className="text-[56px] text-left">Jugá y aprendé desde ahora</h2>
                     <p className="text-[35px] text-left">Explora una lección del abecedario y descubrí como es aprender LSA de forma divertida</p>
                 </div>
-                <div className="bg-[#123062] w-xl text-white flex flex-col items-center justify-center gap-4 p-8 rounded-4xl">
+                <div className="bg-[#123062] md:w-xl text-white flex flex-col items-center justify-center gap-4 p-8 rounded-4xl">
                     <img src={demo} alt="Demo" className="w-48 h-auto" />
                     <fieldset className="grid grid-cols-3 grid-rows-2 gap-8 py-8">
                         <legend className="grid col-span-3 row-span-1 text-center">

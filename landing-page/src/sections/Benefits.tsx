@@ -1,5 +1,4 @@
 import SectionLayout from '../layout/SectionLayout'
-import benefitsBg from '../assets/images/benefits-bg.png'
 import carpiArg from '../assets/images/CarpiArg.png'
 
 export default function Benefits() {
@@ -10,7 +9,7 @@ export default function Benefits() {
 
             <div className="">
                 <h2 className="text-[56px] font-bold text-center pb-20">¿Por qué usar CarpiSeñas?</h2>
-                <div className="flex justify-evenly items-stretch gap-6 max-w-7xl mx-auto">
+                <div className="flex flex-col md:flex-row justify-evenly items-stretch gap-6 max-w-7xl mx-auto">
                     <div className="flex flex-col justify-center align-start gap-10 w-auto max-w-150 h-full">
                         <div className="flex flex-col gap-1 max-w-96">
                             <h3 className="text-[32px] font-bold">Inclusión y empatía</h3>
