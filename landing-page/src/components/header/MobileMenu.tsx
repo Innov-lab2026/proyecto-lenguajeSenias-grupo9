@@ -1,13 +1,22 @@
 
+import { useEffect } from "react";
 import ButtonSuccess from "../common/ButtonSuccess";
+
 export default function MobileMenu({ closeMenu, navLinks }:
     { closeMenu: () => void, navLinks: { name: string, href: string }[] }) {
+
+    useEffect(() => {
+        document.body.style.overflow = "hidden";
+        return () => {
+            document.body.style.overflow = "unset";
+        };
+    }, []);
 
     return (
         <>
             <div
                 className="fixed top-0 left-0 w-full h-full z-10
-                               bg-linear-to-b from-accent/90 to-transparent
+                               bg-background pointer-events-none
                                animate-fade-in"
                 onClick={closeMenu}
                 aria-hidden="true">
