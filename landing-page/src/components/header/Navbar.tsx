@@ -1,4 +1,7 @@
-import ButtonSuccess from "../common/ButtonSuccess";
+import { useState } from "react";
+import MobileMenu from "./MobileMenu";
+import DesktopMenu from "./DesktopMenu";
+import ToggleMenu from "./ToggleMenu";
 
 const navLinks = [
   { name: "Inicio", href: "#home" },
@@ -8,27 +11,22 @@ const navLinks = [
 ];
 
 export default function Navbar() {
-  return (
-    <nav
-      className="
-      flex
-      items-center
-      gap-4 md:gap-6 xl:gap-16
-      text-sm md:text-base lg:text-2xl xl:text-3xl
-      font-semibold
-    "
-    >
-      {navLinks.map((link) => (
-        <a
-          key={link.name}
-          href={link.href}
-          className="hover:text-success transition-colors"
-        >
-          {link.name}
-        </a>
-      ))}
+  const [menuOpen, setMenuOpen] = useState(false);
+  const toggleMenu = () => setMenuOpen(!menuOpen);
+  const closeMenu = () => setMenuOpen(false);
 
-      <ButtonSuccess children="Descargar" span={true} />
-    </nav>
+  return (
+    <>
+      {/* Desktop menu */}
+      <DesktopMenu navLinks={navLinks} />
+
+      { /* Toggle menu */}
+      <ToggleMenu menuOpen={menuOpen} toggleMenu={toggleMenu} />
+
+      {/* Mobile menu */}
+      {menuOpen && (
+        <MobileMenu closeMenu={closeMenu} navLinks={navLinks} />
+      )}
+    </>
   );
 }
