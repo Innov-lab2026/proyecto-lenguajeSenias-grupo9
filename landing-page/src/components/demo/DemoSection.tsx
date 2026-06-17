@@ -1,5 +1,5 @@
 import ButtonSuccess from '../common/ButtonSuccess'
-import FeatureCard from './FeatureCard'
+import FeatureCard from './DemoFeatureCard'
 import SectionHeader from '../common/SectionHeader'
 import demo from '../../assets/images/demo/demo.png'
 import letraA from '../../assets/images/demo/letra-A.webp'
