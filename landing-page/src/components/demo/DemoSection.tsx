@@ -2,7 +2,7 @@ import ButtonSuccess from '../common/ButtonSuccess'
 import FeatureCard from './FeatureCard'
 import DemoHeader from './DemoHeader'
 import demo from '../../assets/images/demo/demo.png'
-import letraA from '../../assets/images/demo/letra-A.png'
+import letraA from '../../assets/images/demo/letra-A.webp'
 import manito from '../../assets/images/demo/manito.svg'
 
 export default function DemoSection() {
@@ -43,7 +43,7 @@ export default function DemoSection() {
                                     flex flex-col items-center justify-center gap-4 
                                     p-8 rounded-4xl aspect-[1/1.39]">
 
-                    <img src={demo} alt="Demo" className="w-48 h-auto" />
+                    <img src={demo} alt="Demo" className="w-48 h-auto" loading="lazy"/>
 
                     <fieldset className="grid grid-cols-3 grid-rows-2 gap-8 py-8">
 

@@ -55,7 +55,7 @@ export default function TeamCurve(
                             hover:scale-110
                             ${active ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}`}
             >
-                <img src={icon} alt={title} className="w-14 h-14" />
+                <img src={icon} alt={title} className="w-14 h-14" loading="lazy"/>
             </div>
         </div>
     );
