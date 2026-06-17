@@ -1,6 +1,6 @@
 import ButtonSuccess from '../common/ButtonSuccess'
 import FeatureCard from './FeatureCard'
-import DemoHeader from './DemoHeader'
+import SectionHeader from '../common/SectionHeader'
 import demo from '../../assets/images/demo/demo.png'
 import letraA from '../../assets/images/demo/letra-A.webp'
 import manito from '../../assets/images/demo/manito.svg'
@@ -15,7 +15,11 @@ export default function DemoSection() {
             flex flex-col items-center pb-20">
 
             { /* Titulo y descripcion */}
-            <DemoHeader />
+            <SectionHeader
+                title="Aprendé jugando"
+                text="Desde el abecedario hasta conversaciones cotidianas,
+                    avanzá a tu ritmo mediante juegos y desafíos"
+            />
 
             { /* Contenido principal */}
             <div className="flex flex-col md:flex-row items-center justify-center gap-12 
@@ -43,7 +47,7 @@ export default function DemoSection() {
                                     flex flex-col items-center justify-center gap-4 
                                     p-8 rounded-4xl aspect-[1/1.39]">
 
-                    <img src={demo} alt="Demo" className="w-48 h-auto" loading="lazy"/>
+                    <img src={demo} alt="Demo" className="w-48 h-auto" loading="lazy" />
 
                     <fieldset className="grid grid-cols-3 grid-rows-2 gap-8 py-8">
 
@@ -111,7 +115,7 @@ export default function DemoSection() {
                         </button>
 
                     </fieldset>
-                    
+
                 </div>
 
             </div>
