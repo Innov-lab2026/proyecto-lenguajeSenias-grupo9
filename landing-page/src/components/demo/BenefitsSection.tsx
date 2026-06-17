@@ -1,6 +1,6 @@
 import BenefitsContent from './BenefitsContent'
 import iconCheck from '../../assets/images/demo/icon-check.svg'
-import BenefitsIlustration from './BenefitsIlustration'
+import BenefitsIllustration from './BenefitsIllustration'
 
 export default function BenefitsSection() {
     { /* First section of Demo.tsx */ }
@@ -45,7 +45,7 @@ export default function BenefitsSection() {
                 </div>
 
                 { /* Image */}
-                <BenefitsIlustration />
+                <BenefitsIllustration />
 
             </div>
 
