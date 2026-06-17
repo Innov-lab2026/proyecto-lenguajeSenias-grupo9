@@ -1,15 +1,61 @@
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import ButtonSuccess from "../common/ButtonSuccess";
 
 export default function MobileMenu({ closeMenu, navLinks }:
     { closeMenu: () => void, navLinks: { name: string, href: string }[] }) {
+
+    const navRef = useRef<HTMLElement>(null);
 
     useEffect(() => {
         document.body.style.overflow = "hidden";
 
         return () => {
             document.body.style.overflow = "unset";
+        };
+    }, []);
+
+    // Focus-trap: enfoca el primer elemento al abrir, mantiene el foco dentro
+    // del menú con Tab/Shift+Tab y lo devuelve al disparador al cerrar.
+    useEffect(() => {
+        const nav = navRef.current;
+        if (!nav) return;
+
+        const previouslyFocused = document.activeElement as HTMLElement | null;
+
+        const getFocusable = () =>
+            Array.from(
+                nav.querySelectorAll<HTMLElement>(
+                    'a[href], button, input, [tabindex]:not([tabindex="-1"])'
+                )
+            );
+
+        getFocusable()[0]?.focus();
+
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key !== "Tab") return;
+
+            const focusable = getFocusable();
+            if (focusable.length === 0) return;
+
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+            const active = document.activeElement;
+
+            if (event.shiftKey && active === first) {
+                event.preventDefault();
+                last.focus();
+            } else if (!event.shiftKey && active === last) {
+                event.preventDefault();
+                first.focus();
+            }
+        };
+
+        nav.addEventListener("keydown", handleKeyDown);
+
+        return () => {
+            nav.removeEventListener("keydown", handleKeyDown);
+            previouslyFocused?.focus();
         };
     }, []);
 
@@ -37,7 +83,7 @@ export default function MobileMenu({ closeMenu, navLinks }:
                 aria-hidden="true">
             </div>
 
-            <nav className="fixed bg-background top-30 left-1/2 w-full max-w-100 rounded-lg
+            <nav ref={navRef} className="fixed bg-background top-30 left-1/2 w-full max-w-100 rounded-lg
                         text-xl transform translate-x-[-50%] text-center p-10
                         animate-slide-down z-20"
                 aria-label="Mobile navigation">
