@@ -10,25 +10,23 @@ const PATHS = {
 } as const;
 
 export default function TeamCurve(
-    { side, active, highlight, icon, title }:
+    { side, active, icon, title }:
         {
-            side: 'left' | 'right'; active: boolean; highlight: boolean;
+            side: 'left' | 'right'; active: boolean;
             icon: string; title: string
         }) {
 
     const path = PATHS[side];
 
     return (
-        <div className="group relative hidden md:block h-full w-[264px] shrink-0">
+        <div className="relative hidden lg:block h-full w-66 shrink-0">
             {/* Arco: nace y termina en el eje central, se curva hacia un lado.
-                Se revela de arriba hacia abajo (clip-path) en accent y decanta
-                a negro (currentColor). No se usa stroke-dasharray porque, junto
-                con non-scaling-stroke, deja huecos en las uniones entre tramos */}
+                Se revela de arriba hacia abajo (clip-path) en accent fijo.
+                No se usa stroke-dasharray porque, junto con non-scaling-stroke,
+                deja huecos en las uniones entre tramos */}
             <svg
-                className={`absolute inset-y-0 w-[132px] h-full overflow-visible
-                            transition-colors duration-700
-                            ${highlight ? 'text-accent' : 'text-black'}
-                            group-hover:text-accent
+                className={`absolute inset-y-0 w-33 h-full overflow-visible
+                            text-accent
                             ${side === 'right' ? 'left-1/2' : 'right-1/2'}`}
                 viewBox="0 0 132 260"
                 preserveAspectRatio="none"
@@ -57,10 +55,7 @@ export default function TeamCurve(
                             hover:scale-110
                             ${active ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}`}
             >
-                <img src={icon} alt={title}
-                    className={`w-14 h-14 transition-[filter] duration-700
-                                ${highlight ? '' : 'brightness-0'}
-                                group-hover:brightness-100`} />
+                <img src={icon} alt={title} className="w-14 h-14" />
             </div>
         </div>
     );

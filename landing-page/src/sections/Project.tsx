@@ -7,6 +7,7 @@ export default function Project() {
     return (
         <SectionLayout
             id="project"
+            className="mt-25"
         >
             <ProjectHeader />
             <ProjectFeatures />

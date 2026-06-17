@@ -1,33 +1,32 @@
-import ButtonSuccess from "../common/ButtonSuccess";
+import { useState } from "react";
+import MobileMenu from "./MobileMenu";
+import DesktopMenu from "./DesktopMenu";
+import ToggleMenu from "./ToggleMenu";
+
+const navLinks = [
+  { name: "Inicio", href: "#home" },
+  { name: "Proyecto", href: "#project" },
+  { name: "Demo", href: "#demo" },
+  { name: "Equipo", href: "#team" },
+];
 
 export default function Navbar() {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const toggleMenu = () => setMenuOpen(!menuOpen);
+  const closeMenu = () => setMenuOpen(false);
+
   return (
-    <nav
-      className="
-      flex
-      items-center
-      gap-4 md:gap-6 lg:gap-16
-      text-base lg:text-[28px]
-      font-semibold
-    "
-    >
-      <a href="#home" className="header-link">
-        Inicio
-      </a>
+    <>
+      {/* Desktop menu */}
+      <DesktopMenu navLinks={navLinks} />
 
-      <a href="#project" className="header-link">
-        Proyecto
-      </a>
+      { /* Toggle menu */}
+      <ToggleMenu menuOpen={menuOpen} toggleMenu={toggleMenu} />
 
-      <a href="#demo" className="header-link">
-        Demo
-      </a>
-
-      <a href="#team" className="header-link">
-        Equipo
-      </a>
-
-      <ButtonSuccess children="Descargar" span={true} />
-    </nav>
+      {/* Mobile menu */}
+      {menuOpen && (
+        <MobileMenu closeMenu={closeMenu} navLinks={navLinks} />
+      )}
+    </>
   );
 }

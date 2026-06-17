@@ -1,6 +1,6 @@
 import type { TeamInfo } from '../../types/team';
-import linkedinIcon from '../../assets/images/linkedin-icon.svg';
-import githubIcon from '../../assets/images/github-icon.svg';
+import linkedinIcon from '../../assets/images/team/linkedin-icon.svg';
+import githubIcon from '../../assets/images/team/github-icon.svg';
 
 // Icono pintado con máscara CSS para poder cambiarle el color en hover
 // (los SVG son monocromos negros)
