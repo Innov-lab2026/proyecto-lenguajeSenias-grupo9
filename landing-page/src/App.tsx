@@ -5,8 +5,8 @@ import Header from './sections/Header'
 import Hero from './sections/Hero'
 import Project from './sections/Project'
 import Team from './sections/Team'
-import Features from './sections/Features'
-import Benefits from './sections/Benefits'
+
+
 
 function App() {
 
@@ -16,8 +16,6 @@ function App() {
       <main>
         <Hero />
         <Project />
-        <Benefits />
-        <Features />
         <Demo />
         <Team />
       </main>

@@ -24,25 +24,25 @@ A continuación se detalla la estructura y propósito de los directorios del pro
 
 ```text
 landing-page/
-├── public/                 # Recursos estáticos públicos (favicon, modelos, etc.)
+├── public/                 # Recursos estáticos públicos (favicon, etc.)
 └── src/                    # Código fuente principal de la aplicación
     ├── assets/             # Recursos visuales y tipografías
     │   ├── fonts/          # Fuentes tipográficas del proyecto (e.g., Nunito)
     │   └── images/         # Imágenes, iconos y recursos gráficos
+    │       ├── demo/       # Fondos, iconos e ilustraciones de la sección de Demo y Beneficios
+    │       └── team/       # Iconos de redes sociales y roles del equipo de desarrollo
     ├── components/         # Componentes React reutilizables organizados por módulo
     │   ├── common/         # Componentes globales genéricos (e.g., botones reutilizables)
-    │   ├── features/       # Componentes de la sección de características
+    │   ├── demo/           # Componentes de la demo interactiva, beneficios y características de la app
     │   ├── header/         # Elementos de cabecera y navegación superior
     │   ├── hero/           # Componentes principales de la sección de bienvenida
     │   ├── project/        # Componentes referidos a la sección "¿Qué es CarpiSeñas?"
     │   └── team/           # Tarjetas y línea de tiempo del equipo de desarrollo
     ├── data/               # Información estática y mockups (e.g., TeamData.js)
-    ├── hooks/              # Custom Hooks de React (e.g., useInView, useRevealPulse)
+    ├── hooks/              # Custom Hooks de React (e.g., useInView)
     ├── layout/             # Componentes contenedores o estructuras de diseño (SectionLayout.tsx)
-    ├── sections/           # Secciones completas de la Landing Page renderizadas en App.tsx
-    │   ├── Benefits.tsx    # Sección de beneficios ("¿Por qué usar CarpiSeñas?")
-    │   ├── Demo.tsx        # Sección interactiva de prueba rápida de señas
-    │   ├── Features.tsx    # Sección de características detalladas
+    ├── sections/           # Secciones principales de la Landing Page renderizadas en App.tsx
+    │   ├── Demo.tsx        # Sección interactiva que unifica Beneficios y la Demo de señas
     │   ├── Footer.tsx      # Pie de página
     │   ├── Header.tsx      # Barra de navegación principal
     │   ├── Hero.tsx        # Pantalla de inicio de la landing

@@ -3,7 +3,8 @@ import carpiLogo from "../../assets/images/hero/carpi-logo.webp";
 export default function HeroIllustration() {
 
     return (
-        <div className="relative left-10 md:shrink-0 w-full sm:min-w-80 md:w-1/2 md:max-w-192.5 
+        <div className="relative left-10 md:shrink-0 
+                     w-full sm:min-w-80 md:w-1/2 md:max-w-192.5 
                      bg-[url('./assets/images/hero/hero-bg.webp')] 
                      bg-no-repeat bg-position-[10%_103%] 
                      bg-size-[100%_auto] sm:overflow-visible"
