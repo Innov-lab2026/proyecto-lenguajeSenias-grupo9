@@ -57,7 +57,7 @@ export default function DemoSection() {
                             rounded-md border
                             grid col-span-1 row-span-1
                             hover:bg-accent
-                            focus-within:ring-2 focus-within:ring-primary
+                            focus-within:ring-2 
                         ">
                             <input
                                 type="radio"
@@ -74,7 +74,7 @@ export default function DemoSection() {
                             rounded-md border
                             grid col-span-1 row-span-1
                             hover:bg-accent
-                            focus-within:ring-2 focus-within:ring-primary
+                            focus-within:ring-2
                         ">
                             <input
                                 type="radio"
@@ -91,7 +91,7 @@ export default function DemoSection() {
                             rounded-md border
                             grid col-span-1 row-span-1
                             hover:bg-accent
-                            focus-within:ring-2 focus-within:ring-primary
+                            focus-within:ring-2
                         ">
                             <input
                                 type="radio"
@@ -105,7 +105,7 @@ export default function DemoSection() {
                             col-span-3 row-span-1 bg-primary 
                             text-white py-2 px-4 rounded-md
                             border border-white hover:bg-accent
-                            focus-within:ring-2 focus-within:ring-primary"
+                            focus-within:ring-2"
                         >
                             Chequear respuesta
                         </button>

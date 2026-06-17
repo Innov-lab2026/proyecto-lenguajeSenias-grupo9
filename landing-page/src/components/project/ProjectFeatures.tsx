@@ -5,7 +5,7 @@ import feature3 from '../../assets/images/project/icon-3.webp'
 
 export default function ProjectFeatures() {
     return (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-4 py-4 px-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-4 py-4">
             <ProjectFeatureCard
                 title="Lecciones cortas"
                 description="Fijá conceptos en 5 minutos sin abrumarte."

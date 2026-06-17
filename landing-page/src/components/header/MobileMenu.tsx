@@ -7,17 +7,32 @@ export default function MobileMenu({ closeMenu, navLinks }:
 
     useEffect(() => {
         document.body.style.overflow = "hidden";
+
         return () => {
             document.body.style.overflow = "unset";
         };
     }, []);
 
+    // Cerrar con Escape
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === "Escape") {
+                closeMenu();
+            }
+        };
+
+        window.addEventListener("keydown", handleKeyDown);
+
+        return () => {
+            window.removeEventListener("keydown", handleKeyDown);
+        };
+    }, [closeMenu]);
+
     return (
         <>
             <div
                 className="fixed top-0 left-0 w-full h-full z-10
-                               bg-background pointer-events-none
-                               animate-fade-in"
+                               bg-background animate-fade-in"
                 onClick={closeMenu}
                 aria-hidden="true">
             </div>

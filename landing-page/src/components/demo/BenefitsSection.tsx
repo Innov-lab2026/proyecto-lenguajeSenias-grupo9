@@ -23,7 +23,7 @@ export default function BenefitsSection() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 mt-10 sm:mt-20 gap-6 w-full px-5 md:px-10 lg:px-20 max-w-7xl">
                 { /* Content */}
-                <div className="flex flex-col align-start gap-5 lg:gap-10 w-80 md:w-100 h-full px-auto sm:px-0">
+                <div className="flex flex-col align-start gap-5 lg:gap-10 w-80 md:w-100 h-full mx-auto sm:mx-0">
 
                     <BenefitsContent
                         icon={iconCheck}
