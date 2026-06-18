@@ -6,7 +6,7 @@ export default function Hero() {
   return (
     <SectionLayout
       id="home"
-      className="flex flex-col flex-start sm:flex-row sm:justify-evenly 
+      className="flex flex-col sm:flex-row sm:justify-evenly 
                 items-center sm:items-stretch pb-0 
                bg-surface sm:bg-background 
                 bg-[url('./assets/images/hero/hero-bg-2.webp')] bg-no-repeat bg-cover 

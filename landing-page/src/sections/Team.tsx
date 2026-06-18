@@ -40,7 +40,7 @@ export default function Team() {
                     <TeamTail />
                 </div>
 
-                <p className="self-center lg:self-end lg:mr-[10%] text-[15px] font-semibold">
+                <p className="self-center lg:self-end lg:mr-[10%] text-base font-semibold">
                     Coordinador: Gustavo Ovejero
                 </p>
 

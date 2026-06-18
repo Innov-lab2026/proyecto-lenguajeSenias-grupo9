@@ -18,7 +18,7 @@ export default function ButtonSuccess({ children, className, span = false }:
       `}
     >
       {children}
-      {span && <span aria-hidden="true" className="text-[12px] md:text-[16px]">⌵</span>}
+      {span && <span aria-hidden="true" className="text-xs md:text-base">⌵</span>}
     </button>
   );
 }

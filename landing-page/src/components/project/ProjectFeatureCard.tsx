@@ -7,12 +7,12 @@ export default function ProjectFeatureCard({ title, description, image }: { titl
                 <img src={image} alt={title} className="w-full" loading="lazy"/>
             </div>
 
-            <h2 className="font-extrabold 
+            <h3 className="font-extrabold 
                            text-xl lg:text-2xl 
                            text-center md:text-left 
                            mb-2 whitespace-nowrap">
                 {title}
-            </h2>
+            </h3>
 
             <p className="text-lg lg:text-xl 
                           text-center md:text-left">

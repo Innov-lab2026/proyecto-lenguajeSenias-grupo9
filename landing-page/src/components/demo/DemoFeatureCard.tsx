@@ -1,4 +1,4 @@
-export default function FeatureCard(
+export default function DemoFeatureCard(
     { title, description, image, className }:
         { title: string, description: string, image: string, className?: string }) {
 
