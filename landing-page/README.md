@@ -2,6 +2,8 @@
 
 **CarpiSeñas** es una aplicación interactiva diseñada para acercar la **Lengua de Señas Argentina (LSA)** a personas oyentes de una manera accesible, divertida e inclusiva. A través de la gamificación y el uso de tecnologías modernas, el proyecto busca fomentar el respeto, la empatía y la inclusión a nivel social.
 
+🔗 **Sitio desplegado:** [carpisenias.netlify.app](https://carpisenias.netlify.app/)
+
 ---
 
 ## 🛠️ Stack Tecnológico
@@ -24,34 +26,44 @@ A continuación se detalla la estructura y propósito de los directorios del pro
 
 ```text
 landing-page/
-├── public/                 # Recursos estáticos públicos (favicon, etc.)
-└── src/                    # Código fuente principal de la aplicación
-    ├── assets/             # Recursos visuales y tipografías
-    │   ├── fonts/          # Fuentes tipográficas del proyecto (e.g., Nunito)
-    │   └── images/         # Imágenes, iconos y recursos gráficos
-    │       ├── demo/       # Fondos, iconos e ilustraciones de la sección de Demo y Beneficios
-    │       └── team/       # Iconos de redes sociales y roles del equipo de desarrollo
-    ├── components/         # Componentes React reutilizables organizados por módulo
-    │   ├── common/         # Componentes globales genéricos (e.g., botones reutilizables)
-    │   ├── demo/           # Componentes de la demo interactiva, beneficios y características de la app
-    │   ├── header/         # Elementos de cabecera y navegación superior
-    │   ├── hero/           # Componentes principales de la sección de bienvenida
-    │   ├── project/        # Componentes referidos a la sección "¿Qué es CarpiSeñas?"
-    │   └── team/           # Tarjetas y línea de tiempo del equipo de desarrollo
-    ├── data/               # Información estática y mockups (e.g., TeamData.js)
-    ├── hooks/              # Custom Hooks de React (e.g., useInView)
-    ├── layout/             # Componentes contenedores o estructuras de diseño (SectionLayout.tsx)
-    ├── sections/           # Secciones principales de la Landing Page renderizadas en App.tsx
-    │   ├── Demo.tsx        # Sección interactiva que unifica Beneficios y la Demo de señas
-    │   ├── Footer.tsx      # Pie de página
-    │   ├── Header.tsx      # Barra de navegación principal
-    │   ├── Hero.tsx        # Pantalla de inicio de la landing
-    │   ├── Project.tsx     # Introducción a CarpiSeñas
-    │   └── Team.tsx        # Presentación del equipo de colaboradores
-    ├── types/              # Declaraciones de interfaces y tipos TypeScript
-    ├── App.tsx             # Componente raíz de la aplicación
-    ├── index.css           # Estilos globales y configuración/directivas de Tailwind CSS v4
-    └── main.tsx            # Punto de entrada de la aplicación en React
+├── public/                     # Recursos estáticos servidos tal cual desde la raíz
+│   ├── favicon.svg             # Favicon del sitio
+│   ├── icons.svg               # Sprite de iconos
+│   └── og-image.png            # Imagen para Open Graph / Twitter cards
+└── src/                        # Código fuente principal de la aplicación
+    ├── assets/                 # Recursos visuales y tipografías
+    │   ├── fonts/              # Fuentes tipográficas del proyecto (e.g., Nunito)
+    │   └── images/             # Imágenes, iconos y recursos gráficos
+    │       ├── demo/           # Fondos, iconos e ilustraciones de Demo y Beneficios
+    │       ├── header/         # Iconos de la cabecera (hamburguesa, cerrar)
+    │       ├── hero/           # Logo e ilustraciones de fondo de la sección Hero
+    │       ├── project/        # Iconos de las características de la sección Project
+    │       └── team/           # Iconos de redes sociales y roles del equipo
+    ├── components/             # Componentes React reutilizables organizados por módulo
+    │   ├── common/             # Genéricos compartidos (ButtonSuccess, SectionHeader)
+    │   ├── demo/               # BenefitsSection, BenefitsContent, BenefitsIllustration,
+    │   │                       #   DemoSection y DemoFeatureCard
+    │   ├── header/             # Navbar, DesktopMenu, MobileMenu, ToggleMenu, LogoText
+    │   ├── hero/               # HeroContent y HeroIllustration
+    │   ├── project/            # ProjectFeatures y ProjectFeatureCard
+    │   └── team/               # Línea de tiempo del equipo (TeamCard, TeamCurve,
+    │                           #   TeamTail, TeamTimelineItem)
+    ├── data/                   # Información estática y mockups
+    │   ├── TeamData.js         # Datos del equipo (áreas, integrantes, enlaces)
+    │   └── TeamData.d.ts       # Declaración de tipos para TeamData.js
+    ├── hooks/                  # Custom Hooks de React (e.g., useInView)
+    ├── layout/                 # Contenedores y estructuras de diseño (SectionLayout.tsx)
+    ├── sections/               # Secciones principales renderizadas en App.tsx
+    │   ├── Demo.tsx            # Sección que unifica Beneficios y la Demo de señas
+    │   ├── Footer.tsx          # Pie de página
+    │   ├── Header.tsx          # Barra de navegación principal
+    │   ├── Hero.tsx            # Pantalla de inicio de la landing
+    │   ├── Project.tsx         # Introducción a CarpiSeñas
+    │   └── Team.tsx            # Presentación del equipo de colaboradores
+    ├── types/                  # Declaraciones de interfaces y tipos TypeScript (team.ts)
+    ├── App.tsx                 # Componente raíz de la aplicación
+    ├── index.css               # Estilos globales y configuración/directivas de Tailwind CSS v4
+    └── main.tsx                # Punto de entrada de la aplicación en React
 ```
 
 ---

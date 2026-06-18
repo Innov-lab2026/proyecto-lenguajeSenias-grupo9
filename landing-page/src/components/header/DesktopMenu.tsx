@@ -1,6 +1,6 @@
 import ButtonSuccess from "../common/ButtonSuccess";
 
-export default function MobileMenu({ navLinks }: { navLinks: { name: string, href: string }[] }) {
+export default function DesktopMenu({ navLinks }: { navLinks: { name: string, href: string }[] }) {
     return (
         <nav
             className="

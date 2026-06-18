@@ -1,4 +1,4 @@
-import carpiArg from '../../assets/images/demo/carpi-arg.png'
+import carpiArg from '../../assets/images/demo/carpi-arg.webp'
 
 export default function BenefitsIlustration() {
     
@@ -7,7 +7,8 @@ export default function BenefitsIlustration() {
             <img
                 src={carpiArg}
                 alt="Carpincho usando la camiseta de argentina"
-                className="w-full h-auto mb-15 "
+                className="w-full h-auto mb-15"
+                loading="lazy"
             />
         </div>
     )

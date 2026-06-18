@@ -24,7 +24,7 @@ export default function Team() {
             id="team">
 
             <div className="flex flex-col items-center gap-6 p-8 text-center">
-                <h1 className="text-4xl font-bold mb-12">Personas que hacen posible CarpiSeñas</h1>
+                <h2 className="text-4xl font-bold mb-12">Personas que hacen posible CarpiSeñas</h2>
 
                 <div className="flex flex-col w-full max-w-5xl gap-10 lg:gap-0">
                     {Object.entries(teamData).map(([key, team], index) => (
@@ -40,7 +40,7 @@ export default function Team() {
                     <TeamTail />
                 </div>
 
-                <p className="self-center lg:self-end lg:mr-[10%] text-[15px] font-semibold">
+                <p className="self-center lg:self-end lg:mr-[10%] text-base font-semibold">
                     Coordinador: Gustavo Ovejero
                 </p>
 

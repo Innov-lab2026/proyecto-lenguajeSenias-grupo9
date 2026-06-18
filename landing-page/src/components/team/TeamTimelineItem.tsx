@@ -27,7 +27,7 @@ export default function TeamTimelineItem(
             <div className={`flex lg:hidden items-center justify-center
                              transition-all duration-700
                              ${inView ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}`}>
-                <img src={icon} alt={team.title} className="w-10 h-10" />
+                <img src={icon} alt={team.title} className="w-10 h-10" loading="lazy"/>
             </div>
 
             <div className={`hidden lg:flex items-center justify-end

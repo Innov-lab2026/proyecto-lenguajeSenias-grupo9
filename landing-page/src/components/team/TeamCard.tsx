@@ -40,14 +40,14 @@ export default function TeamCard({ team }: { team: TeamInfo }) {
     return (
         <div className="flex flex-col gap-3 p-6 w-full max-w-md text-left
                         bg-white rounded-xl border-2 border-accent shadow-md">
-            <h3 className="font-bold text-[24px] text-accent">{team.title}</h3>
-            <p className="text-[15px]">{team.description}</p>
+            <h3 className="font-bold text-2xl text-accent">{team.title}</h3>
+            <p className="text-base">{team.description}</p>
 
             <ul className="flex flex-col divide-y divide-accent/30 border-t border-accent/30">
                 {team.members.map((member) => (
                     <li key={member.name}
                         className="flex items-center justify-between py-2">
-                        <span className="text-[16px] font-semibold">{member.name}</span>
+                        <span className="text-base font-semibold">{member.name}</span>
                         <span className="flex items-center gap-2">
                             <span aria-hidden="true" className="text-accent/50">|</span>
                             <MemberLink href={member.linkedin} icon={linkedinIcon} alt={`LinkedIn de ${member.name}`} />
