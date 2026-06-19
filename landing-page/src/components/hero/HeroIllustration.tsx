@@ -12,9 +12,12 @@ export default function HeroIllustration() {
             <img
                 src={carpiLogo}
                 alt="Carpincho usando la app CarpiSeñas en un celular"
+                width={1500}
+                height={2104}
                 className="w-[70%] max-w-125 h-auto transform   
                         translate-x-[18.25%] sm:translate-x-[17%]
                         translate-y-[5%] sm:translate-y-[10%]"
+                fetchPriority="high"
             />
         </div>
     )
