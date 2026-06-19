@@ -16,10 +16,11 @@ export const login = async (req: Request, res: Response) => {
       user: {
         id: data.user.id,
         email: data.user.email,
-        full_name: data.user.user_metadata?.full_name
+        first_name: data.user.user_metadata?.first_name,
+        last_name: data.user.user_metadata?.last_name
       },
       session: {
-        token: data.session?.access_token,
+        access_token: data.session?.access_token,
         expires_in: data.session?.expires_in
       }
     })
@@ -29,22 +30,24 @@ export const login = async (req: Request, res: Response) => {
 }
 
 export const register = async (req: Request, res: Response) => {
-  const { email, password, full_name, birth_date } = req.body
+  const { email, password, first_name, last_name, birth_date, gender } = req.body
 
-  if (!email || !password || !full_name || !birth_date) {
-    res.status(400).json({ error: 'Email, password, nombre y fecha de nacimiento son requeridos' })
+  if (!email || !password || !first_name || !last_name || !birth_date) {
+    res.status(400).json({ error: 'Email, password, nombre, apellido y fecha de nacimiento son requeridos' })
     return
   }
 
   try {
-    const data = await registerService(email, password, full_name, new Date(birth_date))
+    const data = await registerService(email, password, first_name, last_name, new Date(birth_date), gender)
     res.status(201).json({
       message: 'Usuario registrado exitosamente',
       user: {
         id: data.user?.id,
         email: data.user?.email,
-        full_name,
-        birth_date
+        first_name,
+        last_name,
+        birth_date,
+        gender
       }
     })
   } catch (error: any) {

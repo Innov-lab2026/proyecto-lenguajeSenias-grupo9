@@ -11,14 +11,14 @@ export const loginService = async (email: string, password: string) => {
   return data
 }
 
-export const registerService = async (email: string, password: string, full_name: string, birth_date: Date) => {
+export const registerService = async (email: string, password: string, first_name: string, last_name: string, birth_date: Date, gender: string) => {
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
       data: { 
-        full_name,
-        birth_date
+        first_name,
+        last_name
        }
     }
   })
@@ -26,16 +26,27 @@ export const registerService = async (email: string, password: string, full_name
   if (error) throw new Error(error.message)
 
   if (data.user) {
-    const { error: insertError } = await supabaseAdmin
+    const { error: userError } = await supabaseAdmin
       .from('users')
       .insert({
         id: data.user.id,
         email: data.user.email,
-        full_name,
-        birth_date
+        provider: 'email'
       })
+    if (userError) throw new Error(userError.message)
+     
+    const {error: profileError} = await supabaseAdmin
+      .from('profiles')
+      .insert({
+        id: data.user.id,
+        first_name,
+        last_name,
+        birth_date,
+        gender
+      })
+    if(profileError) throw new Error(profileError.message)
 
-    if (insertError) throw new Error(insertError.message)
+   
   }
 
   return data
