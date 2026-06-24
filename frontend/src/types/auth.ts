@@ -1,40 +1,47 @@
-import type { SupabaseUser } from './user'
+import type { AuthUser } from './user'
 
 export const GENDER_VALUES = ['masculino', 'femenino', 'otro', 'prefiero_no_decir'] as const
 export type Gender = (typeof GENDER_VALUES)[number]
+
+/**
+ * Valor de género que espera el backend.
+ * TODO(backend): confirmar los valores canónicos / constraint de `profiles.gender`.
+ * Por ahora se alinea al ejemplo de swagger ("Femenino", "Masculino", ...).
+ */
+export const GENDER_API_VALUE: Record<Gender, string> = {
+  masculino: 'Masculino',
+  femenino: 'Femenino',
+  otro: 'Otro',
+  prefiero_no_decir: 'Prefiero no decir',
+}
 
 export interface LoginRequest {
   email: string
   password: string
 }
 
-/**
- * Contrato asumido del registro (el endpoint con estos campos aún no está
- * implementado en el backend). Fechas en ISO YYYY-MM-DD.
- */
+/** Body de POST /api/auth/register. Fechas en ISO YYYY-MM-DD. */
 export interface RegisterRequest {
   email: string
   password: string
   first_name: string
   last_name: string
   birth_date: string
-  gender: Gender
-  /**
-   * Compatibilidad con el backend actual, que exige `full_name`.
-   * TODO(backend): quitar cuando el endpoint migre al contrato nuevo.
-   */
-  full_name: string
+  gender: string
 }
 
-/** POST /api/auth/login → token en el body. */
+/** POST /api/auth/login → user plano + session con el access token. */
 export interface LoginResponse {
   message: string
-  user: SupabaseUser
-  token: string
+  user: AuthUser
+  session: {
+    access_token: string
+    expires_in: number
+  }
 }
 
 /** POST /api/auth/register → sin token (confirmación por email). */
 export interface RegisterResponse {
   message: string
-  user: SupabaseUser
+  user: AuthUser & { birth_date?: string; gender?: string }
 }
