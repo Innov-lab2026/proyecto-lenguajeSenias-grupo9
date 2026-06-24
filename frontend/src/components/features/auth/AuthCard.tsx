@@ -1,0 +1,107 @@
+import { Pressable, Text, View } from 'react-native'
+import type { LoginValues, RegisterValues } from '@/src/schemas/auth'
+import { cn } from '@/src/utils/cn'
+import { LoginForm } from './LoginForm'
+import { RegisterForm } from './RegisterForm'
+import { GoogleButton } from './GoogleButton'
+
+export type AuthMode = 'login' | 'register'
+
+interface AuthCardProps {
+  mode: AuthMode
+  onModeChange: (mode: AuthMode) => void
+  onLogin: (values: LoginValues, rememberMe: boolean) => void
+  onRegister: (values: RegisterValues) => void
+  submitting?: boolean
+  /** Error del backend a mostrar sobre el CTA. */
+  serverError?: string | null
+  /** Mensaje informativo (ej. "revisá tu correo para confirmar tu cuenta"). */
+  infoMessage?: string | null
+}
+
+function Tab({
+  label,
+  active,
+  onPress,
+}: {
+  label: string
+  active: boolean
+  onPress: () => void
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      className="flex-1 items-center gap-2"
+      accessibilityRole="tab"
+      accessibilityState={{ selected: active }}
+    >
+      {/* Tab activa en Nunito bold; inactiva en Nunito regular (según diseño). */}
+      <Text
+        className={cn(
+          'font-nunito text-lg',
+          active ? 'font-bold text-secondary' : 'font-normal text-muted',
+        )}
+      >
+        {label}
+      </Text>
+      <View className={cn('h-0.5 w-full rounded-full', active ? 'bg-secondary' : 'bg-transparent')} />
+    </Pressable>
+  )
+}
+
+/**
+ * Tarjeta de autenticación con tabs (Crear Cuenta / Iniciar Sesión).
+ * Componente controlado: el `mode` lo maneja el consumidor.
+ * Mobile-first: ocupa el ancho disponible y se limita a `max-w-md` centrada en web.
+ */
+export function AuthCard({
+  mode,
+  onModeChange,
+  onLogin,
+  onRegister,
+  submitting,
+  serverError,
+  infoMessage,
+}: AuthCardProps) {
+  return (
+    <View className="w-full max-w-md self-center rounded-2xl bg-surface p-6 shadow-sm">
+      {/* Tabs */}
+      <View className="mb-6 flex-row">
+        <Tab label="Crear Cuenta" active={mode === 'register'} onPress={() => onModeChange('register')} />
+        <Tab label="Iniciar Sesión" active={mode === 'login'} onPress={() => onModeChange('login')} />
+      </View>
+
+      {infoMessage ? (
+        <View className="mb-4 rounded-xl bg-accent p-3">
+          <Text className="text-center font-nunito text-sm font-bold text-secondary">
+            {infoMessage}
+          </Text>
+        </View>
+      ) : null}
+
+      {/* Google */}
+      <GoogleButton />
+
+      {/* Divisor */}
+      <View className="my-5 flex-row items-center gap-3">
+        <View className="h-px flex-1 bg-muted/20" />
+        <Text className="font-nunito text-xs font-bold uppercase tracking-wide text-muted">
+          O utiliza tu email
+        </Text>
+        <View className="h-px flex-1 bg-muted/20" />
+      </View>
+
+      {/* Formulario según el modo */}
+      {mode === 'login' ? (
+        <LoginForm onSubmit={onLogin} submitting={submitting} serverError={serverError} />
+      ) : (
+        <RegisterForm onSubmit={onRegister} submitting={submitting} serverError={serverError} />
+      )}
+
+      {/* Footer términos */}
+      <Text className="mt-5 text-center font-nunito text-xs font-bold text-muted">
+        Al registrarte, confirmas tu aceptación de los Términos de Servicio de LSAprende!.
+      </Text>
+    </View>
+  )
+}

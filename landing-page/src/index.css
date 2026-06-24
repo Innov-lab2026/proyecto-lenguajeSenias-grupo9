@@ -1,0 +1,81 @@
+@import "tailwindcss";
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@font-face {
+  font-family: 'Nunito';
+  src: url("./assets/fonts/Nunito-VariableFont_wght.ttf") format("truetype");
+  font-weight: 200 1000;
+  font-style: normal;
+  /* font-display: swap; */
+}
+
+@theme {
+  /* 
+  Fonts 
+  */
+  --font-sans: "Nunito", sans-serif;
+
+  /* 
+  Colors 
+  */
+
+  /* Fondo general */
+  --color-background: #F8FAFC;
+  --color-surface: #ACDCFF;
+
+  /* Textos */
+  --color-foreground: #1F2937;
+
+  /* Botones secundarios, acentos, íconos sutiles */
+  --color-accent: #4A90E2;
+  --color-accent-light: #6CB6FF;
+
+  /* En Iconos, monedas, estrellas de logros, racha de días y pequeños acentos de éxito. */
+  --color-success: #FED75F;
+  --color-success-hover: #F7BB18;
+  --color-success-border: #FFC410;
+
+  /* Header */
+  --header-height: 140px;
+
+  /* Animaciones */
+  --animate-fade-in: fadeIn 500ms ease-in-out forwards;
+  --animate-slide-down: slideDown 500ms ease-in-out forwards;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-sans);
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateX(0%) translateY(-1rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0%) translateY(0);
+  }
+}
