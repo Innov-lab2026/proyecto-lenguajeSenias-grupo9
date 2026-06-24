@@ -137,11 +137,13 @@ useLogin().mutate({ payload: values, rememberMe })   [TanStack Query]
         │
         ▼
 services/auth.login(payload)
-        ├─ USE_MOCK=true  → devuelve { user, token } fake (delay 600ms)
-        └─ USE_MOCK=false → POST /api/auth/login → { message, user, token }
+        ├─ USE_MOCK=true  → devuelve { user, session } fake (delay 600ms)
+        └─ USE_MOCK=false → POST /api/auth/login
+                            → { message, user{ id,email,first_name,last_name },
+                                session{ access_token, expires_in } }
         │
         ▼ (onSuccess)
-toUser(user)
+toUser(user)  +  token = session.access_token
    ├─ rememberMe=true  → saveToken(token) + saveUser(user)   [storage]
    └─ rememberMe=false → sin persistencia (sesión sólo en memoria)
         → setSession(user, token)        [store: status "authenticated"]
@@ -169,7 +171,7 @@ useRegister().mutate(values, { onSuccess })
         ▼
 toRegisterRequest(values)   → mapea al contrato del endpoint:
    { email, password, first_name, last_name,
-     birth_date (ISO YYYY-MM-DD), gender, full_name (compat backend actual) }
+     birth_date (ISO YYYY-MM-DD), gender (valor del backend) }
         │
         ▼
 services/auth.register(payload)
@@ -321,9 +323,9 @@ o la limpia. Usa un flag `active` para evitar actualizaciones tras desmontar.
 
 **`auth.ts`** — `login(payload)`, `register(payload)` y `toRegisterRequest(values)`.
 - Capa **mock** conmutable con `EXPO_PUBLIC_USE_MOCK_AUTH=true` (datos fake con delay, sin red).
-- `toRegisterRequest` mapea los valores del formulario al contrato del endpoint
-  (`birthDate` DD/MM/AAAA → `birth_date` ISO) e incluye `full_name` (= nombre + apellido) por
-  compatibilidad con el backend actual, hasta que migre al contrato nuevo.
+- `toRegisterRequest` mapea los valores del formulario al body del endpoint
+  (`birthDate` DD/MM/AAAA → `birth_date` ISO; `gender` → valor del backend vía `GENDER_API_VALUE`).
+- `login` lee el token de `session.access_token` y el user plano (`first_name`/`last_name`).
 
 ### 4.6 Estado y persistencia
 
@@ -343,13 +345,13 @@ Los datos remotos (lessons, etc.) NO van acá: viven en TanStack Query.
 extiende con: `firstName`/`lastName` (mín. 2), `birthDate` (regex `DD/MM/AAAA` + fecha real, no
 futura, año ≥ 1900) y `gender` (enum de `GENDER_VALUES`). Exporta `LoginValues`/`RegisterValues`.
 
-**`types/auth.ts`** — `GENDER_VALUES`/`Gender`; contratos: `LoginRequest`, `RegisterRequest`
-(`first_name`, `last_name`, `birth_date` ISO, `gender`, + `full_name` compat — contrato asumido, el
-endpoint con estos campos aún no existe), `LoginResponse` (`{ message, user, token }`),
+**`types/auth.ts`** — `GENDER_VALUES`/`Gender` + `GENDER_API_VALUE` (mapa al valor del backend);
+contratos: `LoginRequest`, `RegisterRequest` (`first_name`, `last_name`, `birth_date` ISO, `gender`),
+`LoginResponse` (`{ message, user, session: { access_token, expires_in } }`),
 `RegisterResponse` (`{ message, user }`, sin token).
 
-**`types/user.ts`** — `SupabaseUser` (shape crudo del backend), `User` (modelo interno) y `toUser()`
-que normaliza (`user_metadata.full_name` → `name`).
+**`types/user.ts`** — `AuthUser` (shape que devuelve el backend: `id`, `email`, `first_name`,
+`last_name`), `User` (modelo interno con `firstName`/`lastName`) y `toUser()` que normaliza.
 
 **`utils/date.ts`** — `formatDdMmYyyy` (máscara progresiva al escribir), `parseDdMmYyyy`
 (valida fecha real, ej. rechaza 31/02) y `ddMmYyyyToIso` (formato del backend).
@@ -389,9 +391,11 @@ Probado en **web** y **Expo Go (Android)** con la capa mock (`EXPO_PUBLIC_USE_MO
   Requiere pantalla de recupero + endpoints del backend.
 
 ### Backend / integración
-- Apagar la capa mock y apuntar a los endpoints reales (`/api/auth/*`).
-- Implementar en el backend el contrato nuevo de registro (`first_name`, `last_name`, `birth_date`,
-  `gender`) y quitar el `full_name` de compatibilidad.
-- `GET /me` (restaurar/validar sesión), `POST /logout`, y **refresh token** (hoy la sesión dura ~1h).
+- El front ya está alineado al contrato real (`POST /api/auth/login` con `session.access_token`;
+  `POST /api/auth/register` con `first_name`, `last_name`, `birth_date`, `gender`). Falta:
+- Confirmar los **valores canónicos de `gender`** que espera la DB (`profiles.gender`); el front
+  envía los de `GENDER_API_VALUE` (alineados al ejemplo de swagger).
+- `GET /me` (restaurar/validar sesión — ya existe `authMiddleware` en el backend, falta exponer ruta),
+  `POST /logout`, y **refresh token** (hoy la sesión dura ~1h; el login ya recibe `expires_in`).
 - Estrategia de **Google OAuth** (client IDs + flujo) y, si aplica, cookie httpOnly en web.
 - Formato de errores unificado para mapear mensajes en el formulario.

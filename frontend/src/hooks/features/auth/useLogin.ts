@@ -24,8 +24,9 @@ export function useLogin() {
 
   return useMutation({
     mutationFn: ({ payload }: LoginArgs) => login(payload),
-    onSuccess: async ({ user, token }, { rememberMe }) => {
+    onSuccess: async ({ user, session }, { rememberMe }) => {
       const normalized = toUser(user)
+      const token = session.access_token
       if (rememberMe) {
         await saveToken(token)
         await saveUser(normalized)

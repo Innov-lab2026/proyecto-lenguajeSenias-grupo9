@@ -1,5 +1,6 @@
 import { http } from './http'
 import { ddMmYyyyToIso } from '@/src/utils/date'
+import { GENDER_API_VALUE } from '@/src/types/auth'
 import type { RegisterValues } from '@/src/schemas/auth'
 import type {
   LoginRequest,
@@ -16,21 +17,15 @@ const USE_MOCK = process.env.EXPO_PUBLIC_USE_MOCK_AUTH === 'true'
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
-/**
- * Mapea los valores del formulario de registro al formato del endpoint.
- * `full_name` se mantiene por compatibilidad con el backend actual.
- */
+/** Mapea los valores del formulario de registro al body del endpoint. */
 export function toRegisterRequest(values: RegisterValues): RegisterRequest {
-  const firstName = values.firstName.trim()
-  const lastName = values.lastName.trim()
   return {
     email: values.email,
     password: values.password,
-    first_name: firstName,
-    last_name: lastName,
+    first_name: values.firstName.trim(),
+    last_name: values.lastName.trim(),
     birth_date: ddMmYyyyToIso(values.birthDate),
-    gender: values.gender,
-    full_name: `${firstName} ${lastName}`,
+    gender: GENDER_API_VALUE[values.gender],
   }
 }
 
@@ -39,11 +34,15 @@ export async function login(payload: LoginRequest): Promise<LoginResponse> {
     await delay(600)
     return {
       message: 'Login exitoso (mock)',
-      token: 'mock-access-token',
       user: {
         id: 'mock-user-id',
         email: payload.email,
-        user_metadata: { full_name: payload.email.split('@')[0] },
+        first_name: 'Demo',
+        last_name: 'User',
+      },
+      session: {
+        access_token: 'mock-access-token',
+        expires_in: 3600,
       },
     }
   }
@@ -60,7 +59,8 @@ export async function register(payload: RegisterRequest): Promise<RegisterRespon
       user: {
         id: 'mock-user-id',
         email: payload.email,
-        user_metadata: { full_name: payload.full_name },
+        first_name: payload.first_name,
+        last_name: payload.last_name,
       },
     }
   }
