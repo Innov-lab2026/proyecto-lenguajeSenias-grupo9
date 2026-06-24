@@ -18,7 +18,9 @@ export const registerService = async (email: string, password: string, first_nam
     options: {
       data: { 
         first_name,
-        last_name
+        last_name,
+        birth_date,
+        gender
        }
     }
   })
