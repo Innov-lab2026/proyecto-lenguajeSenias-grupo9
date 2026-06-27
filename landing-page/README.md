@@ -58,9 +58,11 @@ landing-page/
     │   ├── Footer.tsx          # Pie de página
     │   ├── Header.tsx          # Barra de navegación principal
     │   ├── Hero.tsx            # Pantalla de inicio de la landing
+    │   ├── PrivacyPolicy.tsx   # Página de política de privacidad
     │   ├── Project.tsx         # Introducción a CarpiSeñas
-    │   └── Team.tsx            # Presentación del equipo de colaboradores
-    ├── types/                  # Declaraciones de interfaces y tipos TypeScript (team.ts)
+    │   ├── Team.tsx            # Presentación del equipo de colaboradores
+    │   └── TermsAndConditions.tsx # Página de términos y condiciones
+    ├── types/              # Declaraciones de interfaces y tipos TypeScript (team.ts)
     ├── App.tsx                 # Componente raíz de la aplicación
     ├── index.css               # Estilos globales y configuración/directivas de Tailwind CSS v4
     └── main.tsx                # Punto de entrada de la aplicación en React
