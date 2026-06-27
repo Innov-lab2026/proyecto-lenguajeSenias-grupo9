@@ -7,5 +7,4 @@ export default defineConfig({
   plugins: [react(),
   tailwindcss()
   ],
-  base: '/proyecto-lenguajeSenias-grupo9/',
 })
