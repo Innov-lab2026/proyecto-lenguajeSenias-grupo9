@@ -79,24 +79,23 @@ export function AuthCard({
         </View>
       ) : null}
 
-      {/* Google */}
-      <GoogleButton />
-
-      {/* Divisor */}
-      <View className="my-5 flex-row items-center gap-3">
-        <View className="h-px flex-1 bg-muted/20" />
-        <Text className="font-nunito text-xs font-bold uppercase tracking-wide text-muted">
-          O utiliza tu email
-        </Text>
-        <View className="h-px flex-1 bg-muted/20" />
-      </View>
-
       {/* Formulario según el modo */}
       {mode === 'login' ? (
         <LoginForm onSubmit={onLogin} submitting={submitting} serverError={serverError} />
       ) : (
         <RegisterForm onSubmit={onRegister} submitting={submitting} serverError={serverError} />
       )}
+
+      <View className="my-5 flex-row items-center gap-3">
+        <View className="h-px flex-1 bg-muted/20" />
+        <Text className="font-nunito text-xs font-bold uppercase tracking-wide text-muted">
+          O
+        </Text>
+        <View className="h-px flex-1 bg-muted/20" />
+      </View>
+
+      {/* Google */}
+      <GoogleButton />
 
       {/* Footer términos */}
       <Text className="mt-5 text-center font-nunito text-xs font-bold text-muted">
