@@ -1,18 +1,28 @@
 {
   "name": "frontend",
+  "description": "Archivo modificado por Bezerra, Roberto para registrar la configuración del frontend Expo.",
   "main": "expo-router/entry",
   "version": "1.0.0",
+  "engines": {
+    "node": ">=22 <25"
+  },
   "scripts": {
+    "check-node": "node ./scripts/check-node-version.js",
+    "prestart": "npm run check-node",
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
+    "preandroid": "npm run check-node",
     "android": "expo start --android",
+    "preios": "npm run check-node",
     "ios": "expo start --ios",
+    "preweb": "npm run check-node",
     "web": "expo start --web",
     "lint": "expo lint"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
     "@hookform/resolvers": "^5.4.0",
+    "@react-native-community/datetimepicker": "8.4.4",
     "@react-navigation/bottom-tabs": "^7.4.0",
     "@react-navigation/elements": "^2.6.3",
     "@react-navigation/native": "^7.1.8",
