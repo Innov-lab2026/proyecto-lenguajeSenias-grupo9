@@ -1,21 +1,12 @@
 {
   "name": "frontend",
-  "description": "Archivo modificado por Bezerra, Roberto para registrar la configuración del frontend Expo.",
   "main": "expo-router/entry",
   "version": "1.0.0",
-  "engines": {
-    "node": ">=22 <25"
-  },
   "scripts": {
-    "check-node": "node ./scripts/check-node-version.js",
-    "prestart": "npm run check-node",
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
-    "preandroid": "npm run check-node",
     "android": "expo start --android",
-    "preios": "npm run check-node",
     "ios": "expo start --ios",
-    "preweb": "npm run check-node",
     "web": "expo start --web",
     "lint": "expo lint"
   },
