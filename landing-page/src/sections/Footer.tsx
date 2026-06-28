@@ -50,12 +50,12 @@ export default function Footer() {
           <ul className="flex flex-col gap-2 text-sm font-semibold">
             <li>
               <a href="#terminos" className="hover:text-white hover:underline transition-all duration-200">
-                Términos y condiciones
+                Términos y Condiciones
               </a>
             </li>
             <li>
               <a href="#privacidad" className="hover:text-white hover:underline transition-all duration-200">
-                Aviso de privacidad
+                Política de Privacidad
               </a>
             </li>
           </ul>

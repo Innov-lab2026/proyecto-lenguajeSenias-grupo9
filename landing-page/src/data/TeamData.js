@@ -5,7 +5,7 @@ export const teamData = {
         members: [
             { name: "Matias De Vivo", linkedin: "", github: "" },
             { name: "Inés Abarrategui", linkedin: "", github: "" },
-            { name: "Julian Outeyral", linkedin: "", github: "" }
+            { name: "Julian Outeyral", linkedin: "https://www.linkedin.com/in/julian-outeyral/", github: "https://github.com/Outeyral" }
         ]
     },
     uxui: {
@@ -21,9 +21,10 @@ export const teamData = {
         title: "Frontend",
         description: "Desarrollamos la interfaz web y mobile de la plataforma con foco en accesibilidad y rendimiento. Integramos los módulos de aprendizaje y la práctica de señas en una experiencia fluida.",
         members: [
-            { name: "Ezequiel Oliver", linkedin: "", github: "" },
+            { name: "Ezequiel Oliver", linkedin: "https://www.linkedin.com/in/ezequiel-oliver/", github: "https://github.com/Oliver-92" },
             { name: "María Cerpa", linkedin: "", github: "" },
-            { name: "Juan Martinez", linkedin: "", github: "" }
+            { name: "Juan Martinez", linkedin: "", github: "" },
+            { name: "Roberto Bezerra", linkedin: "https://www.linkedin.com/in/rbezerra18/", github: "https://github.com/rbezerra18" }
         ]
     },
     backend: {
@@ -31,7 +32,7 @@ export const teamData = {
         description: "Construimos la API y los servicios que sostienen la plataforma. Gestionamos la autenticación, la base de datos y la integración con el modelo de reconocimiento de señas.",
         members: [
             { name: "Elisa Aroya", linkedin: "", github: "" },
-            { name: "Araceli Fernández", linkedin: "", github: "" },
+            { name: "Araceli Fernández", linkedin: "https://www.linkedin.com/in/araceli-noemi-fernandez/", github: "https://github.com/Araf05" },
             { name: "Mauricio Soto", linkedin: "", github: "" }
         ]
     },
