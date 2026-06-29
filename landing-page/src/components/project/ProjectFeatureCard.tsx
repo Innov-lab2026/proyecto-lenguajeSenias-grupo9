@@ -9,13 +9,13 @@ export default function ProjectFeatureCard({ title, description, image }: { titl
 
             <h3 className="font-extrabold 
                            text-xl lg:text-2xl 
-                           text-center md:text-left 
+                           text-center lg:text-left 
                            mb-2 whitespace-nowrap">
                 {title}
             </h3>
 
             <p className="text-lg lg:text-xl 
-                          text-center md:text-left">
+                          text-center lg:text-left">
                 {description}
             </p>
         </div>

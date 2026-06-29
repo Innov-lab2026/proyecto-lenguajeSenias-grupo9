@@ -1,9 +1,9 @@
 import ButtonSuccess from '../common/ButtonSuccess'
 import FeatureCard from './DemoFeatureCard'
 import SectionHeader from '../common/SectionHeader'
-import demo from '../../assets/images/demo/demo.png'
 import letraA from '../../assets/images/demo/letra-A.webp'
 import manito from '../../assets/images/demo/manito.svg'
+import InteractiveDemo from './InteractiveDemo'
 
 export default function DemoSection() {
     { /* Second section of Demo.tsx */ }
@@ -42,81 +42,7 @@ export default function DemoSection() {
 
                 </div>
 
-                { /* Demo mock temporal */}
-                <div className="bg-[#123062]  text-white 
-                                    flex flex-col items-center justify-center gap-4 
-                                    p-8 rounded-4xl aspect-[1/1.39]">
-
-                    <img src={demo} alt="Demo" className="w-48 h-auto" loading="lazy" />
-
-                    <fieldset className="grid grid-cols-3 grid-rows-2 gap-8 py-8">
-
-                        <legend className="grid col-span-3 row-span-1 text-center">
-                            ¿Qué letra representa esta seña?
-                        </legend>
-
-                        <label className="
-                            h-14 w-14 cursor-pointer
-                            items-center justify-center
-                            rounded-md border
-                            grid col-span-1 row-span-1
-                            hover:bg-accent
-                            focus-within:ring-2 
-                        ">
-                            <input
-                                type="radio"
-                                name="answer"
-                                value="A"
-                                className="sr-only"
-                            />
-                            A
-                        </label>
-
-                        <label className="
-                            h-14 w-14 cursor-pointer
-                            items-center justify-center
-                            rounded-md border
-                            grid col-span-1 row-span-1
-                            hover:bg-accent
-                            focus-within:ring-2
-                        ">
-                            <input
-                                type="radio"
-                                name="answer"
-                                value="B"
-                                className="sr-only"
-                            />
-                            B
-                        </label>
-
-                        <label className="
-                            h-14 w-14 cursor-pointer
-                            items-center justify-center
-                            rounded-md border
-                            grid col-span-1 row-span-1
-                            hover:bg-accent
-                            focus-within:ring-2
-                        ">
-                            <input
-                                type="radio"
-                                name="answer"
-                                value="C"
-                                className="sr-only" />
-                            C
-                        </label>
-
-                        <button className="
-                            col-span-3 row-span-1 bg-primary 
-                            text-white py-2 px-4 rounded-md
-                            border border-white hover:bg-accent
-                            focus-within:ring-2"
-                        >
-                            Chequear respuesta
-                        </button>
-
-                    </fieldset>
-
-                </div>
+                <InteractiveDemo />
 
             </div>
 
