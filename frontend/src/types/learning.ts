@@ -9,3 +9,12 @@ export interface Lesson {
   state: LessonState
   type: ActivityType
 }
+
+export type ModuleState = 'locked' | 'available' | 'current' | 'completed'
+
+export interface Module {
+  id: string
+  title: string
+  state: ModuleState
+  lessons: Lesson[]
+}
