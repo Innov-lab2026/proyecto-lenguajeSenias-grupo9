@@ -57,6 +57,7 @@ router.post('/login', login)
  *               - last_name
  *               - birth_date
  *               - gender
+ *               - country
  *             properties:
  *               email:
  *                 type: string
@@ -76,6 +77,9 @@ router.post('/login', login)
  *               gender:
  *                 type: string
  *                 example: Femenino
+ *               country:
+ *                 type: string
+ *                 example: Argentina
  *     responses:
  *       201:
  *         description: Usuario registrado correctamente
