@@ -16,8 +16,7 @@ export const login = async (req: Request, res: Response) => {
       user: {
         id: data.user.id,
         email: data.user.email,
-        first_name: data.user.user_metadata?.first_name,
-        last_name: data.user.user_metadata?.last_name
+        full_name: data.user?.user_metadata?.full_name,
       },
       session: {
         access_token: data.session?.access_token,
@@ -44,11 +43,10 @@ export const register = async (req: Request, res: Response) => {
       user: {
         id: data.user?.id,
         email: data.user?.email,
-        first_name,
-        last_name,
-        birth_date,
-        gender,
-        country
+        full_name: data.user?.user_metadata?.full_name,
+        birth_date: data.user?.user_metadata?.birth_date,
+        gender: data.user?.user_metadata?.gender,
+        country: data.user?.user_metadata?.country
       }
     })
   } catch (error: any) {
