@@ -1,6 +1,7 @@
-import { useState } from 'react'
-import { Alert, FlatList, Pressable, Text, View, useWindowDimensions } from 'react-native'
+import { useEffect, useState } from 'react'
+import { FlatList, Pressable, Text, View, useWindowDimensions } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { useRouter } from 'expo-router'
 import { cn } from '@/src/utils/cn'
 
 const LSA_ALPHABET = [
@@ -14,11 +15,16 @@ function getNumColumns(width: number): number {
   return 4
 }
 
+const visitedLettersCache: string[] = []
+
 export default function AlphabetScreen() {
+  const router = useRouter()
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null)
+  const [visitedLetters, setVisitedLetters] = useState<string[]>(() => [...visitedLettersCache])
   const [contentWidth, setContentWidth] = useState<number | null>(null)
   const { width } = useWindowDimensions()
 
+  const hasMeasuredWidth = contentWidth !== null
   const availableWidth = contentWidth ?? width
   const numColumns = getNumColumns(availableWidth)
   // Padding total horizontal: 16px a cada lado + gaps entre columnas
@@ -27,10 +33,19 @@ export default function AlphabetScreen() {
   const cardSize = Math.floor((availableWidth - HORIZONTAL_PADDING - GAP * (numColumns - 1)) / numColumns)
 
   const handleLetterPress = (letter: string) => {
-    setSelectedLetter(letter === selectedLetter ? null : letter)
-    // TODO: abrir video de la letra en LSA
-    Alert.alert(`Seña: ${letter}`, 'Próximamente se mostrará el video de esta seña en LSA.')
+    setSelectedLetter(letter)
+    setVisitedLetters((current) => {
+      if (current.includes(letter)) return current
+      const next = [...current, letter]
+      visitedLettersCache.splice(0, visitedLettersCache.length, ...next)
+      return next
+    })
+    router.push({ pathname: '/alphabet/[letter]', params: { letter } })
   }
+
+  useEffect(() => {
+    setVisitedLetters([...visitedLettersCache])
+  }, [])
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
@@ -44,45 +59,54 @@ export default function AlphabetScreen() {
         </View>
 
         {/* Grilla de letras */}
-        <FlatList
-          data={LSA_ALPHABET}
-          keyExtractor={(item) => item}
-          numColumns={numColumns}
-          key={numColumns} // fuerza re-render al cambiar columnas
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
-          columnWrapperStyle={{ gap: GAP, marginBottom: GAP }}
-          style={{ flex: 1 }}
-          renderItem={({ item: letter }) => {
-            const isSelected = selectedLetter === letter
+        {hasMeasuredWidth && (
+          <FlatList
+            data={LSA_ALPHABET}
+            keyExtractor={(item) => item}
+            numColumns={numColumns}
+            key={numColumns} // fuerza re-render al cambiar columnas
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
+            columnWrapperStyle={{ gap: GAP, marginBottom: GAP }}
+            style={{ flex: 1 }}
+            renderItem={({ item: letter }) => {
+              const isSelected = selectedLetter === letter
+              const isVisited = visitedLetters.includes(letter)
 
-            return (
-              <Pressable
-                onPress={() => handleLetterPress(letter)}
-                accessibilityRole="button"
-                accessibilityLabel={`Letra ${letter}`}
-                accessibilityState={{ selected: isSelected }}
-                style={{ width: cardSize, height: cardSize }}
-                className={cn(
-                  'items-center justify-center rounded-2xl',
-                  isSelected
-                    ? 'bg-accent border-2 border-secondary'
-                    : 'bg-muted/15 border-2 border-transparent'
-                )}
-              >
-                <Text
+              return (
+                <Pressable
+                  onPress={() => handleLetterPress(letter)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Letra ${letter}`}
+                  accessibilityState={{ selected: isSelected }}
+                  style={{ width: cardSize, height: cardSize }}
                   className={cn(
-                    'font-nunito font-bold',
-                    isSelected ? 'text-secondary' : 'text-ink/60',
+                    'items-center justify-center rounded-2xl border-2',
+                    isSelected
+                      ? 'bg-accent border-secondary'
+                      : isVisited
+                        ? 'bg-secondary/10 border-secondary/60'
+                        : 'bg-muted/15 border-transparent'
                   )}
-                  style={{ fontSize: cardSize * 0.38 }}
                 >
-                  {letter}
-                </Text>
-              </Pressable>
-            )
-          }}
-        />
+                  <Text
+                    className={cn(
+                      'font-nunito font-bold',
+                      isSelected
+                        ? 'text-secondary'
+                        : isVisited
+                          ? 'text-secondary'
+                          : 'text-ink/60',
+                    )}
+                    style={{ fontSize: cardSize * 0.38 }}
+                  >
+                    {letter}
+                  </Text>
+                </Pressable>
+              )
+            }}
+          />
+        )}
       </View>
     </SafeAreaView>
   )
