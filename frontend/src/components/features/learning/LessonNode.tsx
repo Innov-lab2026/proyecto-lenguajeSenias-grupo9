@@ -23,8 +23,8 @@ const iconByActivity: Record<ActivityType, IconName> = {
 
 const iconColorByState: Record<LessonState, string> = {
   locked: '#6F706F', // muted
-  available: '#0581C3', // secondary
-  current: '#3E3D3B', // ink
+  available: '#4A90E2', // secondary
+  current: '#1F2937', // ink
   completed: '#FFFFFF', // surface
 }
 

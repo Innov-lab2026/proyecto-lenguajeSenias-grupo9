@@ -1,36 +1,45 @@
 # Autenticación — Frontend
 
-Documentación de la implementación de autenticación (registro, login, logout) en la app Expo:
-estado de sesión, persistencia, protección de rutas, flujo de datos y detalle de cada módulo.
+Documentación de la autenticación (registro, login, Google, logout) de la app Expo: flujo de
+pantallas, estado de sesión, persistencia, protección de rutas, paso de completar perfil y detalle
+de cada módulo.
 
 ---
 
 ## 1. Visión general
 
-- Pantalla única de auth (`/login`) con tabs **Crear Cuenta / Iniciar Sesión** (toggle interno).
-- **Login** (email + password) → hidrata la sesión; con **"Recordarme en este equipo"** marcado
-  (default) también la persiste en storage. Incluye mostrar/ocultar contraseña y el link
-  "Olvidaste tu contraseña?" (*stub*; el flujo de recupero es tarea futura).
-- **Registro** (nombre, apellido, fecha de nacimiento, género, email, password) → sin auto-login:
-  muestra "revisá tu correo para confirmar" y vuelve a login (alineado con la confirmación por
-  email de Supabase).
+Flujo basado en **rutas separadas** (no tabs), con estética CarpiSeñas (header azul + panel celeste,
+inputs/botones tipo *pill*, fuente Nunito).
+
+- **Inicio** (`(auth)/index.tsx`) → elegir **"Registrarse con correo"** o **"Continuar con Google"**,
+  + link "¿Ya tienes cuenta? Inicia sesión". (El botón de Google se oculta en modo mock.)
+- **Registro** (email, password, confirmar password, nombre, apellido, fecha de nacimiento, género,
+  país) → sin auto-login (por decisión de UX): navega a login con un aviso de éxito. La confirmación
+  por email está **desactivada** en Supabase, así que el usuario puede loguearse enseguida.
+- **Login** (email + password) → hidrata la sesión; con **"Recordarme en este equipo"** (default)
+  también la persiste. Incluye mostrar/ocultar contraseña y link a recuperar contraseña.
+- **Google** (`useGoogleAuth`) → OAuth vía Supabase (PKCE). Web funciona directo; nativo requiere un
+  *development build* (no Expo Go).
+- **Completar perfil** → si un usuario (típicamente de Google) tiene el perfil incompleto
+  (falta país/género/fecha), un *gate* en `(protected)/_layout.tsx` muestra `CompleteProfileScreen`
+  antes de dejar entrar a la app.
+- **Recuperar contraseña** (`(auth)/forgot-password.tsx`) → UI lista, lógica **pendiente** (stub).
 - **Logout** client-side: limpia token, user y cache de queries.
-- Botón **"Continuar con Google"** como *stub* (UI lista; OAuth real pendiente del backend).
-- Tipografía **Nunito** (variable font) en toda la UI de auth: bold en todos los textos salvo la
-  tab inactiva (regular).
 
 ### Stack
-Expo Router v6 · NativeWind v4 · TanStack Query · React Hook Form + Zod · Axios · Zustand · expo-secure-store · expo-font.
+Expo Router v6 · NativeWind v4 · TanStack Query v5 · React Hook Form + Zod 4 · Axios · Zustand ·
+expo-secure-store · expo-font · expo-image · **@supabase/supabase-js** (sólo para Google OAuth).
 
 ### Responsabilidades por capa
 | Capa | Tecnología | Rol |
 |------|------------|-----|
 | UI / formularios | RHF + Zod + NativeWind | Render y validación de inputs |
 | Estado de sesión | Zustand (`sessionStore`) | `user`, `token`, `status` en memoria |
-| Datos remotos | TanStack Query (`useMutation`) | Ejecuta login/registro, expone `isPending`/`error` |
+| Datos remotos | TanStack Query | login/registro (mutations), perfil (query) |
 | Red | Axios (`http`) | Base URL, header `Authorization`, manejo de 401 |
 | Persistencia | expo-secure-store / localStorage | Token + user entre reinicios (si "Recordarme") |
-| Routing / guard | Expo Router (`Stack.Protected`) | Separa rutas públicas/privadas y redirige |
+| Google OAuth | Supabase (`lib/supabase`) | signInWithOAuth + exchangeCodeForSession (PKCE) |
+| Routing / guard | Expo Router (`Stack.Protected`) | Rutas públicas/privadas + gate de perfil |
 
 ---
 
@@ -38,45 +47,44 @@ Expo Router v6 · NativeWind v4 · TanStack Query · React Hook Form + Zod · Ax
 
 ```bash
 app/
-  _layout.tsx                 # providers + fuentes + hidratación de sesión + guard de rutas
+  _layout.tsx                   # providers + fuentes + hidratación + guard (Stack.Protected)
   (auth)/
-    _layout.tsx               # stack del grupo público
-    login.tsx                 # pantalla de auth (orquesta login/registro)
+    _layout.tsx                 # stack del grupo público (index = pantalla de inicio / anchor)
+    index.tsx                   # Inicio: elegir correo / Google
+    register.tsx                # Registro
+    login.tsx                   # Login (consume el "flash" de registro)
+    forgot-password.tsx         # Recuperar contraseña (stub)
   (protected)/
-    _layout.tsx               # stack del grupo privado
-    index.tsx                 # home protegido (+ botón logout)
+    _layout.tsx                 # gate de perfil + navegación (SideBar / BottomBar responsive)
+    index.tsx · profile.tsx · … # pantallas privadas
 src/
   components/
-    common/                   # primitivos reutilizables
-      Button.tsx
-      Checkbox.tsx
-      TextField.tsx
-    features/auth/            # componentes específicos de auth
-      AuthCard.tsx            # tarjeta con tabs; renderiza LoginForm o RegisterForm
-      LoginForm.tsx
-      RegisterForm.tsx
-      GoogleButton.tsx
-      GoogleIcon.tsx
-      comingSoon.ts           # aviso "Próximamente" cross-platform
+    common/                     # primitivos reutilizables (pill)
+      Button.tsx · Checkbox.tsx · TextField.tsx · Select.tsx
+    features/auth/
+      AuthShell.tsx             # scaffold compartido (header azul + panel celeste)
+      LoginForm.tsx · RegisterForm.tsx
+      BirthDateField.tsx        # input fecha con máscara + date picker
+      GoogleButton.tsx · GoogleIcon.tsx
+    features/profile/
+      CompleteProfileScreen.tsx # paso de completar perfil (Google)
   hooks/features/auth/
-    useLogin.ts
-    useRegister.ts
-    useLogout.ts
-    useSessionHydration.ts
+    useLogin.ts · useRegister.ts · useLogout.ts · useSessionHydration.ts · useGoogleAuth.ts
+  hooks/features/profile/
+    useProfile.ts · useUpdateProfile.ts
   services/
-    http.ts                   # instancia Axios + interceptores + helper de error
-    auth.ts                   # login/register + mapeo del payload (+ capa mock)
-  store/
-    sessionStore.ts           # estado de sesión (Zustand)
+    http.ts                     # Axios + interceptores + helper de error
+    auth.ts                     # login/register + toRegisterRequest (+ mock)
+    profile.ts                  # getProfile/updateProfile (+ mock)
+  store/sessionStore.ts         # estado de sesión (Zustand)
   lib/
-    storage.ts                # persistencia token/user cross-platform
-  schemas/
-    auth.ts                   # validación Zod (login y registro)
-  types/
-    auth.ts                   # contratos request/response + Gender
-    user.ts                   # modelo de usuario + normalización
-  utils/
-    date.ts                   # máscara/parseo de fechas DD/MM/AAAA
+    storage.ts                  # persistencia token/user cross-platform
+    supabase.ts                 # cliente Supabase (sólo OAuth Google)
+    flashMessage.ts             # mensaje de un solo uso entre pantallas (sin URL)
+  schemas/     auth.ts · profile.ts        # validación Zod
+  types/       auth.ts · user.ts · profile.ts
+  constants/   countries.ts · gender.ts · env.ts   # opciones + flag USE_MOCK_AUTH
+  utils/       date.ts · cn.ts
 ```
 
 ---
@@ -85,317 +93,201 @@ src/
 
 ### 3.1 Arranque y restauración de sesión (hidratación)
 
-Al abrir la app no sabemos aún si hay sesión, por eso `status` arranca en `"loading"` y el splash
-permanece visible hasta resolverlo (también espera la carga de la fuente Nunito).
+`status` arranca en `"loading"`; el splash queda visible hasta resolver sesión **y** cargar la fuente.
 
 ```
-App monta
-   │
-   ▼
 app/_layout.tsx
-   ├─ SplashScreen.preventAutoHideAsync()   (a nivel módulo)
-   ├─ useFonts({ Nunito })  ................ carga de la fuente
-   ├─ status = useSessionStore() ............ "loading"
-   ├─ useSessionHydration()  ─────────────┐
-   └─ ready = fuentes listas && status !== "loading"
-      → mientras no esté ready: render null (splash visible)
-                                          │
-                       ┌──────────────────┘
-                       ▼
-   useSessionHydration (al montar):
-     getToken() + getUser()  (desde storage)
-        │
-        ├─ token && user  → setSession(user, token)   → status "authenticated"
-        └─ falta alguno    → limpia storage + clearSession() → status "unauthenticated"
-                       │
-                       ▼
-   _layout re-renderiza → hideAsync() (splash fuera)
-                       │
-        ┌──────────────┴───────────────┐
-   "authenticated"               "unauthenticated"
-   Stack.Protected (protected)   Stack.Protected (auth)
-        → home "/"                    → "/login"
+   ├─ SplashScreen.preventAutoHideAsync()  ·  useFonts({ Nunito })
+   ├─ useSessionHydration()  → getToken() + getUser() (storage)
+   │     ├─ token && user → setSession(user, token)  → status "authenticated"
+   │     └─ falta alguno   → limpia storage + clearSession() → "unauthenticated"
+   └─ ready = fuentes listas && status !== "loading"  → hideAsync()
+                 ┌──────────────┴───────────────┐
+            "authenticated"                "unauthenticated"
+            Stack.Protected (protected)    Stack.Protected (auth)
 ```
 
-> Como todavía no existe `GET /me`, confiamos en el token + user persistidos. Si el token está vencido,
-> el primer request fallará con 401 y el interceptor limpiará la sesión (ver 3.5).
-> Si el login se hizo **sin** "Recordarme", no hay nada en storage y la app abre en login.
+> No hay `GET /me`: se confía en token + user persistidos. Si el token venció, el primer request da
+> 401 y el interceptor limpia la sesión. Sin "Recordarme" no se persiste nada → la app abre en inicio.
 
 ### 3.2 Login
 
 ```
-Usuario completa LoginForm
-        │  onChangeText → react-hook-form
-        ▼
-handleSubmit  → zodResolver(loginSchema) valida
-        │  (ok)
-        ▼
-LoginForm.onSubmit(values, rememberMe) → AuthCard → screen.handleLogin
-        │
-        ▼
-useLogin().mutate({ payload: values, rememberMe })   [TanStack Query]
-        │
-        ▼
-services/auth.login(payload)
-        ├─ USE_MOCK=true  → devuelve { user, session } fake (delay 600ms)
-        └─ USE_MOCK=false → POST /api/auth/login
-                            → { message, user{ id,email,first_name,last_name },
-                                session{ access_token, expires_in } }
-        │
-        ▼ (onSuccess)
-toUser(user)  +  token = session.access_token
-   ├─ rememberMe=true  → saveToken(token) + saveUser(user)   [storage]
-   └─ rememberMe=false → sin persistencia (sesión sólo en memoria)
-        → setSession(user, token)        [store: status "authenticated"]
-        │
-        ▼
-_layout reacciona al cambio de status → Stack.Protected habilita (protected)
-        → Expo Router redirige a "/" automáticamente (sin navegación manual)
+LoginForm (valida con loginSchema) → login.tsx handleSubmit
+  → useLogin().mutate({ payload, rememberMe })
+      → services/auth.login(payload)
+          ├─ mock  → { user, session } fake
+          └─ real  → POST /api/auth/login → { message, user{id,email,first_name,last_name},
+                                              session{access_token, expires_in} }
+      → onSuccess: token = session.access_token; normalized = toUser(user)
+          ├─ rememberMe → saveToken + saveUser (storage)
+          └─ setSession(normalized, token)  → status "authenticated"
+  → el guard habilita (protected) y Expo Router redirige (sin navegación manual)
 ```
-
-Si el login falla, `useLogin().error` queda seteado; la pantalla lo transforma con
-`getApiErrorMessage()` y lo pasa al form, que muestra el mensaje sobre el CTA.
 
 ### 3.3 Registro
 
 ```
-Usuario completa RegisterForm
-  (nombre, apellido, fecha de nacimiento DD/MM/AAAA, género, email, password)
-        │  valida (Zod: registerSchema)
-        ▼
-screen.handleRegister(values)
-        │
-        ▼
-useRegister().mutate(values, { onSuccess })
-        │
-        ▼
-toRegisterRequest(values)   → mapea al contrato del endpoint:
-   { email, password, first_name, last_name,
-     birth_date (ISO YYYY-MM-DD), gender (valor del backend) }
-        │
-        ▼
-services/auth.register(payload)
-        ├─ USE_MOCK=true  → { message, user } fake
-        └─ USE_MOCK=false → POST /api/auth/register → { message, user }   (SIN token)
-        │
-        ▼ (onSuccess en la pantalla)
-setMode("login") + setInfo(message)
-        → NO hay setSession ni token: el usuario debe confirmar el email y luego loguearse
-        → la tarjeta vuelve a "Iniciar Sesión" y muestra el banner "revisá tu correo"
+RegisterForm (registerSchema) → register.tsx handleSubmit
+  → useRegister().mutate(values)
+      → toRegisterRequest: { email, password, first_name, last_name,
+                             birth_date (ISO), gender (GENDER_API_VALUE), country }
+      → POST /api/auth/register → { message, user }   (SIN token)
+  → onSuccess: setFlashMessage(message) + router.replace('/login')
+       (sin auto-login por decisión de UX; confirmación por email desactivada)
+  → login.tsx consume el flash al montar y lo muestra como aviso
 ```
 
-### 3.4 Logout
+### 3.4 Google (OAuth con Supabase, PKCE)
 
 ```
-Home → botón "Cerrar sesión" → useLogout()()
-        │
-        ├─ removeToken() + removeUser()   [storage]
-        ├─ clearSession()                 [store: status "unauthenticated"]
-        └─ queryClient.clear()            [limpia cache de TanStack Query]
-        │
-        ▼
-_layout reacciona → Stack.Protected habilita (auth) → redirige a "/login"
+GoogleButton → useGoogleAuth.signInWithGoogle()
+  → supabase.auth.signInWithOAuth({ provider:'google', redirectTo, skipBrowserRedirect })
+  → WebBrowser.openAuthSessionAsync(url, redirectTo)  → devuelve URL con ?code
+  → supabase.auth.exchangeCodeForSession(code) → session
+  → toGoogleUser(session.user) + saveToken/saveUser + setSession
+  → el guard entra a (protected); si el perfil está incompleto → CompleteProfileScreen
 ```
 
-### 3.5 Autorización de requests y manejo de 401
+### 3.5 Gate de completar perfil
 
 ```
-Cualquier request con http (Axios)
-        │
-        ▼
-interceptor de REQUEST:
-   token = sessionStore.getState().token
-   si hay token → header Authorization: Bearer <token>
-        │
-        ▼
-respuesta del backend
-        │
-        ├─ 2xx → sigue normal
-        └─ 401 → interceptor de RESPONSE:
-                   clearSession()  → status "unauthenticated" → redirige a login
-                   (gancho preparado para refresh token a futuro)
+(protected)/_layout.tsx → useProfile()  (GET /api/profile, sólo si autenticado)
+  ├─ isPending → spinner (ActivityIndicator)
+  ├─ isError   → estado recuperable: "No pudimos cargar tu perfil" + Reintentar + Cerrar sesión
+  ├─ perfil incompleto (falta country || gender || birth_date) → <CompleteProfileScreen/>
+  └─ completo  → navegación normal (SideBar / BottomBar) + <Slot/>
+
+CompleteProfileScreen → useUpdateProfile().mutate({ birth_date, gender, country })
+  → PATCH /api/profile → invalida ['profile'] → el gate deja pasar
 ```
 
-> El token se lee del **store** (memoria) en cada request, no del storage: es más rápido y el store
-> es la fuente de verdad de la sesión activa.
+### 3.6 Logout y manejo de 401
+
+```
+useLogout()() → removeToken + removeUser + clearSession + queryClient.clear()
+             → guard vuelve a (auth)
+
+http (Axios): request → agrega Bearer desde el store · response 401 → clearSession() (redirige a auth)
+```
 
 ---
 
 ## 4. Detalle por módulo
 
 ### 4.1 Routing (`app/`)
-
-**`app/_layout.tsx`** — Layout raíz. Monta los providers globales (`QueryClientProvider`,
-`SafeAreaProvider`), carga la fuente **Nunito** (`useFonts`), dispara la hidratación
-(`useSessionHydration`) y aplica el **guard** de rutas:
-- Mantiene el splash con `SplashScreen.preventAutoHideAsync()` y lo oculta cuando las fuentes
-  cargaron (o fallaron) **y** `status !== "loading"`.
-- Mientras no esté listo renderiza `null` (splash visible).
-- Usa `Stack.Protected guard={...}` para montar `(protected)` si está autenticado o `(auth)` si no.
-  Al cambiar `status`, Expo Router redirige solo (no hay `router.replace` manual).
-
-**`app/(auth)/login.tsx`** — Pantalla pública de auth. Es el **orquestador** del flujo:
-- Mantiene el estado de UI: `mode` ("login" | "register") e `info` (mensaje de confirmación).
-- Instancia `useLogin()` y `useRegister()` y deriva `submitting` y `serverError` del mutation activo.
-- `handleModeChange`: cambia de tab, limpia `info` y resetea los mutations.
-- `handleLogin(values, rememberMe)` → `login.mutate({ payload, rememberMe })`.
-- `handleRegister(values)` → `register.mutate` con `onSuccess` que vuelve a login y muestra el aviso.
-- Layout mobile-first: `SafeAreaView` + `KeyboardAvoidingView` (**`behavior="padding"` en ambas
-  plataformas**: con edge-to-edge de SDK 54, Android ya no redimensiona la ventana solo y el teclado
-  tapaba los inputs inferiores) + `ScrollView` (`keyboardShouldPersistTaps="handled"`).
-
-**`app/(auth)/_layout.tsx`** y **`app/(protected)/_layout.tsx`** — Stacks de cada grupo
-(`headerShown: false`). Separan rutas públicas de privadas.
-
-**`app/(protected)/index.tsx`** — Home protegido. Muestra el saludo y un botón **"Cerrar sesión"**
-cableado a `useLogout()`.
+- **`_layout.tsx`** — providers (`QueryClientProvider`, `SafeAreaProvider`), carga de fuente Nunito,
+  `useSessionHydration`, splash, y guard con `Stack.Protected` (montado según `status`).
+- **`(auth)/_layout.tsx`** — Stack del grupo; `index.tsx` es el *anchor* (pantalla de inicio).
+- **`(auth)/index.tsx`** — Inicio: botón "Registrarse con correo" → `/register`, `GoogleButton`
+  (oculto en mock), link a `/login`.
+- **`(auth)/register.tsx`** — `AuthShell` + `RegisterForm` + `useRegister`. En éxito → flash + `/login`.
+- **`(auth)/login.tsx`** — `AuthShell` + `LoginForm` + `useLogin`. Consume el flash de registro
+  (`consumeFlashMessage`) una vez al montar (sin ensuciar la URL).
+- **`(auth)/forgot-password.tsx`** — `AuthShell` + input email; muestra un aviso genérico (stub).
+- **`(protected)/_layout.tsx`** — gate de perfil (`useProfile`) + navegación responsive
+  (`SideBar` en desktop/tablet, `BottomBar` en mobile).
 
 ### 4.2 Componentes comunes (`src/components/common/`)
-
-**`Button.tsx`** — Botón reutilizable.
-- Props: `label`, `onPress`, `variant` (`"primary"` amarillo / `"ghost"` blanco con borde),
-  `loading`, `disabled`, `leftIcon`, `className`.
-- Cuando `loading` muestra `ActivityIndicator` (su color sale de una tabla por variante, ya que el
-  indicador no acepta `className`) y se deshabilita. Expone `accessibilityRole`/`accessibilityState`.
-
-**`TextField.tsx`** — Input con label + error. `forwardRef` para encadenar foco entre campos.
-- Props: `label`, `error`, `labelRight` (elemento junto al label, ej. link "Olvidaste tu
-  contraseña?"), `rightElement` (elemento dentro del input, ej. ojo de contraseña) + todas las de
-  `TextInput`.
-- El borde/redondeo vive en un contenedor: el outline nativo del navegador se quita (web) y el foco
-  se señala con el borde del contenedor (`border-secondary`; rojo si hay error).
-
-**`Checkbox.tsx`** — Checkbox con label (`checked`, `onChange`). Usado para "Recordarme en este
-equipo". Expone `accessibilityRole="checkbox"` + `accessibilityState`.
+- **`Button.tsx`** — pill (`rounded-full`), variantes `primary` (amarillo) y `white` (blanco con
+  sombra). `hover:` en web (usa `primary-hover`/`accent`), estado `loading` (spinner) y `disabled`.
+- **`TextField.tsx`** — input pill **sin label visible** (el nombre del campo va en el `placeholder`;
+  `label` sólo alimenta `accessibilityLabel`). Foco marcado en el borde del contenedor; `rightElement`
+  (ojo/calendario). Fix de autofill en web (inyecta CSS `-webkit-box-shadow` para que el fondo no se
+  salga de la pill).
+- **`Select.tsx`** — desplegable pill + `Modal` con lista y **buscador opcional** (filtro sin acentos).
+  Al cerrar hace `blur()` del elemento activo (evita warning de `aria-hidden` con foco atrapado).
+- **`Checkbox.tsx`** — checkbox con label (para "Recordarme en este equipo").
 
 ### 4.3 Componentes de auth (`src/components/features/auth/`)
+- **`AuthShell.tsx`** — scaffold compartido: header azul (`bg-secondary`) con eyebrow/título/subtítulo
+  (texto oscuro), panel celeste (`bg-accent`) redondeado que lo solapa, y el contenido acotado a
+  `max-w-md`. `SafeAreaView` + `KeyboardAvoidingView` + `ScrollView`. Prop `headerContent` (para el
+  carpincho de la pantalla de Google).
+- **`LoginForm.tsx`** — email + password (ojo), checkbox "Recordarme", link a `/forgot-password`,
+  footer a `/register`. Presentacional (`onSubmit(values, rememberMe)`).
+- **`RegisterForm.tsx`** — Nombre, Apellido, Género (`Select`), Fecha (`BirthDateField`), País
+  (`Select searchable`), Correo, Contraseña, Confirmar contraseña. Footer a `/login`.
+- **`BirthDateField.tsx`** — input con máscara `DD/MM/AAAA` + selector: calendario nativo (iOS/Android)
+  o `<input type="date">` en web. `onRequestClose` (Escape) y blur al cerrar.
+- **`GoogleButton.tsx`** — botón "Continuar con Google" cableado a `useGoogleAuth`; muestra loading/error.
+- **`GoogleIcon.tsx`** — logo Google con **expo-image** (asset `.svg`, sin transformer).
 
-**`AuthCard.tsx`** — Tarjeta visual con tabs. **Componente controlado** (el `mode` lo maneja el padre).
-- Props: `mode`, `onModeChange`, `onLogin`, `onRegister`, `submitting`, `serverError`, `infoMessage`.
-- Renderiza: tabs (cada una `flex-1`, subrayado azul y **bold** en la activa, regular la inactiva),
-  `GoogleButton`, divisor "O UTILIZA TU EMAIL", `LoginForm` **o** `RegisterForm` según `mode`, y el
-  footer de términos. Muestra `infoMessage` en un banner `accent`.
-- Mobile-first: `w-full max-w-md self-center` (ancho completo en mobile, acotado y centrado en web).
+### 4.4 Componente de perfil
+- **`features/profile/CompleteProfileScreen.tsx`** — dentro de `AuthShell` (con carpincho
+  `capi-body.webp`): Género, Fecha, País + CTA "Continuar". Envía con `useUpdateProfile`. Link
+  "Cerrar sesión" como salida.
 
-**`LoginForm.tsx`** — Formulario de login (email + password), presentacional.
-- `useForm` + `zodResolver(loginSchema)`. Estado local: `rememberMe` (default `true`) y
-  `showPassword` (ojo dentro del input).
-- Link "Olvidaste tu contraseña?" junto al label (stub "Próximamente"; flujo de recupero pendiente).
-- `onSubmit(values, rememberMe)` — no conoce mutations ni navegación (eso vive en la pantalla).
+### 4.5 Hooks
+- **auth:** `useLogin` (`{ payload, rememberMe }`), `useRegister` (mapea con `toRegisterRequest`),
+  `useLogout`, `useSessionHydration`, `useGoogleAuth` (OAuth Supabase; no-op en mock).
+- **profile:** `useProfile` (query `['profile']`, `enabled` si autenticado, `retry: 1`,
+  `staleTime` 5min), `useUpdateProfile` (mutation → invalida `['profile']`).
 
-**`RegisterForm.tsx`** — Formulario de registro, presentacional.
-- Campos: Nombre, Apellido, Fecha de nacimiento (máscara `DD/MM/AAAA` con `formatDdMmYyyy`),
-  Género (chips: Masculino / Femenino / Otro / Prefiero no decir), Email y Contraseña.
-- `useForm` + `zodResolver(registerSchema)`, encadenado de foco entre campos, CTA "Crear Cuenta".
+### 4.6 Servicios
+- **`http.ts`** — Axios: `baseURL = ${EXPO_PUBLIC_API_URL}/api`, Bearer desde el store, 401 → clearSession,
+  `getApiErrorMessage`.
+- **`auth.ts`** — `login`/`register`/`toRegisterRequest`. Capa **mock** vía `USE_MOCK_AUTH`.
+- **`profile.ts`** — `getProfile` (GET `/profile`) / `updateProfile` (PATCH `/profile`). También mock
+  (devuelve un perfil de prueba completo).
 
-**`GoogleButton.tsx`** — Botón "Continuar con Google" (`Button` ghost + `GoogleIcon`). Handler **stub**
-vía `showComingSoon`. Pendiente el OAuth real.
+### 4.7 Estado, persistencia y libs
+- **`store/sessionStore.ts`** — `user`, `token`, `status` + `setSession`/`clearSession`/`setStatus`.
+- **`lib/storage.ts`** — token + user cross-platform (SecureStore / localStorage); helpers
+  `setItem`/`getItem`/`deleteItem` reusados por el storage adapter de Supabase.
+- **`lib/supabase.ts`** — cliente Supabase (PKCE, `persistSession:false`, storage = SecureStore/
+  localStorage sólo para el *code verifier* PKCE). Se usa **sólo** para Google OAuth.
+- **`lib/flashMessage.ts`** — `setFlashMessage`/`consumeFlashMessage`: aviso de un solo uso entre
+  pantallas, en memoria (no viaja por la URL).
 
-**`GoogleIcon.tsx`** — Logo de Google renderizado con **expo-image** (`require` del `.svg` como asset,
-sin transformer). Prop `size`.
-
-**`comingSoon.ts`** — `showComingSoon(message)`: aviso "Próximamente" cross-platform
-(`Alert.alert` en mobile, `alert` del navegador en web, donde `Alert.alert` es no-op).
-
-### 4.4 Hooks (`src/hooks/features/auth/`)
-
-**`useLogin.ts`** — `useMutation`. Recibe `{ payload, rememberMe }`. En `onSuccess`: normaliza el
-user (`toUser`); si `rememberMe` persiste token + user en storage (si no, la sesión vive sólo en
-memoria y se pierde al cerrar la app); luego `setSession`. La navegación la resuelve el guard.
-
-**`useRegister.ts`** — `useMutation` que mapea los valores del form con `toRegisterRequest` y llama
-al service. No hace auto-login (el backend no devuelve token); el manejo del éxito ("revisá tu
-correo" + volver a login) lo hace la pantalla.
-
-**`useLogout.ts`** — Devuelve una función async: `removeToken()` + `removeUser()` + `clearSession()`
-+ `queryClient.clear()`. 100% client-side (no hay endpoint `/logout` aún).
-
-**`useSessionHydration.ts`** — En `useEffect` al montar: lee token + user del storage y setea la sesión
-o la limpia. Usa un flag `active` para evitar actualizaciones tras desmontar.
-
-### 4.5 Servicios (`src/services/`)
-
-**`http.ts`** — Instancia Axios central.
-- `baseURL` = `${EXPO_PUBLIC_API_URL}/api`. Header `Content-Type: application/json`.
-- Interceptor de request: agrega `Authorization: Bearer <token>` leyendo del store.
-- Interceptor de response: ante 401 hace `clearSession()` (gancho para refresh a futuro).
-- `getApiErrorMessage(error)`: extrae un mensaje legible del `{ error }` del backend.
-
-**`auth.ts`** — `login(payload)`, `register(payload)` y `toRegisterRequest(values)`.
-- Capa **mock** conmutable con `EXPO_PUBLIC_USE_MOCK_AUTH=true` (datos fake con delay, sin red).
-- `toRegisterRequest` mapea los valores del formulario al body del endpoint
-  (`birthDate` DD/MM/AAAA → `birth_date` ISO; `gender` → valor del backend vía `GENDER_API_VALUE`).
-- `login` lee el token de `session.access_token` y el user plano (`first_name`/`last_name`).
-
-### 4.6 Estado y persistencia
-
-**`store/sessionStore.ts`** (Zustand) — Sólo sesión: `user`, `token`, `status`
-(`"loading" | "authenticated" | "unauthenticated"`) y acciones `setSession`, `clearSession`, `setStatus`.
-Los datos remotos (lessons, etc.) NO van acá: viven en TanStack Query.
-
-**`lib/storage.ts`** — Persistencia cross-platform con helpers internos (`setItem`/`getItem`/`deleteItem`):
-- mobile → **expo-secure-store**; web → **localStorage**.
-- Expone `saveToken`/`getToken`/`removeToken` y `saveUser`/`getUser`/`removeUser` (user serializado a JSON).
-- Se guarda también el user porque no hay `GET /me` para reconstruir la sesión al reabrir la app.
-- Sólo se escribe si el login fue con "Recordarme en este equipo".
-
-### 4.7 Validación, tipos y utilidades
-
-**`schemas/auth.ts`** — `loginSchema` (email válido + password ≥ 8) y `registerSchema` que lo
-extiende con: `firstName`/`lastName` (mín. 2), `birthDate` (regex `DD/MM/AAAA` + fecha real, no
-futura, año ≥ 1900) y `gender` (enum de `GENDER_VALUES`). Exporta `LoginValues`/`RegisterValues`.
-
-**`types/auth.ts`** — `GENDER_VALUES`/`Gender` + `GENDER_API_VALUE` (mapa al valor del backend);
-contratos: `LoginRequest`, `RegisterRequest` (`first_name`, `last_name`, `birth_date` ISO, `gender`),
-`LoginResponse` (`{ message, user, session: { access_token, expires_in } }`),
-`RegisterResponse` (`{ message, user }`, sin token).
-
-**`types/user.ts`** — `AuthUser` (shape que devuelve el backend: `id`, `email`, `first_name`,
-`last_name`), `User` (modelo interno con `firstName`/`lastName`) y `toUser()` que normaliza.
-
-**`utils/date.ts`** — `formatDdMmYyyy` (máscara progresiva al escribir), `parseDdMmYyyy`
-(valida fecha real, ej. rechaza 31/02) y `ddMmYyyyToIso` (formato del backend).
+### 4.8 Validación, tipos y constantes
+- **`schemas/auth.ts`** — `loginSchema`; `birthDateSchema` (regex + fecha real, no futura, ≥1900);
+  `registerSchema` (firstName/lastName ≥2, birthDate, gender enum, country enum, confirmPassword con
+  `superRefine` de coincidencia). `forgotPasswordSchema`.
+- **`schemas/profile.ts`** — `completeProfileSchema` (birthDate, gender, country) — reusa `birthDateSchema`.
+- **`types/auth.ts`** — `GENDER_VALUES` (`masculino`/`femenino`/`otro`) + `GENDER_API_VALUE` (valor al
+  backend) + `Gender`; `LoginRequest`, `RegisterRequest` (`first_name`, `last_name`, `birth_date`,
+  `gender`, `country`), `LoginResponse` (`session.access_token`), `RegisterResponse` (sin token).
+- **`types/user.ts`** — `AuthUser` (shape del backend), `User` (`firstName`/`lastName`), `toUser()`.
+- **`types/profile.ts`** — `Profile` + `isProfileComplete()` (incompleto si falta country/gender/birth_date).
+- **`constants/countries.ts`** — hispanohablantes + "Otro" (`COUNTRY_OPTIONS`/`COUNTRY_VALUES`).
+- **`constants/gender.ts`** — `GENDER_OPTIONS` para el `Select`.
+- **`constants/env.ts`** — `USE_MOCK_AUTH` (flag central de modo mock).
+- **`utils/date.ts`** — `formatDdMmYyyy`, `parseDdMmYyyy`, `ddMmYyyyToIso`.
 
 ---
 
 ## 5. Configuración
 
-- `EXPO_PUBLIC_API_URL` — base de la API (ej. `http://localhost:3000`; en device físico usar IP LAN,
-  en emulador Android `http://10.0.2.2:3000`).
-- `EXPO_PUBLIC_USE_MOCK_AUTH` — `true` para desarrollar sin backend (capa mock en `services/auth.ts`).
-- Logo de Google vía **expo-image** (el `.svg` queda como asset; no se usa transformer SVG).
-- Tokens de color centralizados: variables CSS en `global.css` + tokens semánticos en
-  `tailwind.config.js` (`primary`, `secondary`, `ink`, `muted`, `surface`, `background`, `accent`).
-- **Fuente Nunito** (`assets/fonts/Nunito-VariableFont_wght.ttf`): se carga **únicamente** con
-  `useFonts` en `app/_layout.tsx` (en web expo-font inyecta el `@font-face` automáticamente).
-  ⚠️ No declarar `@font-face` con `url()` local en `global.css`: NativeWind no lo soporta y rompe
-  Metro. Uso: `font-nunito` + `font-bold`/`font-normal` (token en `tailwind.config.js`).
+- **Env** (`.env`): `EXPO_PUBLIC_API_URL` (base de la API), `EXPO_PUBLIC_USE_MOCK_AUTH` (mock sin
+  backend), `EXPO_PUBLIC_SUPABASE_URL` / `EXPO_PUBLIC_SUPABASE_KEY` (Google OAuth).
+- **Modo mock** (`USE_MOCK_AUTH`): login/registro/perfil responden con datos de prueba. Google **no**
+  se mockea (usa Supabase real) → su botón se oculta en mock.
+- **Google OAuth (config externa, Supabase dashboard):** habilitar el provider Google + client IDs, y
+  agregar a *Redirect URLs* el scheme nativo (`frontend://`) y el origin web (ej. `http://localhost:8081`).
+- **Paleta** (`global.css`, formato "R G B"): `background #F8FAFC`, `surface #FFFFFF`, `ink #1F2937`,
+  `muted #6F706F`, `primary #F7BB18` (+`primary-hover #FED75F`), `secondary #4A90E2`, `accent #ACDCFF`.
+  Expuesta como tokens semánticos en `tailwind.config.js`.
+- **Fuente Nunito** (variable): se carga **sólo** con `useFonts` en `app/_layout.tsx` (en web expo-font
+  inyecta el `@font-face`). ⚠️ No usar `@font-face` con `url()` local en `global.css` (NativeWind no
+  lo soporta y rompe Metro).
 
 ---
 
 ## 6. Verificación
 
-Probado en **web** y **Expo Go (Android)** con la capa mock (`EXPO_PUBLIC_USE_MOCK_AUTH=true`):
-- Flujo completo: registro (con los campos nuevos) → aviso de confirmación → login → home → logout.
-- Persistencia de sesión con "Recordarme" y sesión sólo en memoria sin él.
-- Guard/redirección, validaciones (incl. fecha DD/MM/AAAA y género), mostrar/ocultar contraseña,
-  foco de inputs (borde azul, sin outline desalineado en web), fuente Nunito y teclado que no tapa
-  los inputs en Android (edge-to-edge).
+Probado en **web** y **Expo Go (Android)** con la capa mock:
+- Inicio → registro (todos los campos) → aviso "cuenta creada" → login → home; login/logout;
+  "Recordarme" on/off; validaciones; `Select` de género/país (con buscador y sin acentos); date picker;
+  gate de perfil (spinner/error/incompleto); hover de botones en web.
+- Google se probó en web hasta el punto donde depende de la config de Supabase (habilitar provider).
 
 ---
 
 ## 7. Pendiente
 
-### Recupero de contraseña
-- Implementar el flujo completo de **"Olvidaste tu contraseña?"** (hoy es un stub "Próximamente").
-  Requiere pantalla de recupero + endpoints del backend.
-
-### Backend / integración
-- El front ya está alineado al contrato real (`POST /api/auth/login` con `session.access_token`;
-  `POST /api/auth/register` con `first_name`, `last_name`, `birth_date`, `gender`). Falta:
-- Confirmar los **valores canónicos de `gender`** que espera la DB (`profiles.gender`); el front
-  envía los de `GENDER_API_VALUE` (alineados al ejemplo de swagger).
-- `GET /me` (restaurar/validar sesión — ya existe `authMiddleware` en el backend, falta exponer ruta),
-  `POST /logout`, y **refresh token** (hoy la sesión dura ~1h; el login ya recibe `expires_in`).
-- Estrategia de **Google OAuth** (client IDs + flujo) y, si aplica, cookie httpOnly en web.
-- Formato de errores unificado para mapear mensajes en el formulario.
+- **Recuperar contraseña:** flujo completo (hoy la pantalla es un stub sin backend).
+- **Backend:** `GET /me` (validar sesión al arranque), `POST /logout`, **refresh token** (la sesión
+  dura ~1h; el login ya recibe `expires_in`). Confirmar valores canónicos de `gender` en `profiles.gender`.
+- **Google OAuth:** habilitar el provider en Supabase + probar el flujo nativo con un *development build*.
+- **Estadísticas de perfil** (racha/puntos) siguen mockeadas: faltan endpoints.

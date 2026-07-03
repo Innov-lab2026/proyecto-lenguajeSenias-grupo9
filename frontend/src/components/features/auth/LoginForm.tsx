@@ -17,6 +17,7 @@ interface LoginFormProps {
 }
 
 export function LoginForm({ onSubmit, submitting = false, serverError }: LoginFormProps) {
+  const router = useRouter()
   const passwordRef = useRef<TextInput>(null)
   const [rememberMe, setRememberMe] = useState(true)
   const [showPassword, setShowPassword] = useState(false)
@@ -31,100 +32,90 @@ export function LoginForm({ onSubmit, submitting = false, serverError }: LoginFo
   })
 
   const submit = handleSubmit((values) => onSubmit(values, rememberMe))
-  const router = useRouter()
-
-  const onForgotPassword = () => {
-    router.push('/forgot-password')
-  }
 
   return (
-    <View className="w-full">
-      <View className="mx-auto w-full max-w-md overflow-hidden rounded-[2rem] bg-white shadow-sm shadow-secondary/10">
-        <View className="bg-secondary px-6 py-6 sm:px-8 sm:py-8">
-          <Text className="font-nunito text-3xl font-bold text-white">Iniciar sesión</Text>
-          <Text className="mt-2 text-sm font-normal leading-relaxed text-white/90">
-            Accede a Carpiseñas y continúa tu camino de aprendizaje de LSA.
-          </Text>
-        </View>
+    <View className="w-full gap-4">
+      <Controller
+        control={control}
+        name="email"
+        render={({ field: { onChange, onBlur, value } }) => (
+          <TextField
+            label="Correo electrónico"
+            placeholder="Correo electrónico"
+            value={value}
+            onChangeText={onChange}
+            onBlur={onBlur}
+            error={errors.email?.message}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoComplete="email"
+            textContentType="emailAddress"
+            returnKeyType="next"
+            onSubmitEditing={() => passwordRef.current?.focus()}
+            submitBehavior="submit"
+          />
+        )}
+      />
 
-        <View className="bg-accent px-5 py-6 sm:px-6 sm:py-8">
-          <View className="rounded-[2rem] bg-white p-5 shadow-sm shadow-secondary/10 sm:p-6">
-            <View className="w-full gap-4">
-              <Controller
-                control={control}
-                name="email"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <TextField
-                    label="Correo electrónico"
-                    placeholder="ejemplo@correo.com"
-                    value={value}
-                    onChangeText={onChange}
-                    onBlur={onBlur}
-                    error={errors.email?.message}
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                    autoComplete="email"
-                    textContentType="emailAddress"
-                    returnKeyType="next"
-                    onSubmitEditing={() => passwordRef.current?.focus()}
-                    submitBehavior="submit"
+      <View className="gap-1.5">
+        <Controller
+          control={control}
+          name="password"
+          render={({ field: { onChange, onBlur, value } }) => (
+            <TextField
+              ref={passwordRef}
+              label="Contraseña"
+              placeholder="Contraseña"
+              rightElement={
+                <Pressable
+                  onPress={() => setShowPassword((s) => !s)}
+                  accessibilityRole="button"
+                  accessibilityLabel={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                  hitSlop={8}
+                >
+                  <Ionicons
+                    name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                    size={20}
+                    color="#6F706F"
                   />
-                )}
-              />
+                </Pressable>
+              }
+              value={value}
+              onChangeText={onChange}
+              onBlur={onBlur}
+              error={errors.password?.message}
+              secureTextEntry={!showPassword}
+              autoCapitalize="none"
+              autoComplete="current-password"
+              returnKeyType="go"
+              onSubmitEditing={submit}
+            />
+          )}
+        />
 
-              <Controller
-                control={control}
-                name="password"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <TextField
-                    ref={passwordRef}
-                    label="Contraseña"
-                    labelRight={
-                      <Pressable onPress={onForgotPassword} accessibilityRole="link" hitSlop={8}>
-                        <Text className="font-nunito text-xs font-bold text-secondary">Olvidaste tu contraseña?</Text>
-                      </Pressable>
-                    }
-                    rightElement={
-                      <Pressable
-                        onPress={() => setShowPassword((s) => !s)}
-                        accessibilityRole="button"
-                        accessibilityLabel={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-                        hitSlop={8}
-                      >
-                        <Ionicons
-                          name={showPassword ? 'eye-off-outline' : 'eye-outline'}
-                          size={20}
-                          color="#6F706F"
-                        />
-                      </Pressable>
-                    }
-                    placeholder="Mínimo 8 caracteres"
-                    value={value}
-                    onChangeText={onChange}
-                    onBlur={onBlur}
-                    error={errors.password?.message}
-                    secureTextEntry={!showPassword}
-                    autoCapitalize="none"
-                    autoComplete="current-password"
-                    returnKeyType="go"
-                    onSubmitEditing={submit}
-                  />
-                )}
-              />
-            </View>
+        <Pressable
+          onPress={() => router.push('/forgot-password')}
+          accessibilityRole="link"
+          hitSlop={8}
+          className="self-end"
+        >
+          <Text className="font-nunito text-xs font-bold text-secondary">Olvidaste tu contraseña?</Text>
+        </Pressable>
+      </View>
 
-            {serverError ? (
-              <Text className="mt-3 text-center font-nunito text-sm font-bold text-red-500">{serverError}</Text>
-            ) : null}
+      {serverError ? (
+        <Text className="text-center font-nunito text-sm font-bold text-red-500">{serverError}</Text>
+      ) : null}
 
-            <View className="mt-4">
-              <Checkbox label="Recordarme en este equipo" checked={rememberMe} onChange={setRememberMe} />
-            </View>
+      <Checkbox label="Recordarme en este equipo" checked={rememberMe} onChange={setRememberMe} />
 
-            <Button label="Iniciar sesión" onPress={submit} loading={submitting} className="mt-5" />
-          </View>
-        </View>
+      <Button label="Iniciar sesión" onPress={submit} loading={submitting} className="mt-1" />
 
+      <View className="flex-row items-center justify-center gap-1 pt-1">
+        <Text className="font-nunito text-sm font-normal text-ink/80">¿No tenés cuenta?</Text>
+        <Pressable onPress={() => router.push('/register')} accessibilityRole="link">
+          <Text className="font-nunito text-sm font-bold text-secondary">Regístrate</Text>
+        </Pressable>
       </View>
     </View>
   )

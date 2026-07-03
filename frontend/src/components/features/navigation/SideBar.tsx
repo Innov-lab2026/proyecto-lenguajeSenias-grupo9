@@ -27,7 +27,7 @@ export function SideBar({ isTablet }: SideBarProps) {
         )}
       >
         <View className="h-10 w-10 items-center justify-center rounded-xl bg-primary shadow-sm">
-          <Ionicons name="school" size={22} color="#3E3D3B" />
+          <Ionicons name="school" size={22} color="#1F2937" />
         </View>
         {isTablet ? null : (
           <View>
@@ -47,7 +47,7 @@ export function SideBar({ isTablet }: SideBarProps) {
               : pathname === hrefStr || pathname.startsWith(hrefStr + '/')
 
           const iconName = isActive ? item.icon : (`${item.icon}-outline` as typeof item.icon)
-          const iconColor = isActive ? '#0581C3' : '#6F706F'
+          const iconColor = isActive ? '#4A90E2' : '#6F706F'
 
           return (
             <Pressable
@@ -57,7 +57,7 @@ export function SideBar({ isTablet }: SideBarProps) {
               accessibilityState={{ selected: isActive }}
               className={cn(
                 'flex-row items-center rounded-xl p-3 gap-3 w-full',
-                isActive ? 'bg-accent/80' : 'active:bg-muted/5'
+                isActive ? 'bg-accent/20' : 'active:bg-muted/5'
               )}
             >
               <View className="items-center justify-center w-6">

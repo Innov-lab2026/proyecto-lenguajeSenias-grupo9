@@ -15,7 +15,7 @@ interface LessonButtonProps {
 
 const buttonBgByState: Record<LessonState, string> = {
   locked: 'bg-muted/20 border border-muted/30',
-  available: 'bg-accent border border-secondary/30',
+  available: 'bg-accent/20 border border-secondary/30',
   current: 'bg-primary border border-surface',
   completed: 'bg-secondary',
 }

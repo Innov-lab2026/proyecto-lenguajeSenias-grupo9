@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { ActivityIndicator, Pressable, Text } from 'react-native'
 import { cn } from '@/src/utils/cn'
 
-type Variant = 'primary' | 'ghost'
+type Variant = 'primary' | 'white'
 
 interface ButtonProps {
   label: string
@@ -15,19 +15,19 @@ interface ButtonProps {
 }
 
 const containerByVariant: Record<Variant, string> = {
-  primary: 'bg-primary',
-  ghost: 'bg-surface border border-muted/30',
+  primary: 'bg-primary hover:bg-primary-hover active:bg-primary-hover',
+  white: 'bg-surface shadow-sm shadow-black/5 hover:bg-gray-100 active:bg-gray-200',
 }
 
 const textByVariant: Record<Variant, string> = {
   primary: 'text-ink',
-  ghost: 'text-ink',
+  white: 'text-ink',
 }
 
 // Color del spinner por variante (ActivityIndicator no acepta className).
 const spinnerColorByVariant: Record<Variant, string> = {
-  primary: '#3E3D3B', // ink
-  ghost: '#0581C3', // secondary
+  primary: '#1F2937', // ink
+  white: '#4A90E2', // secondary
 }
 
 export function Button({
@@ -48,7 +48,7 @@ export function Button({
       accessibilityRole="button"
       accessibilityState={{ disabled: isDisabled, busy: loading }}
       className={cn(
-        'h-14 w-full flex-row items-center justify-center gap-2 rounded-xl px-4',
+        'h-14 w-full flex-row items-center justify-center gap-2 rounded-full px-4 web:transition-colors',
         containerByVariant[variant],
         isDisabled && 'opacity-50',
         className,
