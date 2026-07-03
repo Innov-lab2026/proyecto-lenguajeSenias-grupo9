@@ -14,7 +14,12 @@ import type { User } from '@/src/types/user'
 const TOKEN_KEY = 'accessToken'
 const USER_KEY = 'sessionUser'
 
-async function setItem(key: string, value: string): Promise<void> {
+/**
+ * Helpers de bajo nivel (exportados para reusarlos como storage adapter de
+ * Supabase en `lib/supabase.ts`, ya que ahí sólo se persiste el code_verifier
+ * de PKCE, un valor chico que no choca con el límite de SecureStore).
+ */
+export async function setItem(key: string, value: string): Promise<void> {
   if (Platform.OS === 'web') {
     localStorage.setItem(key, value)
     return
@@ -22,14 +27,14 @@ async function setItem(key: string, value: string): Promise<void> {
   await SecureStore.setItemAsync(key, value)
 }
 
-async function getItem(key: string): Promise<string | null> {
+export async function getItem(key: string): Promise<string | null> {
   if (Platform.OS === 'web') {
     return localStorage.getItem(key)
   }
   return SecureStore.getItemAsync(key)
 }
 
-async function deleteItem(key: string): Promise<void> {
+export async function deleteItem(key: string): Promise<void> {
   if (Platform.OS === 'web') {
     localStorage.removeItem(key)
     return

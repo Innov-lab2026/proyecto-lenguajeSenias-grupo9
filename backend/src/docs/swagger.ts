@@ -38,14 +38,10 @@ const options = {
                   type: 'string',
                   example: 'maria@gmail.com'
                 },
-                first_name: {
+                full_name: {
                   type: 'string',
-                  example: 'María'
-                },
-                last_name: {
-                  type: 'string',
-                  example: 'Perez'
-                } 
+                  example: 'María Perez'
+                }
               }
             },
             session: {
@@ -81,13 +77,9 @@ const options = {
                   type: 'string',
                   example: 'maria@gmail.com'
                 },
-                first_name: {
+                full_name: {
                   type: 'string',
-                  example: 'María'
-                },
-                last_name: {
-                  type: 'string',
-                  example: 'Perez'
+                  example: 'María Perez'
                 },
                 birth_date: {
                   type: 'string',
@@ -96,6 +88,10 @@ const options = {
                 gender: {
                   type: 'string',
                   example: 'Femenino'
+                },
+                country: {
+                  type: 'string',
+                  example: 'Argentina'
                 }
               }
             }

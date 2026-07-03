@@ -45,3 +45,6 @@ app-example
 
 # local files
 local/
+GEMINI.md
+.gemini
+.claude

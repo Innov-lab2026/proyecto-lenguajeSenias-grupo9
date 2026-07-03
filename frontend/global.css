@@ -4,9 +4,9 @@
 
 /*
  * Estilos globales.
- * Paleta de colores como variables CSS (fuente única de verdad).
- * Se exponen como tokens semánticos en tailwind.config.js → bg-primary, text-ink, etc.
- * Formato "R G B" para soportar modificadores de opacidad (ej. bg-secondary/20).
+ * Paleta de colores como variables CSS (fuente única de verdad), expuestas como
+ * tokens semánticos en tailwind.config.js → bg-primary, text-ink, etc.
+ * Formato "R G B" (no hex) para soportar modificadores de opacidad (ej. bg-secondary/20).
  *
  * Tipografía: Nunito (variable font, assets/fonts/Nunito-VariableFont_wght.ttf).
  * NOTA: NativeWind no soporta @font-face con url() local ("Importing local resources
@@ -16,12 +16,13 @@
  */
 @layer base {
   :root {
-    --color-surface: 255 255 255; /* #FFFFFF */
-    --color-background: 249 250 252; /* #F9FAFC */
-    --color-accent: 231 244 253; /* #E7F4FD */
-    --color-primary: 249 206 21; /* #F9CE15 */
-    --color-secondary: 5 129 195; /* #0581C3 */
-    --color-muted: 111 112 111; /* #6F706F */
-    --color-ink: 62 61 59; /* #3E3D3B */
+    --color-background: 248 250 252; /* #F8FAFC · fondo de pantalla */
+    --color-surface: 255 255 255; /* #FFFFFF · cards, inputs, botones blancos */
+    --color-ink: 31 41 55; /* #1F2937 · texto principal */
+    --color-muted: 111 112 111; /* #6F706F · texto secundario */
+    --color-primary: 247 187 24; /* #F7BB18 · CTA amarillo */
+    --color-primary-hover: 254 215 95; /* #FED75F · hover/pressed del CTA */
+    --color-secondary: 74 144 226; /* #4A90E2 · azul de marca (headers, links, foco) */
+    --color-accent: 172 220 255; /* #ACDCFF · panel celeste de las pantallas de auth */
   }
 }

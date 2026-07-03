@@ -1,6 +1,6 @@
 import type { AuthUser } from './user'
 
-export const GENDER_VALUES = ['masculino', 'femenino', 'otro', 'prefiero_no_decir'] as const
+export const GENDER_VALUES = ['masculino', 'femenino', 'otro'] as const
 export type Gender = (typeof GENDER_VALUES)[number]
 
 /**
@@ -12,7 +12,6 @@ export const GENDER_API_VALUE: Record<Gender, string> = {
   masculino: 'Masculino',
   femenino: 'Femenino',
   otro: 'Otro',
-  prefiero_no_decir: 'Prefiero no decir',
 }
 
 export interface LoginRequest {
@@ -28,6 +27,7 @@ export interface RegisterRequest {
   last_name: string
   birth_date: string
   gender: string
+  country: string
 }
 
 /** POST /api/auth/login → user plano + session con el access token. */
@@ -43,5 +43,5 @@ export interface LoginResponse {
 /** POST /api/auth/register → sin token (confirmación por email). */
 export interface RegisterResponse {
   message: string
-  user: AuthUser & { birth_date?: string; gender?: string }
+  user: AuthUser & { birth_date?: string; gender?: string; country?: string }
 }

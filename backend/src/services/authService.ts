@@ -11,16 +11,17 @@ export const loginService = async (email: string, password: string) => {
   return data
 }
 
-export const registerService = async (email: string, password: string, first_name: string, last_name: string, birth_date: Date, gender: string) => {
+export const registerService = async (email: string, password: string, first_name: string, last_name: string, birth_date: Date, gender: string, country: string) => {
+  const full_name = `${first_name} ${last_name}`.trim();
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
       data: { 
-        first_name,
-        last_name,
+        full_name,
         birth_date,
-        gender
+        gender,
+        country
        }
     }
   })
@@ -29,3 +30,4 @@ export const registerService = async (email: string, password: string, first_nam
 
   return data
 }
+
