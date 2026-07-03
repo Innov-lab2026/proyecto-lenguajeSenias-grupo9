@@ -1,6 +1,7 @@
 import { http } from './http'
 import { ddMmYyyyToIso } from '@/src/utils/date'
 import { GENDER_API_VALUE } from '@/src/types/auth'
+import { USE_MOCK_AUTH } from '@/src/constants/env'
 import type { RegisterValues } from '@/src/schemas/auth'
 import type {
   LoginRequest,
@@ -8,12 +9,6 @@ import type {
   RegisterRequest,
   RegisterResponse,
 } from '@/src/types/auth'
-
-/**
- * Capa mock conmutable para desarrollar sin backend.
- * Se activa con EXPO_PUBLIC_USE_MOCK_AUTH=true en el .env.
- */
-const USE_MOCK = process.env.EXPO_PUBLIC_USE_MOCK_AUTH === 'true'
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
@@ -26,11 +21,12 @@ export function toRegisterRequest(values: RegisterValues): RegisterRequest {
     last_name: values.lastName.trim(),
     birth_date: ddMmYyyyToIso(values.birthDate),
     gender: GENDER_API_VALUE[values.gender],
+    country: values.country,
   }
 }
 
 export async function login(payload: LoginRequest): Promise<LoginResponse> {
-  if (USE_MOCK) {
+  if (USE_MOCK_AUTH) {
     await delay(600)
     return {
       message: 'Login exitoso (mock)',
@@ -52,7 +48,7 @@ export async function login(payload: LoginRequest): Promise<LoginResponse> {
 }
 
 export async function register(payload: RegisterRequest): Promise<RegisterResponse> {
-  if (USE_MOCK) {
+  if (USE_MOCK_AUTH) {
     await delay(600)
     return {
       message: 'Usuario registrado (mock). Revisá tu correo para confirmar.',
@@ -61,6 +57,9 @@ export async function register(payload: RegisterRequest): Promise<RegisterRespon
         email: payload.email,
         first_name: payload.first_name,
         last_name: payload.last_name,
+        birth_date: payload.birth_date,
+        gender: payload.gender,
+        country: payload.country,
       },
     }
   }

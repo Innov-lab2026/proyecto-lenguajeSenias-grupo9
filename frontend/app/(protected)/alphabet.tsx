@@ -83,7 +83,7 @@ export default function AlphabetScreen() {
                   className={cn(
                     'items-center justify-center rounded-2xl border-2',
                     isSelected
-                      ? 'bg-accent border-secondary'
+                      ? 'bg-accent/20 border-secondary'
                       : isVisited
                         ? 'bg-secondary/10 border-secondary/60'
                         : 'bg-muted/15 border-transparent'

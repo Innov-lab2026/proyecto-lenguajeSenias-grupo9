@@ -19,7 +19,7 @@ export function BottomBar() {
             : pathname === hrefStr || pathname.startsWith(hrefStr + '/')
 
         const iconName = isActive ? item.icon : (`${item.icon}-outline` as typeof item.icon)
-        const iconColor = isActive ? '#0581C3' : '#6F706F' // secondary o muted
+        const iconColor = isActive ? '#4A90E2' : '#6F706F' // secondary o muted
 
         return (
           <Pressable
@@ -29,7 +29,7 @@ export function BottomBar() {
             accessibilityState={{ selected: isActive }}
             className={cn(
               'h-12 w-12 items-center justify-center rounded-xl',
-              isActive ? 'bg-accent/60' : 'active:bg-muted/5'
+              isActive ? 'bg-accent/20' : 'active:bg-muted/5'
             )}
           >
             <Ionicons name={iconName} size={26} color={iconColor} />
