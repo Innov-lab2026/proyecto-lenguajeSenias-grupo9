@@ -44,7 +44,7 @@ export default function Team() {
                     Coordinador: Gustavo Ovejero
                 </p>
 
-                <ButtonSuccess className="px-10">Comienza ya</ButtonSuccess>
+                <ButtonSuccess className="px-10">Comienza Ya</ButtonSuccess>
             </div>
 
         </SectionLayout>

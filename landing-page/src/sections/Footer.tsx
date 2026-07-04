@@ -9,7 +9,7 @@ export default function Footer() {
             CarpiSeñas
           </span>
           <p className="text-sm leading-relaxed opacity-85">
-            Acercando el Lenguaje de Señas Argentina (LSA) a personas oyentes de forma accesible, divertida e interactiva.
+            Acercando la Lengua de Señas Argentina (LSA) a todas las personas de forma accesible, divertida e interactiva.
           </p>
         </div>
 
