@@ -35,7 +35,9 @@ http.interceptors.response.use(
 /** Extrae un mensaje de error legible de la respuesta del backend ({ error: string }). */
 export function getApiErrorMessage(error: unknown, fallback = 'Ocurrió un error. Intentá de nuevo.'): string {
   if (axios.isAxiosError(error)) {
-    return error.response?.data?.error ?? error.message ?? fallback
+    const data = error.response?.data
+    if (typeof data?.error === 'string') return data.error
+    if (typeof error.message === 'string' && error.message) return error.message
   }
   return fallback
 }

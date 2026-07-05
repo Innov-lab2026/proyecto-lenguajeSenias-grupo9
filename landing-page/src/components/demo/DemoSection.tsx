@@ -30,13 +30,13 @@ export default function DemoSection() {
 
                     <FeatureCard
                         title="Abecedarios LSA"
-                        description="Aprende las letras del abecedario con ejercicios interactivos. Puedes hacerlo por letra o ingresando la palabra que te interese."
+                        description="Aprendé las letras del abecedario con ejercicios interactivos. Podés hacerlo por letra o ingresando la palabra que te interese."
                         image={letraA}
                         className="w-120" />
 
                     <FeatureCard
                         title="Palabras básicas"
-                        description="Reconoce y practica palabras del vocabulario cotidiano mediante desafios."
+                        description="Reconocé y practicá palabras del vocabulario cotidiano mediante desafios."
                         image={manito}
                         className="w-70" />
 
@@ -47,7 +47,7 @@ export default function DemoSection() {
             </div>
 
             <ButtonSuccess>
-                Comenzar gratis
+                Comenzar Gratis
             </ButtonSuccess>
 
         </div>
