@@ -1,8 +1,8 @@
 import { Pressable, Text, View } from 'react-native'
 import { usePathname, useRouter } from 'expo-router'
-import { Ionicons } from '@expo/vector-icons'
 import { NAVIGATION_ITEMS } from './constants'
 import { cn } from '@/src/utils/cn'
+import { NavBarIcon } from './NavBarIcon'
 
 interface SideBarProps {
   isTablet: boolean
@@ -15,7 +15,7 @@ export function SideBar({ isTablet }: SideBarProps) {
   return (
     <View
       className={cn(
-        'h-full border-r border-muted/10 bg-surface py-6',
+        'h-full border-r border-muted/10 bg-background py-6',
         isTablet ? 'w-20 items-center' : 'w-64 px-4'
       )}
     >
@@ -27,7 +27,7 @@ export function SideBar({ isTablet }: SideBarProps) {
         )}
       >
         <View className="h-10 w-10 items-center justify-center rounded-xl bg-primary shadow-sm">
-          <Ionicons name="school" size={22} color="#1F2937" />
+          <NavBarIcon name="home" active size={22} />
         </View>
         {isTablet ? null : (
           <View>
@@ -46,22 +46,26 @@ export function SideBar({ isTablet }: SideBarProps) {
               ? pathname === '/'
               : pathname === hrefStr || pathname.startsWith(hrefStr + '/')
 
-          const iconName = isActive ? item.icon : (`${item.icon}-outline` as typeof item.icon)
-          const iconColor = isActive ? '#4A90E2' : '#6F706F'
-
           return (
             <Pressable
               key={item.key}
               onPress={() => router.push(item.href)}
               accessibilityRole="tab"
               accessibilityState={{ selected: isActive }}
-              className={cn(
-                'flex-row items-center rounded-xl p-3 gap-3 w-full',
-                isActive ? 'bg-accent/20' : 'active:bg-muted/5'
-              )}
+              className="flex-row items-center rounded-full p-3 gap-3 w-full"
             >
-              <View className="items-center justify-center w-6">
-                <Ionicons name={iconName} size={24} color={iconColor} />
+              <View
+                className={cn(
+                  'h-10 w-10 items-center justify-center rounded-full',
+                  isActive ? 'bg-active-icon' : ''
+                )}
+              >
+                <NavBarIcon
+                  name={item.icon as any}
+                  active={isActive}
+                  size={24}
+                  color={isActive ? '#4A90E2' : '#1F2937'}
+                />
               </View>
               {isTablet ? null : (
                 <Text

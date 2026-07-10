@@ -22,6 +22,7 @@ module.exports = {
         secondary: "rgb(var(--color-secondary) / <alpha-value>)",
         muted: "rgb(var(--color-muted) / <alpha-value>)",
         ink: "rgb(var(--color-ink) / <alpha-value>)",
+        "active-icon": "rgb(var(--color-active-icon) / <alpha-value>)",
       },
     },
   },
