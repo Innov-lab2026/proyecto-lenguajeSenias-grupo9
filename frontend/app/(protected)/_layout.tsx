@@ -50,7 +50,9 @@ export default function ProtectedLayout() {
 
   if (isMobile) {
     return (
-      <SafeAreaView className="flex-1 bg-background" edges={['bottom']}>
+      // bg-surface: la franja del inset inferior (debajo de la BottomBar) debe
+      // verse blanca como la barra; las pantallas pintan su propio bg-background.
+      <SafeAreaView className="flex-1 bg-surface" edges={['bottom']}>
         <View className="flex-1">
           <Slot />
         </View>
