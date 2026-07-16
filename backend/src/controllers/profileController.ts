@@ -3,21 +3,26 @@ import { getProfileByIdService, updateProfileService } from '../services/profile
 
 export const getProfile = async (req: Request, res: Response) => {
   try {
-    const user = (req as any).user;
+    const user = (req as any).user
+    const meta = user?.user_metadata ?? {}
 
-    const profile = await getProfileByIdService(user.id);
+    const profile = await getProfileByIdService(user.id, {
+      full_name: meta.full_name,
+      name: meta.name,
+      avatar_url: meta.avatar_url,
+      picture: meta.picture,
+    })
 
     return res.status(200).json({
       message: 'Perfil obtenido con éxito.',
       data: {
-        ...profile
-      }
-    });
-
+        ...profile,
+      },
+    })
   } catch (error: any) {
-    return res.status(500).json({ message: error.message });
+    return res.status(500).json({ message: error.message })
   }
-};
+}
 
 
 export const updateProfile = async (req: Request, res: Response) => {
