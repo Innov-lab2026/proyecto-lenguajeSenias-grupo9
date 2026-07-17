@@ -8,7 +8,7 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "build": "expo export --platform web",
+    "build": "expo export --platform web && node -e \"const fs=require('fs');const s='dist/+not-found.html';if(fs.existsSync(s)){fs.copyFileSync(s,'dist/404.html')}else{console.warn('aviso: no se genero +not-found.html')}\"",
     "lint": "expo lint"
   },
   "dependencies": {
