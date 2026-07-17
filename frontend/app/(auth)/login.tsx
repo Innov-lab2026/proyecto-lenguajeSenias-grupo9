@@ -21,7 +21,7 @@ export default function LoginScreen() {
   const serverError = login.error ? getApiErrorMessage(login.error) : null
 
   return (
-    <AuthShell eyebrow="Inicia sesión en" title="CarpiSeñas">
+    <AuthShell eyebrow="Inicia sesión en" title="CarpiSeñas" titleLinksToHome>
       {info ? (
         <Text className="rounded-2xl bg-white px-4 py-3 text-center font-nunito text-sm font-bold text-secondary shadow-sm shadow-black/5">
           {info}

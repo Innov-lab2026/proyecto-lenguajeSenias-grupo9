@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
-import { KeyboardAvoidingView, ScrollView, Text, View } from 'react-native'
+import { KeyboardAvoidingView, Pressable, ScrollView, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { useRouter } from 'expo-router'
 
 interface AuthShellProps {
   /** Texto chico arriba del título (ej. "Regístrate en"). Si no se pasa, el título va primero. */
@@ -11,6 +12,11 @@ interface AuthShellProps {
   children: ReactNode
   /** Contenido extra en el header (ej. la ilustración del carpincho al completar perfil de Google). */
   headerContent?: ReactNode
+  /**
+   * Hace que el título navegue a la pantalla de inicio de auth (vuelta atrás).
+   * No activar en el inicio mismo ni en el gate de completar perfil.
+   */
+  titleLinksToHome?: boolean
 }
 
 /**
@@ -19,7 +25,21 @@ interface AuthShellProps {
  * contenido de la pantalla (formularios, botones, links) adentro.
  * Mobile-first: el contenido se acota a `max-w-md` y se centra en web.
  */
-export function AuthShell({ eyebrow, title, subtitle, children, headerContent }: AuthShellProps) {
+export function AuthShell({
+  eyebrow,
+  title,
+  subtitle,
+  children,
+  headerContent,
+  titleLinksToHome = false,
+}: AuthShellProps) {
+  const router = useRouter()
+
+  // navigate (no push): si el inicio ya está en el stack vuelve a él, evita duplicados.
+  const titleElement = (
+    <Text className="text-center font-nunito text-5xl font-extrabold text-ink">{title}</Text>
+  )
+
   return (
     <SafeAreaView className="flex-1 bg-secondary">
       <KeyboardAvoidingView className="flex-1" behavior="padding">
@@ -35,7 +55,18 @@ export function AuthShell({ eyebrow, title, subtitle, children, headerContent }:
                   {eyebrow}
                 </Text>
               ) : null}
-              <Text className="text-center font-nunito text-5xl font-extrabold text-ink">{title}</Text>
+              {titleLinksToHome ? (
+                <Pressable
+                  onPress={() => router.navigate('/')}
+                  accessibilityRole="link"
+                  accessibilityLabel="Volver al inicio"
+                  hitSlop={8}
+                >
+                  {titleElement}
+                </Pressable>
+              ) : (
+                titleElement
+              )}
               {subtitle ? (
                 <Text className="text-center font-nunito text-lg font-semibold text-ink/80">
                   {subtitle}
