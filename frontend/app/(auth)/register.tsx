@@ -24,7 +24,7 @@ export default function RegisterScreen() {
   const serverError = register.error ? getApiErrorMessage(register.error) : null
 
   return (
-    <AuthShell eyebrow="Regístrate en" title="CarpiSeñas">
+    <AuthShell eyebrow="Regístrate en" title="CarpiSeñas" titleLinksToHome>
       <RegisterForm onSubmit={handleSubmit} submitting={register.isPending} serverError={serverError} />
     </AuthShell>
   )
