@@ -61,18 +61,31 @@ export function useGoogleAuth() {
         options: { redirectTo, skipBrowserRedirect: true },
       })
       if (oauthError) throw oauthError
-      if (!data.url) throw new Error('No se pudo iniciar el flujo de Google.')
+      if (!data.url) throw new Error('signInWithOAuth no devolvió la URL de autorización')
 
       const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo)
-      if (result.type !== 'success') return // cancelado por el usuario, sin error
 
-      const code = new URL(result.url).searchParams.get('code')
-      if (!code) throw new Error('El proveedor no devolvió un código válido.')
+      // El usuario cerró el popup/navegador: no es un error, no se muestra nada.
+      if (result.type === 'cancel' || result.type === 'dismiss') return
+
+      if (result.type !== 'success') {
+        console.error('[useGoogleAuth] resultado inesperado del navegador:', result)
+        throw new Error(`el navegador devolvió un resultado inesperado: ${result.type}`)
+      }
+
+      const returnUrl = new URL(result.url)
+      const code = returnUrl.searchParams.get('code')
+      if (!code) {
+        // Cuando el proveedor rechaza el flujo, el detalle viaja en la URL de retorno.
+        const providerError =
+          returnUrl.searchParams.get('error_description') ?? returnUrl.searchParams.get('error')
+        throw new Error(providerError ?? 'la URL de retorno no incluye el código de autorización')
+      }
 
       const { data: sessionData, error: exchangeError } =
         await supabase.auth.exchangeCodeForSession(code)
       if (exchangeError) throw exchangeError
-      if (!sessionData.session) throw new Error('No se pudo iniciar sesión con Google.')
+      if (!sessionData.session) throw new Error('el intercambio de código no devolvió una sesión')
 
       const user = toGoogleUser(sessionData.session.user)
       const token = sessionData.session.access_token
@@ -81,7 +94,10 @@ export function useGoogleAuth() {
       await saveUser(user)
       setSession(user, token)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'No se pudo iniciar sesión con Google.')
+      // Detalle técnico a consola (para desarrollo); al usuario, un mensaje genérico
+      // accionable — los errores de Supabase/Google vienen en inglés y no le sirven.
+      console.error('[useGoogleAuth] falló el login con Google:', err)
+      setError('Ocurrió un error. Intentá de nuevo más tarde o probá con otro método.')
     } finally {
       setIsLoading(false)
     }

@@ -28,7 +28,11 @@ export default function ForgotPasswordScreen() {
   })
 
   return (
-    <AuthShell title="Recuperar contraseña" subtitle="Ingresa tu correo y te enviamos las instrucciones.">
+    <AuthShell
+      title="Recuperar contraseña"
+      subtitle="Ingresa tu correo y te enviamos las instrucciones."
+      titleLinksToHome
+    >
       <Controller
         control={control}
         name="email"

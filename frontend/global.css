@@ -24,5 +24,6 @@
     --color-primary-hover: 254 215 95; /* #FED75F · hover/pressed del CTA */
     --color-secondary: 74 144 226; /* #4A90E2 · azul de marca (headers, links, foco) */
     --color-accent: 172 220 255; /* #ACDCFF · panel celeste de las pantallas de auth */
+    --color-active-icon: 168 216 252; /* ##A8D8FC · iconos activos del navbar */
   }
 }

@@ -19,22 +19,31 @@ const ILLUSTRATION_SIZE = 176
 
 function CarpiIllustration() {
   return (
-    <View
-      className="relative -mb-10 items-center"
-      style={{ width: ILLUSTRATION_SIZE, height: ILLUSTRATION_SIZE }}
-    >
+    <View className="-mb-10 items-center" style={{ width: ILLUSTRATION_SIZE, height: ILLUSTRATION_SIZE }}>
       <Image
         source={require('@/assets/images/auth/capi-body.webp')}
         style={{ width: ILLUSTRATION_SIZE, height: ILLUSTRATION_SIZE }}
         contentFit="contain"
       />
-      {/* Solapa el borde header/panel; posición aproximada, puede necesitar ajuste visual fino. */}
-      <Image
-        source={require('@/assets/images/auth/capi-hand.webp')}
-        style={{ width: 48, height: 48, position: 'absolute', bottom: -12, left: 4 }}
-        contentFit="contain"
-      />
     </View>
+  )
+}
+
+/**
+ * La mano se renderiza desde el panel (no desde el header): el panel se dibuja
+ * después del header, así que cualquier cosa dentro del header queda tapada por
+ * él. Puesta acá queda POR ENCIMA del borde celeste, apoyada sobre él como en
+ * el diseño (local/desing/03_google.png), alineada al brazo derecho del cuerpo.
+ */
+function CarpiHand() {
+  return (
+    <Image
+      source={require('@/assets/images/auth/capi-hand.webp')}
+      // Posición ajustada a ojo contra el diseño: a caballo del borde del panel
+      // (pt-8 = 32px del contenido al borde), sobre el final del brazo derecho.
+      style={{ position: 'absolute', top: -39, left: '48.5%', marginLeft: 24, width: 44, height: 34 }}
+      contentFit="contain"
+    />
   )
 }
 
@@ -69,6 +78,7 @@ export function CompleteProfileScreen() {
 
   return (
     <AuthShell eyebrow="Regístrate en" title="CarpiSeñas" headerContent={<CarpiIllustration />}>
+      <CarpiHand />
       <Text className="text-center font-nunito text-lg font-bold text-ink">
         ¡Gracias por continuar con Google!
       </Text>
