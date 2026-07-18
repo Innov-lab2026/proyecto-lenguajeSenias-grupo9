@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { View } from 'react-native'
+import { Alert, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { StatsHeader } from '@/src/components/features/home/StatsHeader'
 import { ModuleTabs } from '@/src/components/features/home/ModuleTabs'
+import { IslandPath } from '@/src/components/features/home/IslandPath'
 import { ProgressBar } from '@/src/components/common/ProgressBar'
 import { MOCK_HOME_STATS, MOCK_HOME_MODULES } from '@/src/constants/home'
 import { getModuleProgress } from '@/src/utils/home'
@@ -27,8 +28,18 @@ export default function HomeScreen() {
         onSelect={setSelectedModuleId}
       />
 
-      {/* TODO(paso D/E): camino de islas o vista de módulo bloqueado según selectedModule. */}
-      <View className="flex-1 bg-panel" />
+      {selectedModule.state === 'unlocked' ? (
+        <IslandPath
+          module={selectedModule}
+          // Placeholder hasta que exista la vista de lección.
+          onIslandPress={(n) =>
+            Alert.alert('Próximamente', `Las lecciones de la isla ${n} estarán disponibles pronto.`)
+          }
+        />
+      ) : (
+        // TODO(paso E): vista de módulo bloqueado (carpi-2 + mensaje).
+        <View className="flex-1 bg-panel" />
+      )}
     </SafeAreaView>
   )
 }
