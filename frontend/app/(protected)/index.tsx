@@ -3,6 +3,10 @@ import { Alert, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { LearningPath } from '@/src/components/features/learning/LearningPath'
 import { ModuleTabs } from '@/src/components/features/learning/ModuleTabs'
+import { StatsHeader } from '@/src/components/features/home/StatsHeader'
+import { ProgressBar } from '@/src/components/common/ProgressBar'
+import { MOCK_HOME_STATS, MOCK_HOME_MODULES } from '@/src/constants/home'
+import { getModuleProgress } from '@/src/utils/home'
 import type { Module } from '@/src/types/learning'
 
 const MOCK_MODULES: Module[] = [
@@ -51,6 +55,13 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+      {/* Header nuevo del home. TODO(paso C/D): conectar el progreso al módulo
+          seleccionado cuando las pestañas usen MOCK_HOME_MODULES. */}
+      <View className="w-full gap-4 px-5 pb-3 pt-4">
+        <StatsHeader stats={MOCK_HOME_STATS} />
+        <ProgressBar progress={getModuleProgress(MOCK_HOME_MODULES[0])} />
+      </View>
+
       <ModuleTabs
         modules={MOCK_MODULES}
         selectedId={selectedModuleId}
