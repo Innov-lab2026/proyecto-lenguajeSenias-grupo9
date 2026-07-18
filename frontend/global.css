@@ -23,7 +23,11 @@
     --color-primary: 247 187 24; /* #F7BB18 · CTA amarillo */
     --color-primary-hover: 254 215 95; /* #FED75F · hover/pressed del CTA */
     --color-secondary: 74 144 226; /* #4A90E2 · azul de marca (headers, links, foco) */
-    --color-accent: 172 220 255; /* #ACDCFF · panel celeste de las pantallas de auth */
+    --color-accent: 172 220 255; /* #ACDCFF · panel celeste de las pantallas de auth y río del home */
     --color-active-icon: 168 216 252; /* ##A8D8FC · iconos activos del navbar */
+    --color-progress: 128 211 153; /* #80D399 · barra de progreso (track / 0%) */
+    --color-progress-fill: 47 173 85; /* #2FAD55 · relleno de la barra cuando progreso > 0 */
+    --color-tab-locked: 155 168 177; /* #9BA8B1 · pestañas de módulos bloqueados/inactivos */
+    --color-panel: 240 249 255; /* #F0F9FF · fondo del panel de islas del home */
   }
 }
