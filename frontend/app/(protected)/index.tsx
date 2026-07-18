@@ -4,9 +4,10 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { StatsHeader } from '@/src/components/features/home/StatsHeader'
 import { ModuleTabs } from '@/src/components/features/home/ModuleTabs'
 import { IslandPath } from '@/src/components/features/home/IslandPath'
+import { LockedModuleView } from '@/src/components/features/home/LockedModuleView'
 import { ProgressBar } from '@/src/components/common/ProgressBar'
 import { MOCK_HOME_STATS, MOCK_HOME_MODULES } from '@/src/constants/home'
-import { getModuleProgress } from '@/src/utils/home'
+import { getModuleProgress, getLockedModuleMessage } from '@/src/utils/home'
 
 export default function HomeScreen() {
   const [selectedModuleId, setSelectedModuleId] = useState(MOCK_HOME_MODULES[0].id)
@@ -37,8 +38,7 @@ export default function HomeScreen() {
           }
         />
       ) : (
-        // TODO(paso E): vista de módulo bloqueado (carpi-2 + mensaje).
-        <View className="flex-1 bg-panel" />
+        <LockedModuleView message={getLockedModuleMessage(MOCK_HOME_MODULES, selectedModule)} />
       )}
     </SafeAreaView>
   )

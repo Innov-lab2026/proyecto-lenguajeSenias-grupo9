@@ -14,3 +14,25 @@ export function getIslandState(module: HomeModule, islandNumber: number): Island
   if (module.state === 'locked') return 'blocked'
   return islandNumber <= module.completedIslands + 1 ? 'available' : 'blocked'
 }
+
+/**
+ * Mensaje de la vista de módulo bloqueado: lista los módulos previos que
+ * faltan completar (ej. "Completa el módulo 1 y el módulo 2 para desbloquear
+ * más lecciones.").
+ */
+export function getLockedModuleMessage(modules: HomeModule[], locked: HomeModule): string {
+  const index = modules.findIndex((m) => m.id === locked.id)
+  const pending = modules
+    .slice(0, index)
+    .filter((m) => m.completedIslands < ISLANDS_PER_MODULE)
+    .map((m) => `el ${m.title.toLowerCase()}`)
+
+  if (pending.length === 0) return 'Este módulo todavía no está disponible.'
+
+  const list =
+    pending.length > 1
+      ? `${pending.slice(0, -1).join(', ')} y ${pending[pending.length - 1]}`
+      : pending[0]
+
+  return `Completa ${list} para desbloquear más lecciones.`
+}
