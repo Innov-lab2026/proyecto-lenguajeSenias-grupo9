@@ -19,7 +19,7 @@ export default function HomeScreen() {
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
       {/* Mobile-first: en desktop/tablet el home se acota a una columna centrada
           (mismo criterio que las pantallas de auth) para no estirar el zigzag. */}
-      <View className="mx-auto w-full max-w-md flex-1">
+      <View className="mx-auto w-full max-w-3xl flex-1">
         <View className="w-full gap-4 px-5 pb-3 pt-4">
           <StatsHeader stats={MOCK_HOME_STATS} />
           {/* La barra mide el progreso del módulo abierto (islas completadas / 5). */}
