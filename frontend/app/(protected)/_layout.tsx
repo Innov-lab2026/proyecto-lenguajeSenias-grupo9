@@ -1,6 +1,6 @@
 import { ActivityIndicator, Pressable, Text, View } from 'react-native'
 import { Slot } from 'expo-router'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { SideBar } from '@/src/components/features/navigation/SideBar'
 import { BottomBar } from '@/src/components/features/navigation/BottomBar'
 import { Button } from '@/src/components/common/Button'
@@ -14,6 +14,10 @@ export default function ProtectedLayout() {
   const { isMobile, isTablet } = useResponsive()
   const { data: profile, isPending, isError, refetch } = useProfile()
   const logout = useLogout()
+  // useSafeAreaInsets (no el componente SafeAreaView): lee del contexto ya
+  // resuelto por el SafeAreaProvider raíz, sin remedir de forma nativa en
+  // cada montaje — evita el salto de layout al reentrar a esta pantalla.
+  const insets = useSafeAreaInsets()
 
   // Cargando el perfil: spinner centrado (evita el flash de pantalla en blanco).
   if (isPending) {
@@ -28,7 +32,15 @@ export default function ProtectedLayout() {
   // el gate — mostramos un estado recuperable con reintento y salida.
   if (isError) {
     return (
-      <SafeAreaView className="flex-1 items-center justify-center gap-4 bg-background px-8">
+      <View
+        className="flex-1 items-center justify-center gap-4 bg-background px-8"
+        style={{
+          paddingTop: insets.top,
+          paddingBottom: insets.bottom,
+          paddingLeft: insets.left,
+          paddingRight: insets.right,
+        }}
+      >
         <Text className="text-center font-nunito text-lg font-bold text-ink">
           No pudimos cargar tu perfil
         </Text>
@@ -39,7 +51,7 @@ export default function ProtectedLayout() {
         <Pressable onPress={logout} accessibilityRole="link" hitSlop={8}>
           <Text className="font-nunito text-sm font-bold text-secondary">Cerrar sesión</Text>
         </Pressable>
-      </SafeAreaView>
+      </View>
     )
   }
 
@@ -52,12 +64,12 @@ export default function ProtectedLayout() {
     return (
       // bg-surface: la franja del inset inferior (debajo de la BottomBar) debe
       // verse blanca como la barra; las pantallas pintan su propio bg-background.
-      <SafeAreaView className="flex-1 bg-surface" edges={['bottom']}>
+      <View className="flex-1 bg-surface" style={{ paddingBottom: insets.bottom }}>
         <View className="flex-1">
           <Slot />
         </View>
         <BottomBar />
-      </SafeAreaView>
+      </View>
     )
   }
 

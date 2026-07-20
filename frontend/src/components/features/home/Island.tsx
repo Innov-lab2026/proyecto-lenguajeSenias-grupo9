@@ -1,43 +1,18 @@
+import { useEffect } from 'react'
 import { Pressable } from 'react-native'
-import { Image } from 'expo-image'
+import Animated, {
+  Easing,
+  cancelAnimation,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withSequence,
+  withTiming,
+} from 'react-native-reanimated'
+import { ISLAND_COMPONENTS } from './islands'
 import type { IslandState } from '@/src/types/home'
 
-interface IslandAsset {
-  available: number
-  blocked: number
-  /** alto/ancho del viewBox del SVG, para renderizar sin deformar. */
-  ratio: number
-}
-
-// La isla 1 no tiene versión bloqueada: al desbloquear un módulo siempre está
-// disponible (y los módulos bloqueados no renderizan el camino).
-const ISLAND_ASSETS: Record<number, IslandAsset> = {
-  1: {
-    available: require('@/assets/images/home/01-island.svg'),
-    blocked: require('@/assets/images/home/01-island.svg'),
-    ratio: 64 / 84,
-  },
-  2: {
-    available: require('@/assets/images/home/02-island.svg'),
-    blocked: require('@/assets/images/home/02-island-blocked.svg'),
-    ratio: 51 / 85,
-  },
-  3: {
-    available: require('@/assets/images/home/03-island.svg'),
-    blocked: require('@/assets/images/home/03-island-blocked.svg'),
-    ratio: 68 / 84,
-  },
-  4: {
-    available: require('@/assets/images/home/04-island.svg'),
-    blocked: require('@/assets/images/home/04-island-blocked.svg'),
-    ratio: 66 / 83,
-  },
-  5: {
-    available: require('@/assets/images/home/05-island.svg'),
-    blocked: require('@/assets/images/home/05-island-blocked.svg'),
-    ratio: 81 / 71,
-  },
-}
+const inOut = Easing.inOut(Easing.ease)
 
 interface IslandProps {
   /** Número de isla (1 = abajo de todo, 5 = arriba de todo). */
@@ -48,10 +23,35 @@ interface IslandProps {
   onPress?: () => void
 }
 
-/** Isla individual del camino: elige el asset según número y estado. */
+/**
+ * Isla individual del camino: SVG vivo o bloqueado según el estado. Las vivas
+ * "respiran" (island-breathe de icons.css: translateY ±2.5px · 5.5s); las
+ * bloqueadas quedan totalmente quietas = apagadas.
+ */
 export function Island({ number, state, width, onPress }: IslandProps) {
-  const asset = ISLAND_ASSETS[number]
+  const IslandSvg = ISLAND_COMPONENTS[number]
   const isAvailable = state === 'available'
+
+  const breathe = useSharedValue(0)
+
+  useEffect(() => {
+    if (!isAvailable) return
+    breathe.value = withRepeat(
+      withSequence(
+        withTiming(-2.5, { duration: 2750, easing: inOut }),
+        withTiming(0, { duration: 2750, easing: inOut }),
+      ),
+      -1,
+    )
+    return () => {
+      cancelAnimation(breathe)
+      breathe.value = 0
+    }
+  }, [isAvailable, breathe])
+
+  const breatheStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: breathe.value }],
+  }))
 
   return (
     <Pressable
@@ -62,16 +62,9 @@ export function Island({ number, state, width, onPress }: IslandProps) {
       accessibilityState={{ disabled: !isAvailable }}
       className={isAvailable ? 'active:opacity-80' : undefined}
     >
-      <Image
-        source={isAvailable ? asset.available : asset.blocked}
-        style={{ width, height: width * asset.ratio }}
-        contentFit="contain"
-      />
+      <Animated.View style={breatheStyle}>
+        <IslandSvg width={width} blocked={!isAvailable} />
+      </Animated.View>
     </Pressable>
   )
-}
-
-/** Proporción alto/ancho de una isla (la usa IslandPath para posicionar centros). */
-export function getIslandRatio(number: number): number {
-  return ISLAND_ASSETS[number].ratio
 }
