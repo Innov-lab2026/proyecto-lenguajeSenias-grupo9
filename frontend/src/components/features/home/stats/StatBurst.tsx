@@ -28,7 +28,9 @@ interface ParticleSpec {
   duration: number
 }
 
-// Fórmulas de triggerXp / triggerStar / triggerPaw en icons.js, escaladas por k
+// Fórmulas de triggerXp / triggerStar / triggerPaw en icons.js, escaladas por k.
+// Las duraciones de vuelo están alargadas ~40% respecto de la demo original
+// (900/850/900ms) para que el efecto se sienta más suave al tocar.
 function makeXpSparks(k: number): ParticleSpec[] {
   return Array.from({ length: 14 }, (_, i) => {
     const angle = (Math.PI * 2 * i) / 14 + Math.random() * 0.35
@@ -39,8 +41,8 @@ function makeXpSparks(k: number): ParticleSpec[] {
       rot: Math.random() * 360 - 180,
       size: (4 + Math.random() * 5) * k,
       color: XP_COLORS[i % XP_COLORS.length],
-      delay: Math.random() * 100,
-      duration: 900,
+      delay: Math.random() * 140,
+      duration: 1260,
     }
   })
 }
@@ -55,8 +57,8 @@ function makeStarPieces(k: number): ParticleSpec[] {
       rot: Math.random() * 360 - 180,
       size: (5 + Math.random() * 5) * k,
       color: STAR_COLORS[i % STAR_COLORS.length],
-      delay: Math.random() * 80,
-      duration: 850,
+      delay: Math.random() * 110,
+      duration: 1190,
     }
   })
 }
@@ -71,8 +73,8 @@ function makePawStamps(k: number): ParticleSpec[] {
       rot: (i - 1.5) * 18,
       size: 42 * k,
       color: '#DA9146', // blob del radial-gradient de .paw-stamp
-      delay: i * 50,
-      duration: 900,
+      delay: i * 70,
+      duration: 1260,
     }
   })
 }
@@ -107,8 +109,10 @@ function Particle({ clock, spec, total, kind, index }: ParticleProps) {
 
   return (
     <Animated.View
-      pointerEvents="none"
-      style={[{ position: 'absolute', width: spec.size, height: spec.size }, style]}
+      style={[
+        { position: 'absolute', width: spec.size, height: spec.size, pointerEvents: 'none' },
+        style,
+      ]}
     >
       {kind === 'xp' ? (
         // chispa: cuadradito redondeado
@@ -140,11 +144,11 @@ function Particle({ clock, spec, total, kind, index }: ParticleProps) {
   )
 }
 
-/** Anillo expansivo del XP (xp-ring: 54px, borde 3px, scale 0.4→1.8 · 750ms). */
-function XpRing({ clock, k }: { clock: SharedValue<number>; k: number }) {
+/** Anillo expansivo del XP (xp-ring: 54px, borde 3px, scale 0.4→1.8 · ~1050ms). */
+function XpRing({ clock, k, total }: { clock: SharedValue<number>; k: number; total: number }) {
   const size = 54 * k
   const style = useAnimatedStyle(() => {
-    const local = Math.min((clock.value * 1000) / 750, 1)
+    const local = Math.min((clock.value * total) / RING_DURATION, 1)
     return {
       opacity: local >= 1 ? 0 : interpolate(local, [0, 1], [0.9, 0]),
       transform: [{ scale: interpolate(local, [0, 1], [0.4, 1.8]) }],
@@ -152,7 +156,6 @@ function XpRing({ clock, k }: { clock: SharedValue<number>; k: number }) {
   })
   return (
     <Animated.View
-      pointerEvents="none"
       style={[
         {
           position: 'absolute',
@@ -161,6 +164,7 @@ function XpRing({ clock, k }: { clock: SharedValue<number>; k: number }) {
           borderRadius: size / 2,
           borderWidth: 3 * k,
           borderColor: '#4A90E2', // token secondary
+          pointerEvents: 'none',
         },
         style,
       ]}
@@ -168,19 +172,21 @@ function XpRing({ clock, k }: { clock: SharedValue<number>; k: number }) {
   )
 }
 
-/** Onda del pisotón de la huella (paw-ripple: elipse 20×12, scale 0.6→3.2 · 550ms). */
-function PawRipple({ clock, k }: { clock: SharedValue<number>; k: number }) {
+/** Onda del pisotón de la huella (paw-ripple: elipse 20×12, scale 0.6→3.2 · ~770ms). */
+function PawRipple({ clock, k, total }: { clock: SharedValue<number>; k: number; total: number }) {
   const w = 20 * k
   const h = 12 * k
   const style = useAnimatedStyle(() => {
-    const local = Math.min((clock.value * 1050) / 550, 1)
+    const local = Math.min((clock.value * total) / RIPPLE_DURATION, 1)
     return {
       opacity: local >= 1 ? 0 : interpolate(local, [0, 1], [0.9, 0]),
       transform: [{ translateY: 8 * k }, { scale: interpolate(local, [0, 1], [0.6, 3.2]) }],
     }
   })
   return (
-    <Animated.View pointerEvents="none" style={[{ position: 'absolute', width: w, height: h }, style]}>
+    <Animated.View
+      style={[{ position: 'absolute', width: w, height: h, pointerEvents: 'none' }, style]}
+    >
       <Svg width={w} height={h}>
         <Ellipse
           cx={w / 2}
@@ -196,8 +202,14 @@ function PawRipple({ clock, k }: { clock: SharedValue<number>; k: number }) {
   )
 }
 
-// Duración total de cada burst (delay máximo + vuelo de la partícula)
-const TOTAL: Record<StatKind, number> = { xp: 1000, star: 930, paw: 1050 }
+// Duración propia del anillo de XP y la onda de la huella (alargadas ~40%
+// respecto de la demo original: 750ms y 550ms).
+const RING_DURATION = 1050
+const RIPPLE_DURATION = 770
+
+// Duración total de cada burst (delay máximo + vuelo de la partícula, con
+// margen). Alargadas ~40% respecto de la demo original (1000/930/1050ms).
+const TOTAL: Record<StatKind, number> = { xp: 1450, star: 1350, paw: 1500 }
 
 interface StatBurstProps {
   kind: StatKind
@@ -228,11 +240,11 @@ export function StatBurst({ kind, trigger, size }: StatBurstProps) {
 
   return (
     <View
-      pointerEvents="none"
       className="absolute inset-0 items-center justify-center"
+      style={{ pointerEvents: 'none' }}
     >
-      {kind === 'xp' ? <XpRing clock={clock} k={k} /> : null}
-      {kind === 'paw' ? <PawRipple clock={clock} k={k} /> : null}
+      {kind === 'xp' ? <XpRing clock={clock} k={k} total={TOTAL.xp} /> : null}
+      {kind === 'paw' ? <PawRipple clock={clock} k={k} total={TOTAL.paw} /> : null}
       {specs.map((spec, i) => (
         <Particle key={`${trigger}-${i}`} clock={clock} spec={spec} total={TOTAL[kind]} kind={kind} index={i} />
       ))}

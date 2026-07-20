@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Alert, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { StatsHeader } from '@/src/components/features/home/StatsHeader'
 import { ModuleTabs } from '@/src/components/features/home/ModuleTabs'
 import { IslandPath } from '@/src/components/features/home/IslandPath'
@@ -11,12 +11,16 @@ import { getModuleProgress, getLockedModuleMessage } from '@/src/utils/home'
 
 export default function HomeScreen() {
   const [selectedModuleId, setSelectedModuleId] = useState(MOCK_HOME_MODULES[0].id)
+  // useSafeAreaInsets (no SafeAreaView): lee del contexto ya resuelto por el
+  // SafeAreaProvider raíz, sin remedir de forma nativa en cada montaje —
+  // evita el salto de layout al reentrar a esta pantalla.
+  const insets = useSafeAreaInsets()
 
   const selectedModule =
     MOCK_HOME_MODULES.find((m) => m.id === selectedModuleId) ?? MOCK_HOME_MODULES[0]
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+    <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
       {/* Mobile-first: en desktop/tablet el home se acota a una columna centrada
           (mismo criterio que las pantallas de auth) para no estirar el zigzag. */}
       <View className="mx-auto w-full max-w-3xl flex-1">
@@ -44,6 +48,6 @@ export default function HomeScreen() {
           <LockedModuleView message={getLockedModuleMessage(MOCK_HOME_MODULES, selectedModule)} />
         )}
       </View>
-    </SafeAreaView>
+    </View>
   )
 }

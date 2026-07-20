@@ -70,6 +70,12 @@ export function IslandPath({ module, onIslandPress }: IslandPathProps) {
         <ScrollView
           ref={scrollRef}
           showsVerticalScrollIndicator={false}
+          // Arranca ya scrolleado abajo (isla 1) desde el primer frame: un
+          // offset inicial mayor al máximo posible se clampea solo, sin
+          // pegar el salto visible que había con scrollToEnd tras montar.
+          contentOffset={{ x: 0, y: CONTENT_HEIGHT }}
+          // Red de seguridad no animada por si el contenido termina de
+          // medirse en un tamaño distinto al esperado.
           onContentSizeChange={() => scrollRef.current?.scrollToEnd({ animated: false })}
         >
           <View style={{ width, height: CONTENT_HEIGHT }}>

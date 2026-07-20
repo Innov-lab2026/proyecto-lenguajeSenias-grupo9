@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { Stack } from 'expo-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { SafeAreaProvider } from 'react-native-safe-area-context'
+import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-context'
 import { useFonts } from 'expo-font'
 import * as SplashScreen from 'expo-splash-screen'
 import { useSessionStore } from '@/src/store/sessionStore'
@@ -37,7 +37,11 @@ export default function RootLayout() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <SafeAreaProvider>
+      {/* initialMetrics: evita el "flash" de insets en 0 (contenido pegado al
+          borde superior, tapado por la barra de estado, que luego "salta" a
+          su posición) — sin esto, react-native-safe-area-context arranca sin
+          insets y los actualiza recién tras la primera medición nativa. */}
+      <SafeAreaProvider initialMetrics={initialWindowMetrics}>
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Protected guard={isAuthenticated}>
             <Stack.Screen name="(protected)" />

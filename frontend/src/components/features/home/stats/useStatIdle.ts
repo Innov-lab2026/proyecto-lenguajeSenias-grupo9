@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { Platform } from 'react-native'
 import {
   Easing,
   cancelAnimation,
@@ -10,14 +11,31 @@ import {
   withTiming,
 } from 'react-native-reanimated'
 
+import { composeMatrix } from '../islands/useIslandIdle'
+
 export { AnimatedG } from '../islands/useIslandIdle'
 
 export type StatKind = 'xp' | 'star' | 'paw'
 
+// Origen de rotación de cada cuerpo (transform-origin del CSS: xp/star =
+// centro del viewBox; paw = 29.5px 40px, explícito en icons.css). Horneado
+// acá en la matriz — ver el porqué en useIslandIdle.ts (composeMatrix).
+const ORIGIN: Record<StatKind, [number, number]> = {
+  xp: [20.5, 20],
+  star: [38.5, 37],
+  paw: [29.5, 40],
+}
+
+// `transform` sólo se manda en web: en nativo choca con el `transform` de
+// ViewProps (array de mapas), distinto del array de 6 números que espera acá
+// — ver el detalle completo en useIslandIdle.ts (useMatrixProps).
+const isWeb = Platform.OS === 'web'
+
 // Duraciones de xp-idle / star-idle / paw-wave en icons.css
 const BODY_DURATION: Record<StatKind, number> = { xp: 2600, star: 2400, paw: 2200 }
-// Duración del pop al sumar (xp-pop/star-pop 0.7s · paw-stamp 0.55s)
-const POP_DURATION: Record<StatKind, number> = { xp: 700, star: 700, paw: 550 }
+// Duración del pop al sumar (xp-pop/star-pop 0.7s · paw-stamp 0.55s en la demo
+// original; alargado ~40% acá para que el efecto se sienta más suave al tocar).
+const POP_DURATION: Record<StatKind, number> = { xp: 980, star: 980, paw: 780 }
 
 /**
  * Idle del cuerpo de cada stat (xp-idle / star-idle / paw-wave de icons.css)
@@ -53,40 +71,39 @@ export function useStatIdle(kind: StatKind, enabled: boolean, popTrigger = 0) {
 
   const bodyProps = useAnimatedProps(() => {
     const p = pop.value
+    const [originX, originY] = ORIGIN[kind]
 
     if (kind === 'xp') {
-      return {
-        rotation:
-          interpolate(t.value, [0, 0.35, 0.65, 1], [0, -3, 2, 0]) +
-          interpolate(p, [0, 0.3, 0.55, 1], [0, -8, 5, 0]),
-        scale:
-          interpolate(t.value, [0, 0.35, 0.65, 1], [1, 1.07, 0.98, 1]) *
-          interpolate(p, [0, 0.3, 0.55, 1], [1, 1.35, 0.88, 1]),
-        y: 0,
-      }
+      const rotation =
+        interpolate(t.value, [0, 0.35, 0.65, 1], [0, -3, 2, 0]) +
+        interpolate(p, [0, 0.3, 0.55, 1], [0, -8, 5, 0])
+      const scale =
+        interpolate(t.value, [0, 0.35, 0.65, 1], [1, 1.07, 0.98, 1]) *
+        interpolate(p, [0, 0.3, 0.55, 1], [1, 1.35, 0.88, 1])
+      const matrix = composeMatrix(rotation, scale, scale, originX, originY)
+      return (isWeb ? { matrix, transform: matrix } : { matrix }) as Record<string, unknown>
     }
     if (kind === 'star') {
-      return {
-        rotation:
-          interpolate(t.value, [0, 0.4, 0.7, 1], [-3, 4, -1, -3]) +
-          interpolate(p, [0, 0.3, 0.55, 1], [0, 23, -7, 0]),
-        scale:
-          interpolate(t.value, [0, 0.4, 0.7, 1], [1, 1.08, 0.97, 1]) *
-          interpolate(p, [0, 0.3, 0.55, 1], [1, 1.35, 0.9, 1]),
-        y: 0,
-      }
+      const rotation =
+        interpolate(t.value, [0, 0.4, 0.7, 1], [-3, 4, -1, -3]) +
+        interpolate(p, [0, 0.3, 0.55, 1], [0, 23, -7, 0])
+      const scale =
+        interpolate(t.value, [0, 0.4, 0.7, 1], [1, 1.08, 0.97, 1]) *
+        interpolate(p, [0, 0.3, 0.55, 1], [1, 1.35, 0.9, 1])
+      const matrix = composeMatrix(rotation, scale, scale, originX, originY)
+      return (isWeb ? { matrix, transform: matrix } : { matrix }) as Record<string, unknown>
     }
-    return {
-      rotation:
-        interpolate(t.value, [0, 0.25, 0.5, 0.75, 1], [-8, 10, -4, 7, -8]) +
-        interpolate(p, [0, 0.25, 0.45, 0.7, 1], [0, 8, 8, 12, 0]),
-      scale:
-        interpolate(t.value, [0, 0.25, 0.5, 0.75, 1], [1, 1.03, 0.98, 1.02, 1]) *
-        interpolate(p, [0, 0.25, 0.45, 0.7, 1], [1, 1.25, 0.85, 1.08, 1]),
-      y:
-        interpolate(t.value, [0, 0.25, 0.5, 0.75, 1], [0, -2, 1, -1, 0]) +
-        interpolate(p, [0, 0.25, 0.45, 0.7, 1], [0, -6, 4, -1, 0]),
-    }
+    const rotation =
+      interpolate(t.value, [0, 0.25, 0.5, 0.75, 1], [-8, 10, -4, 7, -8]) +
+      interpolate(p, [0, 0.25, 0.45, 0.7, 1], [0, 8, 8, 12, 0])
+    const scale =
+      interpolate(t.value, [0, 0.25, 0.5, 0.75, 1], [1, 1.03, 0.98, 1.02, 1]) *
+      interpolate(p, [0, 0.25, 0.45, 0.7, 1], [1, 1.25, 0.85, 1.08, 1])
+    const y =
+      interpolate(t.value, [0, 0.25, 0.5, 0.75, 1], [0, -2, 1, -1, 0]) +
+      interpolate(p, [0, 0.25, 0.45, 0.7, 1], [0, -6, 4, -1, 0])
+    const matrix = composeMatrix(rotation, scale, scale, originX, originY, 0, y)
+    return (isWeb ? { matrix, transform: matrix } : { matrix }) as Record<string, unknown>
   })
 
   return { bodyProps }
@@ -117,7 +134,8 @@ export function useStatAura(kind: StatKind, enabled: boolean, flashTrigger = 0) 
   useEffect(() => {
     if (flashTrigger === 0 || kind === 'paw') return
     flash.value = 0
-    flash.value = withTiming(1, { duration: 700, easing: Easing.out(Easing.ease) })
+    // Alargado (era 700ms) para acompañar el pop más suave.
+    flash.value = withTiming(1, { duration: 950, easing: Easing.out(Easing.ease) })
   }, [flashTrigger, kind, flash])
 
   const style = useAnimatedStyle(() => {

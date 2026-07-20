@@ -46,8 +46,10 @@ export function StatBadge({ kind, size = 30, animated = true, burstTrigger = 0 }
     <View className="items-center justify-center">
       {kind === 'paw' ? null : (
         <Animated.View
-          pointerEvents="none"
-          style={[{ position: 'absolute', width: glowSize, height: glowSize}, auraStyle]}
+          style={[
+            { position: 'absolute', width: glowSize, height: glowSize, pointerEvents: 'none' },
+            auraStyle,
+          ]}
         >
           <Svg width={glowSize} height={glowSize}>
             <Defs>

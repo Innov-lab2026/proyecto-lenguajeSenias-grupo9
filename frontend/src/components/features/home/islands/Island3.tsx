@@ -1,5 +1,5 @@
 import Svg, { Path } from 'react-native-svg'
-import { AnimatedG, AnimatedPath, useIslandIdle } from './useIslandIdle'
+import { AnimatedG, AnimatedPath, useIslandIdle, useMatrixProps } from './useIslandIdle'
 
 export const ISLAND3_RATIO = 86 / 99
 export const ISLAND3_BLOCKED_RATIO = 86 / 99
@@ -18,6 +18,7 @@ interface Island3Props {
  */
 export function Island3({ width, blocked = false, animated = true }: Island3Props) {
   const anim = useIslandIdle(animated && !blocked)
+  const reedsMatrix = useMatrixProps(anim.reeds, 1, 63.85, 38.17)
 
   if (blocked) {
     return (
@@ -119,7 +120,7 @@ export function Island3({ width, blocked = false, animated = true }: Island3Prop
       <Path d="M16.5691 54.6157C16.6456 53.7687 15.1023 52.937 13.1222 52.7582C11.142 52.5794 9.47476 53.1211 9.39827 53.9682C9.32178 54.8153 10.865 55.6469 12.8452 55.8257C14.8253 56.0045 16.4926 55.4628 16.5691 54.6157Z" fill="#3C752D"/>
       <Path d="M17.7376 53.9114C19.6852 53.5116 21.1254 52.5121 20.9544 51.6789C20.7834 50.8458 19.0659 50.4945 17.1183 50.8943C15.1707 51.2941 13.7304 52.2936 13.9015 53.1267C14.0725 53.9599 15.79 54.3112 17.7376 53.9114Z" fill="#3C752D"/>
       {/* anim: island-reeds */}
-      <AnimatedG animatedProps={anim.reedsProps} origin="63.85, 38.17">
+      <AnimatedG animatedProps={reedsMatrix}>
       <Path d="M75.3917 31.9827C75.3917 31.9827 81.1817 25.3927 81.9817 25.2627L76.3917 37.2227H72.9917V33.5327L75.3917 31.9827Z" fill="#74933A"/>
       <Path d="M73.0818 26.0527C73.9357 24.4683 74.8876 22.9386 75.9318 21.4727C75.928 23.5211 75.7474 25.5653 75.3918 27.5827C74.8855 29.279 74.2914 30.9479 73.6118 32.5827H71.6118L73.0818 26.0527Z" fill="#74933A"/>
       <Path d="M69.3316 33.263C69.3316 33.263 66.3916 19.023 60.3916 17.793L67.4516 35.703L69.3416 36.173L69.3316 33.263Z" fill="#74933A"/>

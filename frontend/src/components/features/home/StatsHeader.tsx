@@ -35,8 +35,7 @@ function GainLabel({ amount, kind }: { amount: number; kind: StatKind }) {
 
   return (
     <Animated.View
-      pointerEvents="none"
-      style={[{ position: 'absolute', left: '60%', top: -8 }, style]}
+      style={[{ position: 'absolute', left: '60%', top: -8, pointerEvents: 'none' }, style]}
     >
       <Text className="font-nunito text-base font-bold" style={{ color: GAIN_COLOR[kind] }}>
         +{amount}
