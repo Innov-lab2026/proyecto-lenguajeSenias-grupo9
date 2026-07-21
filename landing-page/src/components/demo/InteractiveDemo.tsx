@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Exercises } from './DataDemo'
+import { APP_URL } from '../../constants/app'
 
 type Exercise = {
     img: string
@@ -41,29 +42,27 @@ export default function InteractiveDemo() {
             return
         }
 
-        if (status === 'correct') {
-            // advance or finish
-            if (index < exercises.length - 1) {
-                setIndex(i => i + 1)
-                setSelected(null)
-                setStatus('idle')
-            } else {
-                // last exercise: "Continua en la App" - no action for now
-            }
+        if (status === 'correct' && index < exercises.length - 1) {
+            // advance (el último ejercicio pasa a ser el link "Continua en la App")
+            setIndex(i => i + 1)
+            setSelected(null)
+            setStatus('idle')
         }
     }
+
+    const isFinalCta = status === 'correct' && index === exercises.length - 1
 
     const buttonText =
         status === 'idle' ? 'Chequear respuesta' : status === 'wrong' ? 'Reintentar' : index === 0 ? 'Siguiente' : 'Continua en la App'
 
     const buttonClass =
         status === 'wrong'
-            ? 'col-span-3 row-span-1 cursor-pointer bg-red-600 text-white py-2 px-4 rounded-md border-2 border-white'
+            ? 'col-span-3 row-span-1 flex items-center justify-center cursor-pointer bg-red-600 text-white py-2 px-4 rounded-md border-2 border-white'
             : status === 'correct' && index === 0
-                ? 'col-span-3 row-span-1 cursor-pointer bg-green-600 text-white py-2 px-4 rounded-md border-2 border-white'
+                ? 'col-span-3 row-span-1 flex items-center justify-center cursor-pointer bg-green-600 text-white py-2 px-4 rounded-md border-2 border-white'
                 : status === 'correct' && index === 1
-                    ? 'col-span-3 row-span-1 cursor-pointer bg-success text-foreground font-bold py-2 px-4 rounded-full border-2 border-success-border hover:bg-success-hover'
-                    : 'col-span-3 row-span-1 cursor-pointer bg-primary text-white py-2 px-4 rounded-md border-2 border-white hover:bg-accent'
+                    ? 'col-span-3 row-span-1 flex items-center justify-center cursor-pointer bg-success text-foreground font-bold py-2 px-4 rounded-full border-2 border-success-border hover:bg-success-hover'
+                    : 'col-span-3 row-span-1 flex items-center justify-center cursor-pointer bg-primary text-white py-2 px-4 rounded-md border-2 border-white hover:bg-accent'
 
     return (
         <div
@@ -105,9 +104,15 @@ export default function InteractiveDemo() {
                     )
                 })}
 
-                <button className={buttonClass} onClick={handleButton}>
-                    {buttonText}
-                </button>
+                {isFinalCta ? (
+                    <a href={APP_URL} className={buttonClass}>
+                        {buttonText}
+                    </a>
+                ) : (
+                    <button className={buttonClass} onClick={handleButton}>
+                        {buttonText}
+                    </button>
+                )}
 
             </fieldset>
 
