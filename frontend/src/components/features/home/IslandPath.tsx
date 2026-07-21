@@ -2,9 +2,11 @@ import { useRef, useState } from 'react'
 import { ScrollView, View } from 'react-native'
 import { Image } from 'expo-image'
 import Svg, { Path } from 'react-native-svg'
-import { Island, getIslandRatio } from './Island'
+import { Island } from './Island'
+import { getIslandRatio } from './islands'
 import { getIslandState } from '@/src/utils/home'
 import { ISLANDS_PER_MODULE } from '@/src/constants/home'
+import { useResponsive } from '@/src/hooks/common/useResponsive'
 import type { HomeModule } from '@/src/types/home'
 
 interface IslandPathProps {
@@ -17,7 +19,7 @@ const ISLAND_WIDTH = 120
 /** Centro horizontal de cada isla (fracción del ancho del panel), de la 1 (abajo) a la 5 (arriba). */
 const X_FRACTIONS = [0.5, 0.64, 0.38, 0.65, 0.46]
 /** Separación vertical entre centros de islas consecutivas. */
-const STEP = 108
+const STEP = 122
 /** Aire por encima de la isla 5 (su bandera es el asset más alto). */
 const PAD_TOP = 32
 /** Aire debajo de la isla 1 (comparte zona con carpi-1). */
@@ -54,6 +56,7 @@ function buildRiverPath(points: { x: number; y: number }[]): string {
 export function IslandPath({ module, onIslandPress }: IslandPathProps) {
   const scrollRef = useRef<ScrollView>(null)
   const [width, setWidth] = useState<number | null>(null)
+  const { isMobile, isTablet } = useResponsive()
 
   const islandNumbers = Array.from({ length: ISLANDS_PER_MODULE }, (_, i) => i + 1)
   const centers = width ? islandNumbers.map((n) => getIslandCenter(n, width)) : []
@@ -67,6 +70,12 @@ export function IslandPath({ module, onIslandPress }: IslandPathProps) {
         <ScrollView
           ref={scrollRef}
           showsVerticalScrollIndicator={false}
+          // Arranca ya scrolleado abajo (isla 1) desde el primer frame: un
+          // offset inicial mayor al máximo posible se clampea solo, sin
+          // pegar el salto visible que había con scrollToEnd tras montar.
+          contentOffset={{ x: 0, y: CONTENT_HEIGHT }}
+          // Red de seguridad no animada por si el contenido termina de
+          // medirse en un tamaño distinto al esperado.
           onContentSizeChange={() => scrollRef.current?.scrollToEnd({ animated: false })}
         >
           <View style={{ width, height: CONTENT_HEIGHT }}>
@@ -88,7 +97,8 @@ export function IslandPath({ module, onIslandPress }: IslandPathProps) {
 
             {islandNumbers.map((n) => {
               const center = centers[n - 1]
-              const height = ISLAND_WIDTH * getIslandRatio(n)
+              const state = getIslandState(module, n)
+              const height = ISLAND_WIDTH * getIslandRatio(n, state === 'blocked')
               return (
                 <View
                   key={n}
@@ -100,7 +110,7 @@ export function IslandPath({ module, onIslandPress }: IslandPathProps) {
                 >
                   <Island
                     number={n}
-                    state={getIslandState(module, n)}
+                    state={state}
                     width={ISLAND_WIDTH}
                     onPress={onIslandPress ? () => onIslandPress(n) : undefined}
                   />
@@ -110,7 +120,13 @@ export function IslandPath({ module, onIslandPress }: IslandPathProps) {
 
             <Image
               source={require('@/assets/images/home/carpi-1.png')}
-              style={{ position: 'absolute', right: 12, bottom: 8, width: 90, height: 90 }}
+              style={{
+                position: 'absolute',
+                right: isMobile ? 6 : isTablet ? 8 : 10,
+                bottom: isMobile ? 6 : isTablet ? 8 : 10,
+                width: isMobile ? 120 : isTablet ? 140 : 160,
+                height: isMobile ? 120 : isTablet ? 140 : 160,
+              }}
               contentFit="contain"
               accessibilityLabel="Carpincho de CarpiSeñas"
             />
