@@ -21,7 +21,7 @@ interface UpdateProfileInput {
   birth_date?: Date | string
   gender?: string
   country?: string
-  avatar_url?: string
+  avatar_url?: string | null
 }
 
 function resolveFullName(meta?: ProfileUserMeta): string {
@@ -161,4 +161,34 @@ export const updateProfileService = async (
   }
 
   return data
+}
+
+const AVATAR_BUCKET = 'avatars'
+
+export async function uploadAvatarService(userId: string, dataUrl: string) {
+  const match = /^data:(image\/(?:jpeg|png|webp));base64,([a-zA-Z0-9+/=]+)$/.exec(dataUrl)
+  if (!match) throw new Error('Formato de imagen no válido')
+
+  const contentType = match[1]
+  const buffer = Buffer.from(match[2], 'base64')
+  if (buffer.length > 4 * 1024 * 1024) throw new Error('La imagen supera el límite de 4 MB')
+
+  const extension = contentType === 'image/png' ? 'png' : contentType === 'image/webp' ? 'webp' : 'jpg'
+  const objectPath = `${userId}/avatar.${extension}`
+  const { error } = await supabaseAdmin.storage
+    .from(AVATAR_BUCKET)
+    .upload(objectPath, buffer, { contentType, upsert: true, cacheControl: '3600' })
+  if (error) throw new Error(`No se pudo subir la foto: ${error.message}`)
+
+  const { data: publicUrl } = supabaseAdmin.storage.from(AVATAR_BUCKET).getPublicUrl(objectPath)
+  return updateProfileService(userId, { avatar_url: publicUrl.publicUrl })
+}
+
+export async function deleteAvatarService(userId: string) {
+  const profile = await fetchProfileById(userId)
+  if (profile?.avatar_url) {
+    const objectPath = `${userId}/avatar.jpg`
+    await supabaseAdmin.storage.from(AVATAR_BUCKET).remove([objectPath, `${userId}/avatar.png`, `${userId}/avatar.webp`])
+  }
+  return updateProfileService(userId, { avatar_url: null })
 }

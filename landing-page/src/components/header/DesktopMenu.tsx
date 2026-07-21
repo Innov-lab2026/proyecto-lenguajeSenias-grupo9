@@ -21,7 +21,7 @@ export default function DesktopMenu({ navLinks }: { navLinks: { name: string, hr
                 </a>
             ))}
 
-            <ButtonSuccess children="Descargar" span={true} />
+            <ButtonSuccess children="Entrar" span={true} href="https://carpisenias.vercel.app/" />
         </nav>
     )
 }

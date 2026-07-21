@@ -41,6 +41,12 @@
         }
       ],
       "expo-secure-store",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Permita acesso \u00e0s fotos para alterar a imagem de perfil."
+        }
+      ],
       "@react-native-community/datetimepicker"
     ],
     "experiments": {

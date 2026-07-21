@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import { getProfileByIdService, updateProfileService } from '../services/profileService'
+import { deleteAvatarService, getProfileByIdService, updateProfileService, uploadAvatarService } from '../services/profileService'
 
 function getUserContext(req: Request) {
   const user = (req as any).user
@@ -62,5 +62,25 @@ export const updateProfile = async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error('[PATCH /api/profile]', error)
     return res.status(500).json({ error: error.message })
+  }
+}
+
+export const uploadAvatar = async (req: Request, res: Response) => {
+  try {
+    const { dataUrl } = req.body
+    if (typeof dataUrl !== 'string') return res.status(400).json({ error: 'La imagen es requerida.' })
+    const profile = await uploadAvatarService((req as any).user.id, dataUrl)
+    return res.status(200).json({ message: 'Foto actualizada.', data: profile })
+  } catch (error: any) {
+    return res.status(400).json({ error: error.message })
+  }
+}
+
+export const deleteAvatar = async (req: Request, res: Response) => {
+  try {
+    const profile = await deleteAvatarService((req as any).user.id)
+    return res.status(200).json({ message: 'Foto eliminada.', data: profile })
+  } catch (error: any) {
+    return res.status(400).json({ error: error.message })
   }
 }

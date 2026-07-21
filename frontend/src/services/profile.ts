@@ -42,3 +42,26 @@ export async function updateProfile(payload: UpdateProfilePayload): Promise<Prof
   const { data } = await http.patch<ProfileResponse>('/profile', payload)
   return data.data
 }
+
+export async function uploadAvatar(dataUrl: string): Promise<Profile> {
+  if (USE_MOCK_AUTH) return { ...MOCK_PROFILE, avatar_url: dataUrl }
+  const { data } = await http.put<ProfileResponse>('/profile/avatar', { dataUrl })
+  return data.data
+}
+
+export async function deleteAvatar(): Promise<Profile> {
+  if (USE_MOCK_AUTH) return { ...MOCK_PROFILE, avatar_url: null }
+  const { data } = await http.delete<ProfileResponse>('/profile/avatar')
+  return data.data
+}
+
+export interface UpdateCredentialsPayload {
+  currentPassword: string
+  email?: string
+  password?: string
+}
+
+export async function updateCredentials(payload: UpdateCredentialsPayload): Promise<void> {
+  if (USE_MOCK_AUTH) return
+  await http.patch('/auth/credentials', payload)
+}

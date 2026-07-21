@@ -93,7 +93,7 @@ export default function MobileMenu({ closeMenu, navLinks }:
                             <a href={link.href} onClick={closeMenu}>{link.name}</a>
                         </li>
                     ))}
-                    <ButtonSuccess children="Descargar" span={true} className="mx-auto" />
+                    <ButtonSuccess children="Entrar" span={true} className="mx-auto" href="https://carpisenias.vercel.app/" />
                 </ul>
             </nav>
 
