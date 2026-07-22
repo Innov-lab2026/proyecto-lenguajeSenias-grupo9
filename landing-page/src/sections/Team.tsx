@@ -44,7 +44,7 @@ export default function Team() {
                     Coordinador: Gustavo Ovejero
                 </p>
 
-                <ButtonSuccess className="px-10" href="https://carpisenias.vercel.app/">Comienza Ya</ButtonSuccess>
+                <ButtonSuccess className="px-10">Comienza Ya</ButtonSuccess>
             </div>
 
         </SectionLayout>

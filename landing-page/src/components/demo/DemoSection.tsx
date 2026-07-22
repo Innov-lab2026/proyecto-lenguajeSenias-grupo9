@@ -46,7 +46,7 @@ export default function DemoSection() {
 
             </div>
 
-            <ButtonSuccess href="https://carpisenias.vercel.app/">
+            <ButtonSuccess>
                 Comenzar Gratis
             </ButtonSuccess>
 

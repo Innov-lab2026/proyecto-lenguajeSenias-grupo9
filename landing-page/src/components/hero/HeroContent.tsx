@@ -20,7 +20,7 @@ export default function HeroContent() {
             </p>
 
             <div>
-                <ButtonSuccess className="mb-10" href="https://carpisenias.vercel.app/" target="_blank">
+                <ButtonSuccess className="mb-10">
                     Probá la Demo
                 </ButtonSuccess>
             </div>
