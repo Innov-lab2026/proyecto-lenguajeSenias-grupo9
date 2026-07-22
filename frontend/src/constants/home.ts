@@ -8,7 +8,7 @@ export const ISLANDS_PER_MODULE = 5
  * todo en cero. Módulo 1 desbloqueado con la primera isla disponible; el resto
  * de los módulos se desbloquean secuencialmente al completar los anteriores.
  */
-export const MOCK_HOME_STATS: HomeStats = { xp: 0, stars: 0, paws: 0 }
+export const MOCK_HOME_STATS: HomeStats = { xp: 60, stars: 150, paws: 15 }
 
 export const MOCK_HOME_MODULES: HomeModule[] = [
   { id: 'modulo-1', title: 'Módulo 1', state: 'unlocked', completedIslands: 0 },

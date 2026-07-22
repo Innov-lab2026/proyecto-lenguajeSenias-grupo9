@@ -1,13 +1,21 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ScrollView, View } from 'react-native'
 import { Image } from 'expo-image'
 import Svg, { Path } from 'react-native-svg'
+import Animated, { 
+  useAnimatedStyle, 
+  withSpring, 
+  useSharedValue,
+  useDerivedValue,
+  interpolate
+} from 'react-native-reanimated'
 import { Island } from './Island'
 import { getIslandRatio } from './islands'
 import { getIslandState } from '@/src/utils/home'
 import { ISLANDS_PER_MODULE } from '@/src/constants/home'
 import { useResponsive } from '@/src/hooks/common/useResponsive'
 import type { HomeModule } from '@/src/types/home'
+import { CarpiAvatar } from '../../common/CarpiAvatar'
 
 interface IslandPathProps {
   module: HomeModule
@@ -61,6 +69,52 @@ export function IslandPath({ module, onIslandPress }: IslandPathProps) {
   const islandNumbers = Array.from({ length: ISLANDS_PER_MODULE }, (_, i) => i + 1)
   const centers = width ? islandNumbers.map((n) => getIslandCenter(n, width)) : []
 
+  // La isla actual donde debe estar el carpincho (1 a 5)
+  const targetIsland = Math.min(module.completedIslands + 1, ISLANDS_PER_MODULE)
+  
+  // Progreso animado entre islas (0 a ISLANDS_PER_MODULE - 1)
+  const animProgress = useSharedValue(Math.max(0, targetIsland - 1))
+
+  useEffect(() => {
+    if (width) {
+      animProgress.value = withSpring(targetIsland - 1, { damping: 15, stiffness: 60 })
+    }
+  }, [targetIsland, width])
+
+  const animatedCarpiStyle = useAnimatedStyle(() => {
+    // Si no hay centros aún, mantenemos invisible
+    if (!centers || centers.length === 0) {
+      return { opacity: 0 }
+    }
+
+    const tTotal = animProgress.value
+    
+    // Clampeamos el valor para evitar desbordes de índice
+    const index = Math.min(Math.max(0, Math.floor(tTotal)), centers.length - 2)
+    const t = tTotal - Math.floor(tTotal)
+
+    const p0 = centers[index]
+    const p3 = centers[index + 1]
+
+    if (!p0 || !p3) return { opacity: 0 }
+
+    const midY = (p0.y + p3.y) / 2
+    const p1 = { x: p0.x, y: midY }
+    const p2 = { x: p3.x, y: midY }
+
+    const mt = 1 - t
+    const x = mt * mt * mt * p0.x + 3 * mt * mt * t * p1.x + 3 * mt * t * t * p2.x + t * t * t * p3.x
+    const y = mt * mt * mt * p0.y + 3 * mt * mt * t * p1.y + 3 * mt * t * t * p2.y + t * t * t * p3.y
+
+    return {
+      opacity: 1,
+      transform: [
+        { translateX: x - 28 },
+        { translateY: y - 45 }
+      ]
+    }
+  })
+
   return (
     <View
       className="flex-1 bg-panel"
@@ -94,6 +148,20 @@ export function IslandPath({ module, onIslandPress }: IslandPathProps) {
                 fill="none"
               />
             </Svg>
+
+            {width && (
+              <Animated.View
+                style={[
+                  {
+                    position: 'absolute',
+                    zIndex: 20,
+                  },
+                  animatedCarpiStyle
+                ]}
+              >
+                <CarpiAvatar size={56} />
+              </Animated.View>
+            )}
 
             {islandNumbers.map((n) => {
               const center = centers[n - 1]

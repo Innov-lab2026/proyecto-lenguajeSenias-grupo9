@@ -1,13 +1,23 @@
-import { Text } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { View, Text } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { FavoritesList } from '@/src/components/features/favorites/FavoritesList'
 
 export default function FavoritesScreen() {
+  const insets = useSafeAreaInsets()
+
   return (
-    <SafeAreaView className="flex-1 bg-background justify-center items-center px-5" edges={['top']}>
-      <Text className="font-nunito text-2xl font-bold text-ink">Mis Favoritos</Text>
-      <Text className="font-nunito text-sm text-muted mt-2 text-center">
-        Aquí podrás ver tus señas y lecciones marcadas como favoritas.
-      </Text>
-    </SafeAreaView>
+    <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
+      <View className="px-5 pt-8 pb-6 max-w-4xl mx-auto w-full">
+        <Text className="font-nunito text-4xl font-bold text-ink">Favoritos</Text>
+        <Text className="font-nunito text-base text-muted mt-2">
+          Tus lecciones y señas guardadas
+        </Text>
+      </View>
+      
+      <View className="flex-1 max-w-4xl mx-auto w-full">
+        <FavoritesList />
+      </View>
+    </View>
   )
 }
+

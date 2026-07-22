@@ -27,9 +27,9 @@ export default function AlphabetScreen() {
   const hasMeasuredWidth = contentWidth !== null
   const availableWidth = contentWidth ?? width
   const numColumns = getNumColumns(availableWidth)
-  // Padding total horizontal: 16px a cada lado + gaps entre columnas
-  const HORIZONTAL_PADDING = 32
-  const GAP = 10
+  // Padding total horizontal: 20px a cada lado + gaps entre columnas
+  const HORIZONTAL_PADDING = 40
+  const GAP = 12
   const cardSize = Math.floor((availableWidth - HORIZONTAL_PADDING - GAP * (numColumns - 1)) / numColumns)
 
   const handleLetterPress = (letter: string) => {
@@ -49,11 +49,11 @@ export default function AlphabetScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
-      <View className="flex-1" onLayout={(event) => setContentWidth(event.nativeEvent.layout.width)}>
+      <View className="flex-1 max-w-4xl mx-auto w-full" onLayout={(event) => setContentWidth(event.nativeEvent.layout.width)}>
         {/* Encabezado */}
-        <View className="px-4 pt-5 pb-3">
-          <Text className="font-nunito text-2xl font-bold text-ink">Abecedario LSA</Text>
-          <Text className="font-nunito text-sm text-muted mt-0.5">
+        <View className="px-5 pt-8 pb-6">
+          <Text className="font-nunito text-4xl font-bold text-ink">Abecedario</Text>
+          <Text className="font-nunito text-base text-muted mt-2">
             Seleccioná una letra para ver su seña
           </Text>
         </View>
@@ -66,7 +66,7 @@ export default function AlphabetScreen() {
             numColumns={numColumns}
             key={numColumns} // fuerza re-render al cambiar columnas
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
+            contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 40 }}
             columnWrapperStyle={{ gap: GAP, marginBottom: GAP }}
             style={{ flex: 1 }}
             renderItem={({ item: letter }) => {
@@ -81,12 +81,12 @@ export default function AlphabetScreen() {
                   accessibilityState={{ selected: isSelected }}
                   style={{ width: cardSize, height: cardSize }}
                   className={cn(
-                    'items-center justify-center rounded-2xl border-2',
+                    'items-center justify-center rounded-[24px] border-b-4 active:mt-1 active:border-b-0',
                     isSelected
-                      ? 'bg-accent/20 border-secondary'
+                      ? 'bg-accent border-secondary'
                       : isVisited
-                        ? 'bg-secondary/10 border-secondary/60'
-                        : 'bg-muted/15 border-transparent'
+                        ? 'bg-surface border-secondary/30'
+                        : 'bg-surface border-black/5'
                   )}
                 >
                   <Text
@@ -95,8 +95,8 @@ export default function AlphabetScreen() {
                       isSelected
                         ? 'text-secondary'
                         : isVisited
-                          ? 'text-secondary'
-                          : 'text-ink/60',
+                          ? 'text-secondary/70'
+                          : 'text-ink/40',
                     )}
                     style={{ fontSize: cardSize * 0.38 }}
                   >
