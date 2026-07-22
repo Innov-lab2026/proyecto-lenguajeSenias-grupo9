@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useRouter } from 'expo-router'
 import * as WebBrowser from 'expo-web-browser'
 import { makeRedirectUri } from 'expo-auth-session'
 import type { User as SupabaseAuthUser } from '@supabase/supabase-js'
@@ -43,6 +44,7 @@ export function useGoogleAuth() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const setSession = useSessionStore((s) => s.setSession)
+  const router = useRouter()
 
   const signInWithGoogle = async () => {
     if (USE_MOCK_AUTH) {
@@ -93,6 +95,7 @@ export function useGoogleAuth() {
       await saveToken(token)
       await saveUser(user)
       setSession(user, token)
+      router.replace('/home')
     } catch (err) {
       // Detalle técnico a consola (para desarrollo); al usuario, un mensaje genérico
       // accionable — los errores de Supabase/Google vienen en inglés y no le sirven.

@@ -5,16 +5,15 @@ import { useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { Controller, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { registerSchema, type RegisterValues } from '@/src/schemas/auth'
+import { registerFormSchema, type RegisterFormValues } from '@/src/schemas/auth'
 import { GENDER_OPTIONS } from '@/src/constants/gender'
-import { COUNTRY_OPTIONS } from '@/src/constants/countries'
 import { TextField } from '@/src/components/common/TextField'
 import { Select } from '@/src/components/common/Select'
 import { Button } from '@/src/components/common/Button'
 import { BirthDateField } from './BirthDateField'
 
 interface RegisterFormProps {
-  onSubmit: (values: RegisterValues) => void
+  onSubmit: (values: RegisterFormValues) => void
   submitting?: boolean
   /** Mensaje de error del backend a mostrar sobre el CTA. */
   serverError?: string | null
@@ -35,14 +34,13 @@ export function RegisterForm({ onSubmit, submitting = false, serverError }: Regi
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<RegisterValues>({
-    resolver: zodResolver(registerSchema),
+  } = useForm<RegisterFormValues>({
+    resolver: zodResolver(registerFormSchema),
     defaultValues: {
       firstName: '',
       lastName: '',
       birthDate: '',
       gender: undefined,
-      country: undefined,
       email: '',
       password: '',
       confirmPassword: '',
@@ -120,23 +118,6 @@ export function RegisterForm({ onSubmit, submitting = false, serverError }: Regi
             onBlur={onBlur}
             error={errors.birthDate?.message}
             onSubmitEditing={() => emailRef.current?.focus()}
-          />
-        )}
-      />
-
-      <Controller
-        control={control}
-        name="country"
-        render={({ field: { onChange, value } }) => (
-          <Select
-            label="País"
-            placeholder="País"
-            options={COUNTRY_OPTIONS}
-            value={value}
-            onChange={onChange}
-            error={errors.country?.message}
-            searchable
-            searchPlaceholder="Buscar país..."
           />
         )}
       />

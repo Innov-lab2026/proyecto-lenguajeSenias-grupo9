@@ -1,5 +1,6 @@
 import { Router } from 'express'
-import { login, register } from '../controllers/authController'
+import { login, register, updateCredentials } from '../controllers/authController'
+import { authMiddleware } from '../middleware/auth'
 
 const router = Router()
 
@@ -89,5 +90,6 @@ router.post('/login', login)
  *                  $ref: '#/components/schemas/RegisterResponse'
  */
 router.post('/register', register)
+router.patch('/credentials', authMiddleware, updateCredentials)
 
 export default router

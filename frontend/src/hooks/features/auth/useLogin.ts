@@ -1,4 +1,5 @@
 import { useMutation } from '@tanstack/react-query'
+import { useRouter } from 'expo-router'
 import { login } from '@/src/services/auth'
 import { saveToken, saveUser } from '@/src/lib/storage'
 import { useSessionStore } from '@/src/store/sessionStore'
@@ -21,6 +22,7 @@ interface LoginArgs {
  */
 export function useLogin() {
   const setSession = useSessionStore((s) => s.setSession)
+  const router = useRouter()
 
   return useMutation({
     mutationFn: ({ payload }: LoginArgs) => login(payload),
@@ -32,6 +34,7 @@ export function useLogin() {
         await saveUser(normalized)
       }
       setSession(normalized, token)
+      router.replace('/home')
     },
   })
 }

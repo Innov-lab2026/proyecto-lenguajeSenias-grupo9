@@ -11,7 +11,7 @@ export default function HeroContent() {
         >
 
             <h1 className="text-4xl  lg:text-6xl font-bold leading-[1.1]">
-                Aprendé lengua de señas argentina jugando.
+                Aprendé Lengua de Señas Argentina jugando.
             </h1>
 
             <p className="text-xl lg:text-3xl leading-[1.3]">

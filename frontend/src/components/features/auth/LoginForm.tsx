@@ -113,7 +113,7 @@ export function LoginForm({ onSubmit, submitting = false, serverError }: LoginFo
 
       <View className="flex-row items-center justify-center gap-1 pt-1">
         <Text className="font-nunito text-sm font-normal text-ink/80">¿No tenés cuenta?</Text>
-        <Pressable onPress={() => router.push('/register')} accessibilityRole="link">
+        <Pressable onPress={() => router.push('/pre-register')} accessibilityRole="link">
           <Text className="font-nunito text-sm font-bold text-secondary">Regístrate</Text>
         </Pressable>
       </View>

@@ -57,7 +57,7 @@ export function AuthShell({
               ) : null}
               {titleLinksToHome ? (
                 <Pressable
-                  onPress={() => router.navigate('/')}
+                  onPress={() => router.navigate('/pre-register')}
                   accessibilityRole="link"
                   accessibilityLabel="Volver al inicio"
                   hitSlop={8}
