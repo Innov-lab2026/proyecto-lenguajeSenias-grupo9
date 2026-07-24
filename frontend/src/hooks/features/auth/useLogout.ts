@@ -1,20 +1,13 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { removeToken, removeUser } from '@/src/lib/storage'
-import { useSessionStore } from '@/src/store/sessionStore'
+import { signOut } from '@/src/services/session'
 
 /**
- * Cierre de sesión (100% client-side por ahora: no hay endpoint /logout).
- * Limpia token + user persistidos, estado de sesión y cache de queries.
- * El guard de rutas redirige a login al pasar a "unauthenticated".
+ * Cierre de sesión. Delega en `signOut`, que limpia storage (token, user,
+ * refresh), estado en memoria y cache de queries — el mismo camino que usa el
+ * cierre forzado cuando el refresh falla. El guard de rutas redirige a login al
+ * pasar a "unauthenticated".
  */
 export function useLogout() {
-  const clearSession = useSessionStore((s) => s.clearSession)
   const queryClient = useQueryClient()
-
-  return async () => {
-    await removeToken()
-    await removeUser()
-    clearSession()
-    queryClient.clear()
-  }
+  return () => signOut(queryClient)
 }

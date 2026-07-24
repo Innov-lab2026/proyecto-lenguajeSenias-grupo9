@@ -43,7 +43,7 @@ export default function ProfileScreen() {
   const updateProfile = useUpdateProfile()
   const user = useSessionStore((state) => state.user)
   const token = useSessionStore((state) => state.token)
-  const setSession = useSessionStore((state) => state.setSession)
+  const updateUser = useSessionStore((state) => state.updateUser)
   
   const insets = useSafeAreaInsets()
 
@@ -77,7 +77,7 @@ export default function ProfileScreen() {
     if (!firstName.trim()) return Alert.alert("Error", "El nombre es obligatorio")
     
     try {
-      const birthDateIso = birthDate ? birthDate.split("/").reverse().join("-") : null
+      const birthDateIso = birthDate ? birthDate.split("/").reverse().join("-") : undefined
       await updateProfile.mutateAsync({
         full_name: fullName,
         gender,
@@ -101,7 +101,7 @@ export default function ProfileScreen() {
       if (user && token && email !== user.email) {
         const updatedUser = { ...user, email }
         await saveUser(updatedUser)
-        setSession(updatedUser, token)
+        updateUser(updatedUser)
       }
       setCurrentPassword("")
       setNewPassword("")
@@ -198,18 +198,18 @@ export default function ProfileScreen() {
                   <View className="gap-4">
                     <TextField label="Nombre" value={firstName} onChangeText={setFirstName} />
                     <TextField label="Apellido" value={lastName} onChangeText={setLastName} />
-                    <Select 
-                      label="Género" 
-                      options={GENDER_OPTIONS} 
-                      value={gender} 
-                      onValueChange={setGender} 
+                    <Select
+                      label="Género"
+                      options={GENDER_OPTIONS}
+                      value={gender}
+                      onChange={setGender}
                     />
-                    <BirthDateField value={birthDate} onChangeText={setBirthDate} />
+                    <BirthDateField value={birthDate} onChange={setBirthDate} />
                     <View className="flex-row gap-3 mt-2">
-                      <Button 
-                        label="Cancelar" 
-                        variant="ghost" 
-                        onPress={() => setEditingPersonal(false)} 
+                      <Button
+                        label="Cancelar"
+                        variant="white"
+                        onPress={() => setEditingPersonal(false)}
                         className="flex-1"
                       />
                       <Button 
@@ -225,10 +225,10 @@ export default function ProfileScreen() {
                     <Row label="NOMBRE Y APELLIDO" value={fullName} />
                     <Row label="GÉNERO" value={gender || "No especificado"} />
                     <Row label="FECHA DE NACIMIENTO" value={birthDate || "No especificada"} />
-                    <Button 
-                      label="Editar información" 
-                      variant="ghost" 
-                      onPress={() => setEditingPersonal(true)} 
+                    <Button
+                      label="Editar información"
+                      variant="white"
+                      onPress={() => setEditingPersonal(true)}
                       className="mt-4"
                     />
                   </View>
@@ -243,10 +243,10 @@ export default function ProfileScreen() {
                     <TextField label="Nueva contraseña" value={newPassword} onChangeText={setNewPassword} secureTextEntry />
                     <TextField label="Confirmar contraseña" value={confirmPassword} onChangeText={setConfirmPassword} secureTextEntry />
                     <View className="flex-row gap-3 mt-2">
-                      <Button 
-                        label="Cancelar" 
-                        variant="ghost" 
-                        onPress={() => setEditingSecurity(false)} 
+                      <Button
+                        label="Cancelar"
+                        variant="white"
+                        onPress={() => setEditingSecurity(false)}
                         className="flex-1"
                       />
                       <Button 
@@ -261,10 +261,10 @@ export default function ProfileScreen() {
                   <View>
                     <Row label="CORREO ELECTRÓNICO" value={email} />
                     <Row label="CONTRASEÑA" value="••••••••" />
-                    <Button 
-                      label="Editar seguridad" 
-                      variant="ghost" 
-                      onPress={() => setEditingSecurity(true)} 
+                    <Button
+                      label="Editar seguridad"
+                      variant="white"
+                      onPress={() => setEditingSecurity(true)}
                       className="mt-4"
                     />
                   </View>
@@ -313,9 +313,9 @@ export default function ProfileScreen() {
                 </Pressable>
               </Section>
               
-              <Button 
-                label="Cerrar sesión" 
-                variant="outline" 
+              <Button
+                label="Cerrar sesión"
+                variant="white"
                 onPress={confirmLogout}
                 className="mt-2"
               />
