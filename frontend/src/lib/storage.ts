@@ -12,6 +12,7 @@ import type { User } from '@/src/types/user'
  * Si en el futuro hay cookie httpOnly (web) o /me, esto se simplifica.
  */
 const TOKEN_KEY = 'accessToken'
+const REFRESH_KEY = 'refreshToken'
 const USER_KEY = 'sessionUser'
 
 /**
@@ -45,6 +46,10 @@ export async function deleteItem(key: string): Promise<void> {
 export const saveToken = (token: string) => setItem(TOKEN_KEY, token)
 export const getToken = () => getItem(TOKEN_KEY)
 export const removeToken = () => deleteItem(TOKEN_KEY)
+
+export const saveRefreshToken = (token: string) => setItem(REFRESH_KEY, token)
+export const getRefreshToken = () => getItem(REFRESH_KEY)
+export const removeRefreshToken = () => deleteItem(REFRESH_KEY)
 
 export const saveUser = (user: User) => setItem(USER_KEY, JSON.stringify(user))
 

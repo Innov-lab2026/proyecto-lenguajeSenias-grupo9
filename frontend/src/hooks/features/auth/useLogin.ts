@@ -1,8 +1,9 @@
 import { useMutation } from '@tanstack/react-query'
 import { useRouter } from 'expo-router'
 import { login } from '@/src/services/auth'
-import { saveToken, saveUser } from '@/src/lib/storage'
+import { saveRefreshToken, saveToken, saveUser } from '@/src/lib/storage'
 import { useSessionStore } from '@/src/store/sessionStore'
+import { getTokenExpiry } from '@/src/utils/jwt'
 import { toUser } from '@/src/types/user'
 import type { LoginRequest } from '@/src/types/auth'
 
@@ -29,11 +30,15 @@ export function useLogin() {
     onSuccess: async ({ user, session }, { rememberMe }) => {
       const normalized = toUser(user)
       const token = session.access_token
+      const refreshToken = session.refresh_token
+      // `exp` del JWT como fuente autoritativa; `expires_in` como respaldo.
+      const expiresAt = getTokenExpiry(token) ?? Math.floor(Date.now() / 1000) + session.expires_in
       if (rememberMe) {
         await saveToken(token)
+        await saveRefreshToken(refreshToken)
         await saveUser(normalized)
       }
-      setSession(normalized, token)
+      setSession(normalized, token, { refreshToken, expiresAt })
       router.replace('/home')
     },
   })
