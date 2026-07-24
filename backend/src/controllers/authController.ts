@@ -21,6 +21,7 @@ export const login = async (req: Request, res: Response) => {
       },
       session: {
         access_token: data.session?.access_token,
+        refresh_token: data.session?.refresh_token,
         expires_in: data.session?.expires_in
       }
     })

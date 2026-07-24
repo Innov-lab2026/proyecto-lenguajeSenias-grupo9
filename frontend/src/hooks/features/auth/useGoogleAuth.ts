@@ -4,7 +4,8 @@ import * as WebBrowser from 'expo-web-browser'
 import { makeRedirectUri } from 'expo-auth-session'
 import type { User as SupabaseAuthUser } from '@supabase/supabase-js'
 import { supabase } from '@/src/lib/supabase'
-import { saveToken, saveUser } from '@/src/lib/storage'
+import { saveRefreshToken, saveToken, saveUser } from '@/src/lib/storage'
+import { getTokenExpiry } from '@/src/utils/jwt'
 import { useSessionStore } from '@/src/store/sessionStore'
 import { USE_MOCK_AUTH } from '@/src/constants/env'
 import type { User } from '@/src/types/user'
@@ -91,10 +92,14 @@ export function useGoogleAuth() {
 
       const user = toGoogleUser(sessionData.session.user)
       const token = sessionData.session.access_token
+      const refreshToken = sessionData.session.refresh_token
+      // Supabase ya da el epoch de expiración; el `exp` del JWT es el respaldo.
+      const expiresAt = sessionData.session.expires_at ?? getTokenExpiry(token)
 
       await saveToken(token)
+      await saveRefreshToken(refreshToken)
       await saveUser(user)
-      setSession(user, token)
+      setSession(user, token, { refreshToken, expiresAt })
       router.replace('/home')
     } catch (err) {
       // Detalle técnico a consola (para desarrollo); al usuario, un mensaje genérico

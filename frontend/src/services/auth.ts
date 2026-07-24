@@ -38,6 +38,7 @@ export async function login(payload: LoginRequest): Promise<LoginResponse> {
       },
       session: {
         access_token: 'mock-access-token',
+        refresh_token: 'mock-refresh-token',
         expires_in: 3600,
       },
     }

@@ -30,12 +30,13 @@ export interface RegisterRequest {
   country: string
 }
 
-/** POST /api/auth/login → user plano + session con el access token. */
+/** POST /api/auth/login → user plano + session con access + refresh token. */
 export interface LoginResponse {
   message: string
   user: AuthUser
   session: {
     access_token: string
+    refresh_token: string
     expires_in: number
   }
 }
