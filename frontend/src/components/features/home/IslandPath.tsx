@@ -72,14 +72,29 @@ export function IslandPath({ module, onIslandPress }: IslandPathProps) {
   // La isla actual donde debe estar el carpincho (1 a 5)
   const targetIsland = Math.min(module.completedIslands + 1, ISLANDS_PER_MODULE)
   
+  // Posición inicial del ScrollView basada en la isla destino
+  const initialScrollY = centers.length > 0 
+    ? Math.max(0, centers[ISLANDS_PER_MODULE - targetIsland].y - 300) 
+    : CONTENT_HEIGHT
+
   // Progreso animado entre islas (0 a ISLANDS_PER_MODULE - 1)
   const animProgress = useSharedValue(Math.max(0, targetIsland - 1))
 
   useEffect(() => {
-    if (width) {
+    if (width && centers.length > 0) {
       animProgress.value = withSpring(targetIsland - 1, { damping: 15, stiffness: 60 })
+      
+      // Hacer scroll hasta la posición del avatar
+      const targetCenter = centers[targetIsland - 1]
+      if (targetCenter) {
+        // Centrar aproximadamente la isla en la pantalla
+        scrollRef.current?.scrollTo({ 
+          y: Math.max(0, targetCenter.y - 300), 
+          animated: true 
+        })
+      }
     }
-  }, [targetIsland, width])
+  }, [targetIsland, width, centers])
 
   const animatedCarpiStyle = useAnimatedStyle(() => {
     // Si no hay centros aún, mantenemos invisible
@@ -91,7 +106,7 @@ export function IslandPath({ module, onIslandPress }: IslandPathProps) {
     
     // Clampeamos el valor para evitar desbordes de índice
     const index = Math.min(Math.max(0, Math.floor(tTotal)), centers.length - 2)
-    const t = tTotal - Math.floor(tTotal)
+    const t = tTotal - index
 
     const p0 = centers[index]
     const p3 = centers[index + 1]
@@ -124,13 +139,8 @@ export function IslandPath({ module, onIslandPress }: IslandPathProps) {
         <ScrollView
           ref={scrollRef}
           showsVerticalScrollIndicator={false}
-          // Arranca ya scrolleado abajo (isla 1) desde el primer frame: un
-          // offset inicial mayor al máximo posible se clampea solo, sin
-          // pegar el salto visible que había con scrollToEnd tras montar.
-          contentOffset={{ x: 0, y: CONTENT_HEIGHT }}
-          // Red de seguridad no animada por si el contenido termina de
-          // medirse en un tamaño distinto al esperado.
-          onContentSizeChange={() => scrollRef.current?.scrollToEnd({ animated: false })}
+          // Posiciona el scroll inicialmente cerca do avatar
+          contentOffset={{ x: 0, y: initialScrollY }}
         >
           <View style={{ width, height: CONTENT_HEIGHT }}>
             {/* Río detrás de las islas. Color = token accent (#ACDCFF); las props

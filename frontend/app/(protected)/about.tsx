@@ -27,7 +27,7 @@ export default function AboutScreen() {
 
           <View className="mt-6 gap-5">
             <Text className="font-nunito text-base leading-7 text-ink/80">
-              Carpiseñas es una App pensada para acercar el Lenguaje de Señas Argentina a personas oyentes de manera accesible, divertida e inclusiva.
+              Carpiseñas es una App pensada para acercar el Lenguaje de Señas Argentina a todos de manera accesible, divertida e inclusiva.
             </Text>
             <Text className="font-nunito text-base leading-7 text-ink/80">
               Creemos en un mundo donde la comunicacion no tenga barreras y el aprendizaje sea una experiencia significativa para todos.
