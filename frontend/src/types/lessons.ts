@@ -18,6 +18,15 @@ export interface LessonStep {
   tip?: string
   contentTitle?: string
 }
+
+/** Estado del ejercicio "matching" (relacionar video con palabra). */
+export interface MatchingState {
+  selectedVideo: string | null
+  selectedWord: string | null
+  completedPairs: Set<string>
+  attempts: Record<string, 'correct' | 'incorrect' | null>
+  shuffledWords: string[]
+}
 /* ... existing code ... */
 export const MOCK_LESSON_5: Lesson = {
   id: 'lesson-5',
@@ -80,6 +89,10 @@ export const MOCK_LESSON_1: Lesson = {
       type: 'quiz',
       question: '¿Cuál de estos videos representa la palabra "Hola"?',
       options: ['Hola', 'Adiós'],
+      videoUrls: {
+        'Hola': 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/01_pfseqz.mp4',
+        'Adiós': 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/02_ztp8b3.mp4',
+      },
       correctAnswer: 'Hola',
       tip: '💡 ¿Sabías que...?\n\nEl saludo es la primera forma de iniciar una conversación y demostrar respeto hacia la otra persona.',
     }
@@ -131,6 +144,12 @@ export const MOCK_LESSON_3: Lesson = {
       type: 'quiz',
       question: '¿Cuál de estos videos representa la palabra "Nombre"?',
       options: ['Mío', 'Nombre', 'Hola', 'Tuyo'],
+      videoUrls: {
+        'Mío': 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/01_pfseqz.mp4',
+        'Nombre': 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/03_jqt9r7.mp4',
+        'Hola': 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/02_ztp8b3.mp4',
+        'Tuyo': 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/01_pfseqz.mp4',
+      },
       correctAnswer: 'Nombre',
       tip: '💡 Tip de Nombre\n\nEn la comunidad sorda, además de deletrear tu nombre, solemos tener una "seña personal" que nos identifica de forma única.',
     }
