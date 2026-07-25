@@ -1,15 +1,13 @@
 import { useRouter, useLocalSearchParams } from 'expo-router'
-import { View, Text, Pressable } from 'react-native'
+import { View } from 'react-native'
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { Ionicons } from '@expo/vector-icons'
 import { MOCK_LESSON_1, MOCK_LESSON_2, MOCK_LESSON_3, MOCK_LESSON_4, MOCK_LESSON_5, type MatchingState } from '@/src/types/lessons'
-import { Image } from 'expo-image'
-import { Button } from '@/src/components/common/Button'
 import { ContentStep } from '@/src/components/features/lessons/steps/ContentStep'
 import { QuizStep } from '@/src/components/features/lessons/steps/QuizStep'
 import { MatchingStep } from '@/src/components/features/lessons/steps/MatchingStep'
 import { DialogueStep } from '@/src/components/features/lessons/steps/DialogueStep'
+import { LessonSummary } from '@/src/components/features/lessons/LessonSummary'
 import { LessonHeader } from '@/src/components/features/lessons/LessonHeader'
 import { LessonFooter } from '@/src/components/features/lessons/LessonFooter'
 import { IntroModal } from '@/src/components/features/lessons/IntroModal'
@@ -353,66 +351,15 @@ export default function LessonScreen() {
 
   if (showSummary) {
     return (
-      <View
-        className="flex-1 bg-[#EAF8FF] items-center justify-start px-4 overflow-hidden"
-        style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
-      >
-        <Pressable 
-          onPress={() => router.back()} 
-          className="absolute top-2 right-2 z-10 p-2"
-        >
-          <Ionicons name="close" size={32} color="#1F2937" />
-        </Pressable>
-
-        <View className="flex-1 w-full items-center justify-center">
-          <Image 
-          source={require('@/assets/images/lessons/carpi_victory.png')} 
-          className="w-full h-[50%] max-h-[250px] mb-4"
-          contentFit="contain"
-          />
-        
-        <Text className="font-nunito text-4xl font-bold text-ink mb-0">¡Estuviste increíble!</Text>
-        <Text className="font-nunito text-lg text-muted mb-2">Completaste tu primera lección</Text>
-        </View>
-        
-        <View className="w-full max-w-md flex-row justify-between gap-2 mt-auto mb-4">
-           <View className="flex-1 min-h-[116px] bg-surface rounded-2xl border-2 border-[#4A90E2] items-center justify-center px-1">
-             <View className="w-8 h-8 rounded-full bg-secondary/20 items-center justify-center mb-1">
-               <Text className="font-nunito text-xs font-bold text-secondary">XP</Text>
-             </View>
-             <Text className="font-nunito text-xs font-bold text-ink mb-1">Experiencia</Text>
-             <Text className="font-nunito text-2xl font-bold text-ink">{earnedStats.xp}</Text>
-           </View>
-           <View className="flex-1 min-h-[116px] bg-surface rounded-2xl border-2 border-[#4A90E2] items-center justify-center px-1">
-             <Ionicons name="star" size={30} color="#F7BB18" />
-             <Text className="font-nunito text-xs font-bold text-ink mb-1">Puntos</Text>
-             <Text className="font-nunito text-2xl font-bold text-ink">+{earnedStats.stars}</Text>
-           </View>
-           <View className="flex-1 min-h-[116px] bg-surface rounded-2xl border-2 border-[#4A90E2] items-center justify-center px-1">
-             <Ionicons name="paw" size={30} color="#A5652E" />
-             <Text className="font-nunito text-xs font-bold text-ink mb-1">Señas</Text>
-             <Text className="font-nunito text-2xl font-bold text-ink">{lesson.steps.filter(step => step.type === 'content').length}</Text>
-           </View>
-        </View>
-
-
-        <View className="h-[22%] min-h-[150px] self-stretch -mx-4 bg-[#67AEF5] items-center justify-end pb-5 relative">
-          <View className="items-center z-10 mb-3">
-            <Image
-              source={require('@/assets/images/lessons/candado_abierto.svg')}
-              className="w-16 h-16"
-              contentFit="contain"
-            />
-            <Text className="font-nunito text-base font-bold text-ink text-center leading-4">Nivel {Number(id) + 1}{'\n'}desbloqueado</Text>
-          </View>
-          <Button 
-            label={isSaving ? "Guardando..." : "Continuar"} 
-            onPress={() => !isSaving && router.back()} 
-            className="w-40 z-10"
-            disabled={isSaving}
-          />
-        </View>
-      </View>
+      <LessonSummary
+        earnedStats={earnedStats}
+        signCount={lesson.steps.filter(step => step.type === 'content').length}
+        nextLevel={Number(id) + 1}
+        isSaving={isSaving}
+        onClose={() => router.back()}
+        onContinue={() => !isSaving && router.back()}
+        insets={insets}
+      />
     )
   }
 
