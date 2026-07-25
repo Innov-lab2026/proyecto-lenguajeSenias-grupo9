@@ -1,6 +1,6 @@
 import { useRouter, useLocalSearchParams } from 'expo-router'
-import { View, Text, Pressable, Modal, ScrollView, Alert, ActivityIndicator } from 'react-native'
-import { useState, useMemo, useEffect, useCallback } from 'react'
+import { View, Text, Pressable, Modal } from 'react-native'
+import { Fragment, useState, useMemo, useEffect, useCallback } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
 import { MOCK_LESSON_1, MOCK_LESSON_2, MOCK_LESSON_3, MOCK_LESSON_4, MOCK_LESSON_5 } from '@/src/types/lessons'
@@ -307,57 +307,78 @@ export default function LessonScreen() {
 
   if (showSummary) {
     return (
-      <View className="flex-1 bg-background items-center justify-center px-6" style={{ paddingTop: insets.top }}>
+      <View
+        className="flex-1 bg-[#EAF8FF] items-center justify-start px-4 overflow-hidden"
+        style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
+      >
         <Pressable 
           onPress={() => router.back()} 
-          className="absolute top-12 right-6 z-10 p-2"
+          className="absolute top-2 right-2 z-10 p-2"
         >
           <Ionicons name="close" size={32} color="#1F2937" />
         </Pressable>
 
-        <Image 
-          source={require('@/assets/images/home/carpi-2.png')} 
-          className="w-48 h-48 mb-6"
+        <View className="flex-1 w-full items-center justify-center">
+          <Image 
+          source={require('@/assets/images/lessons/carpi_victory.png')} 
+          className="w-full h-[50%] max-h-[250px] mb-4"
           contentFit="contain"
-        />
+          />
         
-        <Text className="font-nunito text-4xl font-bold text-ink mb-2">¡Estuviste increíble!</Text>
-        <Text className="font-nunito text-lg text-muted mb-8">Completaste tu primera lección</Text>
+        <Text className="font-nunito text-4xl font-bold text-ink mb-0">¡Estuviste increíble!</Text>
+        <Text className="font-nunito text-lg text-muted mb-2">Completaste tu primera lección</Text>
+        </View>
         
-        <View className="w-full flex-row justify-between gap-3 mb-10">
-           <View className="flex-1 bg-surface rounded-2xl p-4 items-center shadow-sm">
-             <Text className="font-nunito text-xs font-bold text-secondary mb-1">XP</Text>
+        <View className="w-full max-w-md flex-row justify-between gap-2 mt-auto mb-4">
+           <View className="flex-1 min-h-[116px] bg-surface rounded-2xl border-2 border-[#4A90E2] items-center justify-center px-1">
+             <View className="w-8 h-8 rounded-full bg-secondary/20 items-center justify-center mb-1">
+               <Text className="font-nunito text-xs font-bold text-secondary">XP</Text>
+             </View>
+             <Text className="font-nunito text-xs font-bold text-ink mb-1">Experiencia</Text>
              <Text className="font-nunito text-2xl font-bold text-ink">{earnedStats.xp}</Text>
            </View>
-           <View className="flex-1 bg-surface rounded-2xl p-4 items-center shadow-sm">
-             <Text className="font-nunito text-xs font-bold text-primary mb-1">Puntos</Text>
+           <View className="flex-1 min-h-[116px] bg-surface rounded-2xl border-2 border-[#4A90E2] items-center justify-center px-1">
+             <Ionicons name="star" size={30} color="#F7BB18" />
+             <Text className="font-nunito text-xs font-bold text-ink mb-1">Puntos</Text>
              <Text className="font-nunito text-2xl font-bold text-ink">+{earnedStats.stars}</Text>
            </View>
-           <View className="flex-1 bg-surface rounded-2xl p-4 items-center shadow-sm">
-             <Text className="font-nunito text-xs font-bold text-accent mb-1">Señas</Text>
-             <Text className="font-nunito text-2xl font-bold text-ink">{earnedStats.accuracy}%</Text>
+           <View className="flex-1 min-h-[116px] bg-surface rounded-2xl border-2 border-[#4A90E2] items-center justify-center px-1">
+             <Ionicons name="paw" size={30} color="#A5652E" />
+             <Text className="font-nunito text-xs font-bold text-ink mb-1">Señas</Text>
+             <Text className="font-nunito text-2xl font-bold text-ink">{lesson.steps.filter(step => step.type === 'content').length}</Text>
            </View>
         </View>
 
 
-        <Text className="font-nunito text-lg font-bold text-ink mb-6">nivel 2 desbloqueado</Text>
-        
-        <Button 
-          label={isSaving ? "Guardando..." : "Continuar"} 
-          onPress={() => !isSaving && router.back()} 
-          className="w-full"
-          disabled={isSaving}
-        />
+        <View className="h-[22%] min-h-[150px] self-stretch -mx-4 bg-[#67AEF5] items-center justify-end pb-5 relative">
+          <View className="items-center z-10 mb-3">
+            <Image
+              source={require('@/assets/images/lessons/candado_abierto.svg')}
+              className="w-16 h-16"
+              contentFit="contain"
+            />
+            <Text className="font-nunito text-base font-bold text-ink text-center leading-4">Nivel {Number(id) + 1}{'\n'}desbloqueado</Text>
+          </View>
+          <Button 
+            label={isSaving ? "Guardando..." : "Continuar"} 
+            onPress={() => !isSaving && router.back()} 
+            className="w-40 z-10"
+            disabled={isSaving}
+          />
+        </View>
       </View>
     )
   }
 
   return (
-    <View className="flex-1 bg-background" style={{ paddingTop: insets.top }}>
+    <View
+      className="flex-1 bg-background overflow-hidden"
+      style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
+    >
       {/* HUD Header */}
-      <View className="px-5 py-3 border-b border-black/5">
+      <View className="px-5 py-2 border-b border-black/5">
         {/* Stats Row */}
-        <View className="flex-row justify-around items-center mb-3">
+        <View className="flex-row justify-around items-center mb-2">
           <View className="flex-row items-center gap-1">
             <View className="w-6 h-6 bg-secondary/20 rounded-full items-center justify-center">
               <Text className="text-[10px] text-secondary font-bold">XP</Text>
@@ -378,7 +399,7 @@ export default function LessonScreen() {
         <ProgressBar 
           progress={Math.max(0, ((currentStepIndex + 1) / lesson.steps.length) * 100)} 
           showPercentage={false}
-          className="h-3"
+          className="h-2"
         />
       </View>
 
@@ -416,10 +437,12 @@ export default function LessonScreen() {
 
       {/* Main Content */}
       {currentStep && (
-        <View className="flex-1 px-5 pt-4 pb-2">
+        <View 
+          className="flex-1 w-full max-w-6xl self-center px-4 pt-2"
+        >
           {currentStep.type === 'content' ? (
-            <View className="flex-1">
-              <View className="flex-1 w-full bg-slate-200 rounded-3xl items-center justify-center overflow-hidden border-2 border-slate-300 mb-4 relative">
+            <View className="flex-1 w-full">
+              <View className="flex-1 w-full bg-slate-200 rounded-3xl items-center justify-center overflow-hidden border-2 border-slate-300 mb-2 relative">
                 <Ionicons name="videocam-outline" size={60} color="#9BA8B1" />
                 <Text className="font-nunito text-muted mt-2 text-sm">
                   {selectedOption ? `Video de ${selectedOption}` : 'Mira el video'}
@@ -444,12 +467,12 @@ export default function LessonScreen() {
                 )}
               </View>
 
-              <Text className="font-nunito text-2xl font-bold text-ink text-center mb-4">
+              <Text className="font-nunito text-xl font-bold text-ink text-center mb-2">
                 {selectedOption || currentStep.contentTitle}
               </Text>
 
               {currentStep.options && (
-                <View className="flex-row gap-3 mb-4">
+                <View className="flex-col md:flex-row gap-2 mb-2">
                   {currentStep.options.map((option) => (
                     <Pressable
                       key={option}
@@ -462,7 +485,7 @@ export default function LessonScreen() {
                         })
                       }}
                       className={cn(
-                        "flex-1 h-14 rounded-2xl border-2 flex-row items-center justify-center px-4",
+                        "flex-1 h-12 rounded-2xl border-2 flex-row items-center justify-center px-4",
                         selectedOption === option 
                           ? "bg-accent/20 border-secondary" 
                           : "bg-surface border-black/5"
@@ -470,40 +493,40 @@ export default function LessonScreen() {
                     >
                       <Ionicons 
                         name="play" 
-                        size={18} 
+                        size={16} 
                         color={selectedOption === option ? "#4A90E2" : "#9BA8B1"} 
                         style={{ marginRight: 8 }}
                       />
-                      <Text className="font-nunito text-base font-bold text-ink">{option}</Text>
+                      <Text className="font-nunito text-sm font-bold text-ink">{option}</Text>
                     </Pressable>
                   ))}
                 </View>
               )}
             </View>
 ) : currentStep.type === 'matching' ? (
-            <View className="flex-1">
-              {/* Video Preview at the top - Increased size for more prominence */}
-              <View className="flex-[1.2] w-full bg-slate-200 rounded-2xl items-center justify-center overflow-hidden border-2 border-slate-300 mb-2 relative">
+            <View className="flex-1 w-full">
+              {/* Video Preview at the top */}
+              <View className="flex-1 w-full bg-slate-200 rounded-2xl items-center justify-center overflow-hidden border-2 border-slate-300 mb-2 relative">
                 {matchingState.selectedVideo ? (
                   <>
-                    <Ionicons name="play" size={60} color="#4A90E2" />
+                    <Ionicons name="play" size={48} color="#4A90E2" />
                     <View className="absolute bottom-2 right-4 bg-black/20 px-2 py-0.5 rounded-full">
                       <Text className="text-[10px] text-white font-bold">Reproduciendo...</Text>
                     </View>
                   </>
                 ) : (
                   <>
-                    <Ionicons name="videocam-outline" size={60} color="#9BA8B1" />
-                    <Text className="font-nunito text-xs text-muted mt-2">Selecciona un video</Text>
+                    <Ionicons name="videocam-outline" size={48} color="#9BA8B1" />
+                    <Text className="font-nunito text-xs text-muted mt-1">Selecciona un video</Text>
                   </>
                 )}
               </View>
 
-              <Text className="font-nunito text-sm font-bold text-ink text-center mb-2">
+              <Text className="font-nunito text-xs font-bold text-ink text-center mb-2">
                 {currentStep.question}
               </Text>
 
-              <View className="flex-[0.8] flex-row justify-between mb-2">
+              <View className="flex-row justify-between mb-2 w-full max-w-4xl self-center flex-[1.5]">
                 {/* Columna de Videos */}
                 <View className="w-[45%] justify-between py-1">
                   {currentStep.pairs?.map((pair, index) => (
@@ -511,7 +534,7 @@ export default function LessonScreen() {
                       key={`video-${index}`}
                       onPress={() => handleMatchSelection('video', pair.videoUrl)}
                       className={cn(
-                        "h-[30%] rounded-2xl border-2 items-center justify-center relative",
+                        "flex-1 my-1 rounded-2xl border-2 items-center justify-center relative min-h-[40px]",
                         matchingState.selectedVideo === pair.videoUrl 
                           ? "bg-accent/20 border-secondary" 
                           : matchingState.completedPairs.has(pair.word)
@@ -521,16 +544,12 @@ export default function LessonScreen() {
                     >
                       <Ionicons 
                         name={matchingState.completedPairs.has(pair.word) ? "checkmark-circle" : "play-circle"} 
-                        size={24} 
+                        size={20} 
                         color={
                           matchingState.completedPairs.has(pair.word) ? "#10B981" :
                           matchingState.selectedVideo === pair.videoUrl ? "#4A90E2" : "#9BA8B1"
                         } 
                       />
-                      {/* Temporary label for testing */}
-                      <Text className="absolute bottom-1 text-[8px] text-muted font-bold opacity-40">
-                        {pair.word}
-                      </Text>
                     </Pressable>
                   ))}
                 </View>
@@ -543,7 +562,7 @@ export default function LessonScreen() {
                       onPress={() => handleMatchSelection('word', word)}
                       disabled={matchingState.completedPairs.has(word)}
                       className={cn(
-                        "h-[30%] rounded-2xl border-2 items-center justify-center px-1",
+                        "flex-1 my-1 rounded-2xl border-2 items-center justify-center px-1 min-h-[40px]",
                         matchingState.selectedWord === word 
                           ? "bg-accent/20 border-secondary"
                           : matchingState.attempts[word] === 'incorrect'
@@ -566,148 +585,138 @@ export default function LessonScreen() {
               </View>
             </View>
           ) : currentStep.type === 'dialogue' ? (
-            <View className="flex-1">
+            <View className="flex-1 w-full">
               {/* Video Area */}
-              <View className="h-[20%] w-full bg-slate-200 rounded-2xl items-center justify-center overflow-hidden border-2 border-slate-300 mb-2">
-                 <Ionicons name="videocam-outline" size={32} color="#9BA8B1" />
-                 <Text className="font-nunito text-[10px] text-muted mt-1">Video conversation</Text>
+              <View className="flex-1 w-full bg-slate-200 rounded-2xl items-center justify-center overflow-hidden border-2 border-slate-300 mb-2">
+                 <Ionicons name="videocam-outline" size={24} color="#9BA8B1" />
               </View>
 
-              <Text className="font-nunito text-sm font-bold text-ink text-center mb-2">
+              <Text className="font-nunito text-xs font-bold text-ink text-center mb-2">
                 {currentStep.question}
               </Text>
 
               {/* Dialogue Area */}
-              <View className="flex-1 bg-surface rounded-2xl border-2 border-black/5 p-3 mb-3">
-                <ScrollView showsVerticalScrollIndicator={false}>
+              <View className="flex-[1.5] bg-surface rounded-2xl border-2 border-black/5 p-3 mb-2">
                   {currentStep.dialogue?.map((line, lineIdx) => {
                     const parts = line.text.split('[blank]');
                     let blankCounter = 0;
                     const previousLinesBlanks = currentStep.dialogue!.slice(0, lineIdx).reduce((acc, l) => acc + (l.text.match(/\[blank\]/g)?.length || 0), 0);
 
                     return (
-                      <View key={lineIdx} className="mb-2">
-                        <Text className="font-nunito text-[10px] font-bold text-secondary mb-0.5">{line.speaker}:</Text>
-                        <View className="flex-row flex-wrap items-center">
-                          {parts.map((part, partIdx) => (
-                            <View key={partIdx} className="flex-row items-center flex-wrap">
-                              <Text className="font-nunito text-xs text-ink">{part}</Text>
-                              {partIdx < parts.length - 1 && (() => {
-                                const globalIdx = previousLinesBlanks + blankCounter;
-                                blankCounter++;
-                                return (
-                                  <Pressable
-                                    onPress={() => {
-                                      if (selectedWordForDialogue) {
-                                        setDialogueAnswers(prev => ({ ...prev, [globalIdx]: selectedWordForDialogue }));
-                                        setSelectedWordForDialogue(null);
-                                      } else if (dialogueAnswers[globalIdx]) {
-                                        setDialogueAnswers(prev => {
-                                          const newAns = { ...prev };
-                                          delete newAns[globalIdx];
-                                          return newAns;
-                                        });
-                                      }
-                                    }}
+                      <View key={lineIdx} className={cn(
+                        "flex-row flex-wrap items-center mb-2",
+                        line.speaker === 'Ana' ? "justify-start" : "justify-end"
+                      )}>
+                        <View className={cn(
+                          "max-w-[90%] rounded-xl p-2 flex-row flex-wrap items-center gap-1",
+                          line.speaker === 'Ana' ? "bg-accent/10" : "bg-primary/10"
+                        )}>
+                          {parts.map((part, partIdx) => {
+                            const showBlank = partIdx < parts.length - 1;
+                            const blankIdx = previousLinesBlanks + blankCounter;
+                            if (showBlank) blankCounter++;
+
+                            return (
+                              <Fragment key={partIdx}>
+                                <Text className="font-nunito text-[10px] text-ink">{part}</Text>
+                                {showBlank && (
+                                  <Pressable 
+                                    onPress={() => setSelectedWordForDialogue(String(blankIdx))}
                                     className={cn(
-                                      "mx-1 min-w-[50px] h-5 rounded-md border-b-2 items-center justify-center px-1",
-                                      dialogueAnswers[globalIdx] ? "bg-accent/20 border-secondary" : "bg-slate-100 border-slate-300"
+                                      "h-5 min-w-[40px] border-b-2 items-center justify-center px-1 mx-1",
+                                      selectedWordForDialogue === String(blankIdx) ? "border-secondary bg-accent/20" : "border-black/20"
                                     )}
                                   >
-                                    <Text className="font-nunito text-[10px] font-bold text-ink">
-                                      {dialogueAnswers[globalIdx] || ''}
+                                    <Text className="font-nunito text-[10px] font-bold text-secondary">
+                                      {dialogueAnswers[blankIdx] || ''}
                                     </Text>
                                   </Pressable>
-                                );
-                              })()}
-                            </View>
-                          ))}
+                                )}
+                              </Fragment>
+                            );
+                          })}
                         </View>
                       </View>
                     );
                   })}
-                </ScrollView>
               </View>
 
               {/* Word Bank */}
-              <View className="flex-row flex-wrap gap-2 justify-center mb-1">
-                {currentStep.options?.map((option) => {
-                  const isUsed = Object.values(dialogueAnswers).includes(option);
-                  return (
-                    <Pressable
-                      key={option}
-                      onPress={() => !isUsed && setSelectedWordForDialogue(option)}
-                      disabled={isUsed}
-                      className={cn(
-                        "px-3 py-1 rounded-xl border-2",
-                        selectedWordForDialogue === option ? "bg-accent/20 border-secondary" : "bg-surface border-black/5",
-                        isUsed && "opacity-20"
-                      )}
-                    >
-                      <Text className="font-nunito text-[10px] font-bold text-ink">{option}</Text>
-                    </Pressable>
-                  );
-                })}
+              <View className="flex-row flex-wrap gap-1 justify-center mb-2">
+                {currentStep.options?.map((option) => (
+                  <Pressable
+                    key={option}
+                    onPress={() => {
+                      if (selectedWordForDialogue !== null) {
+                        setDialogueAnswers(prev => ({ ...prev, [selectedWordForDialogue]: option }));
+                        setSelectedWordForDialogue(null);
+                      }
+                    }}
+                    className="bg-surface border-2 border-black/5 rounded-lg px-2 py-1"
+                  >
+                    <Text className="font-nunito text-[10px] font-bold text-ink">{option}</Text>
+                  </Pressable>
+                ))}
               </View>
-            </View>          ) : (
-            <View className="flex-1">
+            </View>
+          ) : (
+            <View className="flex-1 w-full">
               {currentStep.videoUrl ? (
                 // Quiz with main video and text options
-                <View className="flex-1">
-                  <View className="flex-1 w-full bg-slate-200 rounded-3xl items-center justify-center overflow-hidden border-2 border-slate-300 mb-4">
+                <View className="flex-1 w-full">
+                  <View className="flex-1 w-full bg-slate-200 rounded-3xl items-center justify-center overflow-hidden border-2 border-slate-300 mb-2">
                     <Ionicons name="videocam-outline" size={60} color="#9BA8B1" />
-                    <Text className="font-nunito text-muted mt-2 text-sm">Video del ejercicio</Text>
                   </View>
 
-                  <Text className="font-nunito text-lg font-bold text-ink text-center mb-4">
+                  <Text className="font-nunito text-lg font-bold text-ink text-center mb-2">
                     {currentStep.question}
                   </Text>
 
-                  <View className="flex-row gap-3 mb-4">
+                  <View className="flex-col md:flex-row gap-2 mb-2">
                     {currentStep.options?.map((option) => (
                       <Pressable 
                         key={option}
                         onPress={() => !correctSteps.has(currentStepIndex) && setSelectedOption(option)}
                         disabled={correctSteps.has(currentStepIndex)}
                         className={cn(
-                          "flex-1 h-14 rounded-2xl border-2 items-center justify-center",
+                          "flex-1 h-12 rounded-2xl border-2 items-center justify-center",
                           selectedOption === option 
                             ? "bg-accent/20 border-secondary" 
                             : "bg-surface border-black/5",
                           correctSteps.has(currentStepIndex) && "opacity-80"
                         )}
                       >
-                        <Text className="font-nunito text-base font-bold text-ink">{option}</Text>
+                        <Text className="font-nunito text-sm font-bold text-ink">{option}</Text>
                       </Pressable>
                     ))}
                   </View>
                 </View>
               ) : (
                 // Quiz where options are videos (like Lesson 1 & 3)
-                <View className="flex-1 justify-center">
-                  <View className="flex-row flex-wrap justify-between gap-y-4 mb-8">
+                <View className="flex-1 items-center w-full">
+                  <View className="flex-1 flex-col md:flex-row justify-center gap-2 mb-2 w-full max-w-5xl">
                     {(shuffledQuizOptions[currentStepIndex] || currentStep.options)?.map((option) => (
                       <Pressable 
                         key={option}
                         onPress={() => !correctSteps.has(currentStepIndex) && setSelectedOption(option)}
                         disabled={correctSteps.has(currentStepIndex)}
                         className={cn(
-                          "w-[48%] aspect-square rounded-[32px] border-2 items-center justify-center p-2",
+                          "flex-1 w-full md:w-[48%] rounded-2xl border-2 items-center justify-center p-2 relative",
                           selectedOption === option 
                             ? "bg-accent/20 border-secondary" 
                             : "bg-surface border-black/5",
                           correctSteps.has(currentStepIndex) && "opacity-80"
                         )}
                       >
-                        <View className="bg-slate-200 w-full h-full rounded-[24px] items-center justify-center overflow-hidden relative">
-                          <Ionicons name="videocam-outline" size={32} color="#9BA8B1" />
-                          <Text className="font-nunito text-[10px] text-muted bottom-2 absolute">{option}</Text>
+                        <View className="bg-slate-200 w-full h-full rounded-xl items-center justify-center overflow-hidden relative min-h-[100px]">
+                          <Ionicons name="videocam-outline" size={24} color="#9BA8B1" />
+                          <Text className="font-nunito text-[8px] text-muted bottom-1 absolute">{option}</Text>
                         </View>
                       </Pressable>
                     ))}
                   </View>
 
-                  <Text className="font-nunito text-lg font-bold text-ink text-center">
+                  <Text className="font-nunito text-lg font-bold text-ink text-center mb-2">
                     {currentStep.question}
                   </Text>
                 </View>
@@ -716,40 +725,37 @@ export default function LessonScreen() {
           )}
         </View>
       )}
-
       {/* Feedback Modals Overlay */}
-      <Modal visible={showFeedback !== null} transparent animationType="slide">
-        <View className="flex-1 bg-black/20 justify-end">
-          <View className={cn(
-            "bg-surface rounded-t-[40px] px-6 pt-8 pb-12 items-center shadow-lg",
-            showFeedback === 'incorrect' ? "border-t-4 border-red-500" : "border-t-4 border-green-500"
-          )}>
-            <View className="items-center mb-6">
+      <Modal visible={showFeedback !== null} animationType="slide" presentationStyle="fullScreen">
+        <View
+          className="flex-1 bg-surface"
+          style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
+        >
+          <View className="flex-1 w-full items-center">
               <Image 
                 source={
                   showFeedback === 'correct' 
                     ? require('@/assets/images/lessons/feedback_correcto.svg') 
                     : require('@/assets/images/lessons/feedback_incorrecto.svg')
                 } 
-                className="w-32 h-32 mb-4"
-                contentFit="contain"
+                className="w-full h-1/2"
+                contentFit="cover"
               />
+            <View className="flex-1 w-full px-6 pt-3 pb-4 items-center">
               <Text className={cn(
-                "font-nunito text-2xl font-bold",
+                "font-nunito text-2xl font-bold mb-4",
                 showFeedback === 'correct' ? "text-green-600" : "text-red-600"
               )}>
                 {showFeedback === 'correct' ? "¡Correcto!" : "Incorrecto"}
               </Text>
-            </View>
-
             {showFeedback === 'correct' ? (
-              <View className="bg-accent/5 p-4 rounded-2xl mb-8 w-full">
+              <View className="bg-accent/5 p-4 rounded-2xl w-full flex-1">
                 <Text className="font-nunito text-sm text-ink leading-relaxed">
                   {currentStep?.tip}
                 </Text>
               </View>
             ) : (
-              <View className="mb-8 w-full">
+              <View className="w-full flex-1">
                 <Text className="font-nunito text-base text-ink mb-1">Puedes intentarlo nuevamente.</Text>
                 <Text className="font-nunito text-sm text-muted mb-4 opacity-70">
                   Como es tu primer reintento, todavia puedes obtener 75 puntos.
@@ -760,7 +766,7 @@ export default function LessonScreen() {
               </View>
             )}
 
-            <View className="w-full gap-3">
+            <View className="w-full gap-3 mt-4">
               {showFeedback === 'incorrect' && (
                 <Button 
                   label="Reintentar" 
@@ -771,6 +777,7 @@ export default function LessonScreen() {
               )}
               <Button label="Siguiente" onPress={handleNext} />
             </View>
+          </View>
           </View>
         </View>
       </Modal>
@@ -836,7 +843,7 @@ export default function LessonScreen() {
 
       {/* Footer Navigation (only if not showing feedback) */}
       {!showFeedback && currentStepIndex !== -1 && (
-        <View className="px-5 pb-8 pt-4 bg-background border-t border-black/5">
+        <View className="px-4 pb-2 pt-2 bg-background border-t border-black/5">
           <Button 
             label={
               ((currentStep?.type === 'quiz' && !!selectedOption) || 
@@ -856,7 +863,7 @@ export default function LessonScreen() {
               (currentStep?.type === 'dialogue' && Object.keys(dialogueAnswers).length < (currentStep.dialogue?.reduce((acc, l) => acc + (l.text.match(/\[blank\]/g)?.length || 0), 0) || 0) && !correctSteps.has(currentStepIndex))
             }
           />
-          <View className="flex-row items-center mt-6 h-10">
+          <View className="flex-row items-center mt-2 h-8">
              <View className="w-10">
                {currentStepIndex > 0 && (
                  <Pressable onPress={handleBack}>

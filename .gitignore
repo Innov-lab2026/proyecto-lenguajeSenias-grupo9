@@ -1,0 +1,5 @@
+backend/database/seed.sql
+backend/supabase/migrations/20260721180000_create_avatars_bucket.sql
+backend/supabase/migrations/20260722000000_create_user_progress.sql
+backend/supabase/migrations/20260724000000_full_schema.sql
+backend/supabase/migrations/20260724000001_create_videos_bucket.sql
