@@ -58,7 +58,7 @@ export function FeedbackModal({ feedback, tip, onRetry, onNext }: FeedbackModalP
       <Modal visible={feedback !== null} animationType="slide" presentationStyle="fullScreen">
         <View className="flex-1 bg-surface" style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}>
           <View className="flex-1 w-full items-center">
-            <Image source={image} className="w-full h-1/2" contentFit="cover" />
+            <Image source={image} className="w-full h-1/2" contentFit="cover" contentPosition="top" />
             <View className="flex-1 w-full px-6 pt-3 pb-4 items-center">{body}</View>
           </View>
         </View>
@@ -70,7 +70,7 @@ export function FeedbackModal({ feedback, tip, onRetry, onNext }: FeedbackModalP
     <Modal visible={feedback !== null} transparent animationType="fade">
       <View className="flex-1 bg-black/50 items-center justify-center px-6">
         <View className="w-full max-w-md items-center overflow-hidden rounded-[32px] bg-surface">
-          <Image source={image} className="w-full h-56" contentFit="cover" />
+          <Image source={image} className="w-full h-64" contentFit="cover" contentPosition="top" />
           <View className="w-full items-center px-6 pb-6 pt-3">{body}</View>
         </View>
       </View>
