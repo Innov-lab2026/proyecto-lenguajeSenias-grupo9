@@ -1,6 +1,6 @@
 import { useRouter, useLocalSearchParams } from 'expo-router'
 import { View } from 'react-native'
-import { useState, useMemo, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { MOCK_LESSON_1, MOCK_LESSON_2, MOCK_LESSON_3, MOCK_LESSON_4, MOCK_LESSON_5, type MatchingState } from '@/src/types/lessons'
 import { ContentStep } from '@/src/components/features/lessons/steps/ContentStep'
@@ -24,15 +24,15 @@ export default function LessonScreen() {
   const router = useRouter()
   const insets = useSafeAreaInsets()
   
-  const lesson = useMemo(() => {
+  const lesson = (() => {
     if (id === '1') return MOCK_LESSON_1
     if (id === '2') return MOCK_LESSON_2
     if (id === '3') return MOCK_LESSON_3
     if (id === '4') return MOCK_LESSON_4
     return MOCK_LESSON_5
-  }, [id])
+  })()
 
-  const [currentStepIndex, setCurrentStepIndex] = useState(-1) // -1 for intro modal
+  const [currentStepIndex, setCurrentStepIndex] = useState(-1) // -1 = modal de intro
   const [selectedOption, setSelectedOption] = useState<string | null>(null)
   const [stepAnswers, setStepAnswers] = useState<Record<number, string | null>>({})
   const [showFeedback, setShowFeedback] = useState<'correct' | 'incorrect' | null>(null)
@@ -85,7 +85,7 @@ export default function LessonScreen() {
     if (currentStepIndex !== -1) {
       setSelectedOption(stepAnswers[currentStepIndex] || null)
       
-      // Shuffle words for matching exercise
+      // Mezcla las palabras del ejercicio de matching
       if (currentStep?.type === 'matching' && currentStep.pairs) {
         const words = currentStep.pairs.map(p => p.word)
         setMatchingState(prev => ({
@@ -94,7 +94,7 @@ export default function LessonScreen() {
         }))
       }
 
-      // Shuffle options for quiz with multiple videos
+      // Mezcla las opciones del quiz con varios videos
       if (currentStep?.type === 'quiz' && !currentStep.videoUrl && currentStep.options) {
         setShuffledQuizOptions(prev => ({
           ...prev,
@@ -114,11 +114,11 @@ export default function LessonScreen() {
   
   const handleNext = () => {
     if (showFeedback === 'incorrect') {
-      // User clicked "Siguiente" after an error
+      // El usuario tocó "Siguiente" después de un error (en vez de "Reintentar")
       setShowFeedback(null)
-      
+
       if (currentStep.type === 'matching') {
-        // Reset selections on matching retry
+        // En matching, un par incorrecto no avanza de step: solo reinicia la selección actual
         setMatchingState(prev => ({
           ...prev,
           selectedVideo: null,
@@ -129,8 +129,8 @@ export default function LessonScreen() {
       }
 
       setStepAnswers(prev => ({ ...prev, [currentStepIndex]: selectedOption }))
-      
-      // Points for finishing with error: 0 additional points
+
+      // Sigue de largo tras un error: xp de participación, sin estrellas
       setEarnedStats(prev => ({
         ...prev,
         xp: prev.xp + xpValues[currentStepIndex]
@@ -143,30 +143,27 @@ export default function LessonScreen() {
       }
       return
     }
-    
-    if (showFeedback === 'correct' || showFeedback === 'incorrect') {
-      // User clicked "Siguiente" after any feedback
+
+    if (showFeedback === 'correct') {
+      // El usuario tocó "Siguiente" después de responder correctamente
       setShowFeedback(null)
       setStepAnswers(prev => ({ ...prev, [currentStepIndex]: selectedOption }))
 
-      // Only give points if correct
-      if (showFeedback === 'correct') {
-        const hasErrors = (retryCount[currentStepIndex] || 0) > 0
-        const xpGain = xpValues[currentStepIndex]
-        const starsGain = hasErrors ? pointsWithErrors[currentStepIndex] : pointsNoErrors[currentStepIndex]
+      const hasErrors = (retryCount[currentStepIndex] || 0) > 0
+      const xpGain = xpValues[currentStepIndex]
+      const starsGain = hasErrors ? pointsWithErrors[currentStepIndex] : pointsNoErrors[currentStepIndex]
 
-        if (!correctSteps.has(currentStepIndex)) {
-            setEarnedStats(prev => ({
-            ...prev,
-            xp: prev.xp + xpGain,
-            stars: prev.stars + starsGain
-            }))
-            setCorrectSteps(prev => {
-            const newSet = new Set(prev)
-            newSet.add(currentStepIndex)
-            return newSet
-            })
-        }
+      if (!correctSteps.has(currentStepIndex)) {
+        setEarnedStats(prev => ({
+          ...prev,
+          xp: prev.xp + xpGain,
+          stars: prev.stars + starsGain
+        }))
+        setCorrectSteps(prev => {
+          const newSet = new Set(prev)
+          newSet.add(currentStepIndex)
+          return newSet
+        })
       }
 
       if (isLastStep) {
@@ -184,7 +181,7 @@ export default function LessonScreen() {
         setCurrentStepIndex(prev => prev + 1)
       }
     } else if (currentStep.type === 'matching') {
-      // Logic for matching check
+      // Verifica el par seleccionado contra la respuesta correcta del step
       if (matchingState.selectedVideo && matchingState.selectedWord) {
         const correctPair = currentStep.pairs?.find(p => p.videoUrl === matchingState.selectedVideo)
         const isMatch = correctPair?.word === matchingState.selectedWord
@@ -197,8 +194,8 @@ export default function LessonScreen() {
             selectedVideo: null,
             selectedWord: null
           }))
-          
-          // Verify if all finished
+
+          // Si ya completó todos los pares, el step queda resuelto
           const allDone = (matchingState.completedPairs.size + 1) === (currentStep.pairs?.length || 0)
           if (allDone) {
             setShowFeedback('correct')
@@ -240,7 +237,7 @@ export default function LessonScreen() {
         setEarnedStats(prev => ({ ...prev, accuracy: Math.max(0, prev.accuracy - 20) }))
       }
     } else {
-      // Quiz step
+      // Step de quiz
       if (selectedOption === currentStep.correctAnswer) {
         setShowFeedback('correct')
       } else {
@@ -306,18 +303,14 @@ export default function LessonScreen() {
     })
   }
 
-  const handleMatchSelection = useCallback((type: 'video' | 'word', value: string) => {
-    if (showFeedback || correctSteps.has(currentStepIndex)) return;
+  const handleMatchSelection = (type: 'video' | 'word', value: string) => {
+    if (showFeedback || correctSteps.has(currentStepIndex)) return
 
     setMatchingState(prev => ({
       ...prev,
       [type === 'video' ? 'selectedVideo' : 'selectedWord']: value
-    }));
-  }, [showFeedback, correctSteps, currentStepIndex]);
-
-  useEffect(() => {
-    // Shuffling words for matching exercise is done in the effect that reacts to currentStepIndex
-  }, []);
+    }))
+  }
 
   const dialogueBlanksCount = currentStep?.dialogue?.reduce(
     (acc, l) => acc + (l.text.match(/\[blank\]/g)?.length || 0),
@@ -381,7 +374,7 @@ export default function LessonScreen() {
         onStart={handleStart}
       />
 
-      {/* Main Content */}
+      {/* Contenido del step actual */}
       {currentStep && (
         <View className={cn('flex-1 px-4 pt-2', LESSON_SHELL)}>
           {currentStep.type === 'content' ? (
