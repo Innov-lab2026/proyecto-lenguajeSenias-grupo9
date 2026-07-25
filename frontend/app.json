@@ -44,10 +44,11 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Permita acesso \u00e0s fotos para alterar a imagem de perfil."
+          "photosPermission": "Permita acesso às fotos para alterar a imagem de perfil."
         }
       ],
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      "expo-video"
     ],
     "experiments": {
       "typedRoutes": true,
