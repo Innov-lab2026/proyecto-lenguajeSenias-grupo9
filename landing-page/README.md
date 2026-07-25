@@ -117,6 +117,6 @@ CarpiSeñas es posible gracias al trabajo colaborativo de las siguientes áreas:
 * **Coordinación General:** Gustavo Ovejero
 * **Data Analytics:** Matías De Vivo, Inés Abarrategui, Julián Outeyral
 * **Diseño UX/UI:** Sol Diessler, Belén Coronel, Karina Rosa
-* **Frontend:** Ezequiel Oliver, María Cerpa, Juan Martínez
+* **Frontend:** Ezequiel Oliver, Roberto Bezerra
 * **Backend:** Elisa Aroya, Araceli Fernández, Mauricio Soto
 * **Testing QA:** María Martín, Julián Salazar
