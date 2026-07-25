@@ -1,10 +1,11 @@
 import { Router } from 'express'
-import { getProgress, updateProgress } from '../controllers/progressController'
+import { completeLesson, getCompletedLessons, getStats } from '../controllers/progressController'
 import { authMiddleware } from '../middleware/auth'
 
 const router = Router()
 
-router.get('/progress', authMiddleware, getProgress)
-router.post('/progress', authMiddleware, updateProgress)
+router.get('/stats', authMiddleware, getStats)
+router.get('/lessons/completed', authMiddleware, getCompletedLessons)
+router.post('/lessons/:id/complete', authMiddleware, completeLesson)
 
 export default router

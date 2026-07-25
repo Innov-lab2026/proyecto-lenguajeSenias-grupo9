@@ -1,5 +1,5 @@
 import { useRouter, useLocalSearchParams } from 'expo-router'
-import { View, Text, Pressable, Modal, ScrollView, Alert, ActivityIndicator } from 'react-native'
+import { View, Text, Pressable, Modal, Alert, ActivityIndicator } from 'react-native'
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
@@ -8,31 +8,39 @@ import { Image } from 'expo-image'
 import { Button } from '@/src/components/common/Button'
 import { ProgressBar } from '@/src/components/common/ProgressBar'
 import { RewardStats } from '@/src/components/features/rewards/RewardStats'
-import { MOCK_HOME_STATS } from '@/src/constants/home'
-import { updateProgress } from '@/src/services/progress'
+import { useStats } from '@/src/hooks/features/lessons/useStats'
+import { useCompleteLesson } from '@/src/hooks/features/lessons/useCompleteLesson'
+import { DialogueExercise } from '@/src/components/features/lessons/DialogueExercise'
 import { cn } from '@/src/utils/cn'
 
 export default function LessonScreen() {
-  const { id } = useLocalSearchParams()
+  const { id, n } = useLocalSearchParams()
   const router = useRouter()
   const insets = useSafeAreaInsets()
-  
+
+  // `id` es el UUID real de la lección (para completeLesson); `n` es el
+  // lesson_number (1-5) que llega por query param desde el home y decide qué
+  // contenido mock mostrar. El backend no modela el contenido del ejercicio
+  // todavía (ver PLAN_FRONTEND_CONECTAR_BACKEND.md §4) — sólo la economía.
+  const lessonNumber = Number(Array.isArray(n) ? n[0] : n) || 1
+
   const lesson = useMemo(() => {
-    if (id === '1') return MOCK_LESSON_1
-    if (id === '2') return MOCK_LESSON_2
-    if (id === '3') return MOCK_LESSON_3
-    if (id === '4') return MOCK_LESSON_4
-    return MOCK_LESSON_5
-  }, [id])
+    if (lessonNumber === 2) return MOCK_LESSON_2
+    if (lessonNumber === 3) return MOCK_LESSON_3
+    if (lessonNumber === 4) return MOCK_LESSON_4
+    if (lessonNumber === 5) return MOCK_LESSON_5
+    return MOCK_LESSON_1
+  }, [lessonNumber])
+
+  const statsQuery = useStats()
+  const completeLessonMutation = useCompleteLesson()
 
   const [currentStepIndex, setCurrentStepIndex] = useState(-1) // -1 for intro modal
   const [selectedOption, setSelectedOption] = useState<string | null>(null)
   const [stepAnswers, setStepAnswers] = useState<Record<number, string | null>>({})
   const [showFeedback, setShowFeedback] = useState<'correct' | 'incorrect' | null>(null)
   const [showSummary, setShowSummary] = useState(false)
-  const [isSaving, setIsSaving] = useState(false)
   const [retryCount, setRetryCount] = useState<Record<number, number>>({})
-  const [earnedStats, setEarnedStats] = useState({ xp: 0, stars: 0, accuracy: 100 })
   const [correctSteps, setCorrectSteps] = useState<Set<number>>(new Set())
   const [isMuted, setIsMuted] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
@@ -41,7 +49,6 @@ export default function LessonScreen() {
   const [favorites, setFavorites] = useState<Set<string>>(new Set())
   const [watchedOptions, setWatchedOptions] = useState<Record<number, Set<string>>>({})
   const [dialogueAnswers, setDialogueAnswers] = useState<Record<number, string>>({})
-  const [selectedWordForDialogue, setSelectedWordForDialogue] = useState<string | null>(null)
   const [shuffledQuizOptions, setShuffledQuizOptions] = useState<Record<number, string[]>>({})
   const [matchingState, setMatchingState] = useState<{
     selectedVideo: string | null;
@@ -58,24 +65,12 @@ export default function LessonScreen() {
   })
 
   useEffect(() => {
-    if (showSummary) {
-      const saveProgress = async () => {
-        setIsSaving(true)
-        try {
-          await updateProgress({
-            module_id: lesson.moduleId,
-            completed_islands: Number(id), // Suponemos que id es el número de isla
-            xp_gain: earnedStats.xp,
-            stars_gain: earnedStats.stars
-          })
-        } catch (error) {
-          console.error('Error saving progress:', error)
-        } finally {
-          setIsSaving(false)
-        }
-      }
-      saveProgress()
-    }
+    if (!showSummary) return
+    // isPerfect = ningún paso de la lección tuvo un error, en ningún intento.
+    // La recompensa la calcula y persiste el server (nunca el cliente); acá
+    // sólo se informa qué pasó.
+    const isPerfect = Object.keys(retryCount).length === 0
+    completeLessonMutation.mutate({ lessonId: id as string, isPerfect })
   }, [showSummary])
 
   const currentStep = lesson.steps[currentStepIndex]
@@ -105,10 +100,6 @@ export default function LessonScreen() {
 
   const isLastStep = currentStepIndex === lesson.steps.length - 1
 
-  const xpValues = [15, 15, 20, 25, 25]
-  const pointsNoErrors = [100, 100, 150, 200, 250]
-  const pointsWithErrors = [50, 50, 75, 100, 125]
-
   const handleStart = () => setCurrentStepIndex(0)
   
   const handleNext = () => {
@@ -128,12 +119,6 @@ export default function LessonScreen() {
       }
 
       setStepAnswers(prev => ({ ...prev, [currentStepIndex]: selectedOption }))
-      
-      // Points for finishing with error: 0 additional points
-      setEarnedStats(prev => ({
-        ...prev,
-        xp: prev.xp + xpValues[currentStepIndex]
-      }))
 
       if (isLastStep) {
         setShowSummary(true)
@@ -142,30 +127,18 @@ export default function LessonScreen() {
       }
       return
     }
-    
+
     if (showFeedback === 'correct' || showFeedback === 'incorrect') {
       // User clicked "Siguiente" after any feedback
       setShowFeedback(null)
       setStepAnswers(prev => ({ ...prev, [currentStepIndex]: selectedOption }))
 
-      // Only give points if correct
-      if (showFeedback === 'correct') {
-        const hasErrors = (retryCount[currentStepIndex] || 0) > 0
-        const xpGain = xpValues[currentStepIndex]
-        const starsGain = hasErrors ? pointsWithErrors[currentStepIndex] : pointsNoErrors[currentStepIndex]
-
-        if (!correctSteps.has(currentStepIndex)) {
-            setEarnedStats(prev => ({
-            ...prev,
-            xp: prev.xp + xpGain,
-            stars: prev.stars + starsGain
-            }))
-            setCorrectSteps(prev => {
-            const newSet = new Set(prev)
-            newSet.add(currentStepIndex)
-            return newSet
-            })
-        }
+      if (showFeedback === 'correct' && !correctSteps.has(currentStepIndex)) {
+        setCorrectSteps(prev => {
+          const newSet = new Set(prev)
+          newSet.add(currentStepIndex)
+          return newSet
+        })
       }
 
       if (isLastStep) {
@@ -212,7 +185,6 @@ export default function LessonScreen() {
             ...prev,
             [currentStepIndex]: (prev[currentStepIndex] || 0) + 1
           }))
-          setEarnedStats(prev => ({ ...prev, accuracy: Math.max(0, prev.accuracy - 20) }))
         }
       }
     } else if (currentStep.type === 'dialogue') {
@@ -236,7 +208,6 @@ export default function LessonScreen() {
           ...prev,
           [currentStepIndex]: (prev[currentStepIndex] || 0) + 1
         }))
-        setEarnedStats(prev => ({ ...prev, accuracy: Math.max(0, prev.accuracy - 20) }))
       }
     } else {
       // Quiz step
@@ -248,7 +219,6 @@ export default function LessonScreen() {
           ...prev,
           [currentStepIndex]: (prev[currentStepIndex] || 0) + 1
         }))
-        setEarnedStats(prev => ({ ...prev, accuracy: Math.max(0, prev.accuracy - 20) }))
       }
     }
   }
@@ -257,7 +227,6 @@ export default function LessonScreen() {
     setShowFeedback(null)
     setSelectedOption(null)
     setDialogueAnswers({})
-    setSelectedWordForDialogue(null)
     setMatchingState({
       selectedVideo: null,
       selectedWord: null,
@@ -306,47 +275,63 @@ export default function LessonScreen() {
 
 
   if (showSummary) {
+    const result = completeLessonMutation.data
+    const isPending = completeLessonMutation.isPending
+    const alreadyCompleted = result != null && !result.success
+
     return (
       <View className="flex-1 bg-background items-center justify-center px-6" style={{ paddingTop: insets.top }}>
-        <Pressable 
-          onPress={() => router.back()} 
+        <Pressable
+          onPress={() => router.back()}
           className="absolute top-12 right-6 z-10 p-2"
         >
           <Ionicons name="close" size={32} color="#1F2937" />
         </Pressable>
 
-        <Image 
-          source={require('@/assets/images/home/carpi-2.png')} 
+        <Image
+          source={require('@/assets/images/home/carpi-2.png')}
           className="w-48 h-48 mb-6"
           contentFit="contain"
         />
-        
-        <Text className="font-nunito text-4xl font-bold text-ink mb-2">¡Estuviste increíble!</Text>
-        <Text className="font-nunito text-lg text-muted mb-8">Completaste tu primera lección</Text>
-        
+
+        <Text className="font-nunito text-4xl font-bold text-ink mb-2">
+          {alreadyCompleted ? '¡De nuevo por acá!' : '¡Estuviste increíble!'}
+        </Text>
+        <Text className="font-nunito text-lg text-muted mb-8">
+          {alreadyCompleted ? 'Ya habías completado esta lección.' : 'Completaste la lección'}
+        </Text>
+
         <View className="w-full flex-row justify-between gap-3 mb-10">
            <View className="flex-1 bg-surface rounded-2xl p-4 items-center shadow-sm">
              <Text className="font-nunito text-xs font-bold text-secondary mb-1">XP</Text>
-             <Text className="font-nunito text-2xl font-bold text-ink">{earnedStats.xp}</Text>
+             <Text className="font-nunito text-2xl font-bold text-ink">{result?.earned_xp ?? 0}</Text>
            </View>
            <View className="flex-1 bg-surface rounded-2xl p-4 items-center shadow-sm">
              <Text className="font-nunito text-xs font-bold text-primary mb-1">Puntos</Text>
-             <Text className="font-nunito text-2xl font-bold text-ink">+{earnedStats.stars}</Text>
+             <Text className="font-nunito text-2xl font-bold text-ink">+{result?.earned_points ?? 0}</Text>
            </View>
            <View className="flex-1 bg-surface rounded-2xl p-4 items-center shadow-sm">
              <Text className="font-nunito text-xs font-bold text-accent mb-1">Señas</Text>
-             <Text className="font-nunito text-2xl font-bold text-ink">{earnedStats.accuracy}%</Text>
+             <Text className="font-nunito text-2xl font-bold text-ink">{result?.earned_signs ?? 0}</Text>
            </View>
         </View>
 
+        {!alreadyCompleted && lessonNumber < 5 && (
+          <Text className="font-nunito text-lg font-bold text-ink mb-2">
+            Nivel {lessonNumber + 1} desbloqueado
+          </Text>
+        )}
+        {result && result.earned_achievements.length > 0 && (
+          <Text className="font-nunito text-base font-bold text-secondary mb-6 text-center">
+            ¡Nuevo logro! {result.earned_achievements.map((a) => a.name).join(', ')}
+          </Text>
+        )}
 
-        <Text className="font-nunito text-lg font-bold text-ink mb-6">nivel 2 desbloqueado</Text>
-        
-        <Button 
-          label={isSaving ? "Guardando..." : "Continuar"} 
-          onPress={() => !isSaving && router.back()} 
+        <Button
+          label={isPending ? "Guardando..." : "Continuar"}
+          onPress={() => !isPending && router.back()}
           className="w-full"
-          disabled={isSaving}
+          disabled={isPending}
         />
       </View>
     )
@@ -362,15 +347,15 @@ export default function LessonScreen() {
             <View className="w-6 h-6 bg-secondary/20 rounded-full items-center justify-center">
               <Text className="text-[10px] text-secondary font-bold">XP</Text>
             </View>
-            <Text className="font-nunito text-xs font-bold text-ink">{MOCK_HOME_STATS.xp}</Text>
+            <Text className="font-nunito text-xs font-bold text-ink">{statsQuery.data?.total_xp ?? 0}</Text>
           </View>
           <View className="flex-row items-center gap-1">
              <Ionicons name="star" size={16} color="#F7BB18" />
-             <Text className="font-nunito text-xs font-bold text-ink">{MOCK_HOME_STATS.stars}</Text>
+             <Text className="font-nunito text-xs font-bold text-ink">{statsQuery.data?.total_points ?? 0}</Text>
           </View>
           <View className="flex-row items-center gap-1">
              <Ionicons name="paw" size={16} color="#A5652E" />
-             <Text className="font-nunito text-xs font-bold text-ink">{MOCK_HOME_STATS.paws}</Text>
+             <Text className="font-nunito text-xs font-bold text-ink">{statsQuery.data?.total_signs ?? 0}</Text>
           </View>
         </View>
 
@@ -400,7 +385,7 @@ export default function LessonScreen() {
                  />
                </View>
                <View className="bg-primary px-3 py-1 rounded-md rotate-[-5deg]">
-                 <Text className="text-white font-bold text-xs">Nivel {id}</Text>
+                 <Text className="text-white font-bold text-xs">Nivel {lessonNumber}</Text>
                </View>
             </View>
 
@@ -573,82 +558,13 @@ export default function LessonScreen() {
                  <Text className="font-nunito text-[10px] text-muted mt-1">Video conversation</Text>
               </View>
 
-              <Text className="font-nunito text-sm font-bold text-ink text-center mb-2">
-                {currentStep.question}
-              </Text>
-
-              {/* Dialogue Area */}
-              <View className="flex-1 bg-surface rounded-2xl border-2 border-black/5 p-3 mb-3">
-                <ScrollView showsVerticalScrollIndicator={false}>
-                  {currentStep.dialogue?.map((line, lineIdx) => {
-                    const parts = line.text.split('[blank]');
-                    let blankCounter = 0;
-                    const previousLinesBlanks = currentStep.dialogue!.slice(0, lineIdx).reduce((acc, l) => acc + (l.text.match(/\[blank\]/g)?.length || 0), 0);
-
-                    return (
-                      <View key={lineIdx} className="mb-2">
-                        <Text className="font-nunito text-[10px] font-bold text-secondary mb-0.5">{line.speaker}:</Text>
-                        <View className="flex-row flex-wrap items-center">
-                          {parts.map((part, partIdx) => (
-                            <View key={partIdx} className="flex-row items-center flex-wrap">
-                              <Text className="font-nunito text-xs text-ink">{part}</Text>
-                              {partIdx < parts.length - 1 && (() => {
-                                const globalIdx = previousLinesBlanks + blankCounter;
-                                blankCounter++;
-                                return (
-                                  <Pressable
-                                    onPress={() => {
-                                      if (selectedWordForDialogue) {
-                                        setDialogueAnswers(prev => ({ ...prev, [globalIdx]: selectedWordForDialogue }));
-                                        setSelectedWordForDialogue(null);
-                                      } else if (dialogueAnswers[globalIdx]) {
-                                        setDialogueAnswers(prev => {
-                                          const newAns = { ...prev };
-                                          delete newAns[globalIdx];
-                                          return newAns;
-                                        });
-                                      }
-                                    }}
-                                    className={cn(
-                                      "mx-1 min-w-[50px] h-5 rounded-md border-b-2 items-center justify-center px-1",
-                                      dialogueAnswers[globalIdx] ? "bg-accent/20 border-secondary" : "bg-slate-100 border-slate-300"
-                                    )}
-                                  >
-                                    <Text className="font-nunito text-[10px] font-bold text-ink">
-                                      {dialogueAnswers[globalIdx] || ''}
-                                    </Text>
-                                  </Pressable>
-                                );
-                              })()}
-                            </View>
-                          ))}
-                        </View>
-                      </View>
-                    );
-                  })}
-                </ScrollView>
-              </View>
-
-              {/* Word Bank */}
-              <View className="flex-row flex-wrap gap-2 justify-center mb-1">
-                {currentStep.options?.map((option) => {
-                  const isUsed = Object.values(dialogueAnswers).includes(option);
-                  return (
-                    <Pressable
-                      key={option}
-                      onPress={() => !isUsed && setSelectedWordForDialogue(option)}
-                      disabled={isUsed}
-                      className={cn(
-                        "px-3 py-1 rounded-xl border-2",
-                        selectedWordForDialogue === option ? "bg-accent/20 border-secondary" : "bg-surface border-black/5",
-                        isUsed && "opacity-20"
-                      )}
-                    >
-                      <Text className="font-nunito text-[10px] font-bold text-ink">{option}</Text>
-                    </Pressable>
-                  );
-                })}
-              </View>
+              <DialogueExercise
+                question={currentStep.question}
+                dialogue={currentStep.dialogue ?? []}
+                options={currentStep.options ?? []}
+                answers={dialogueAnswers}
+                onAnswersChange={setDialogueAnswers}
+              />
             </View>          ) : (
             <View className="flex-1">
               {currentStep.videoUrl ? (

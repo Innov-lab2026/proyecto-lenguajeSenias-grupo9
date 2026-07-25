@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { Stack } from 'expo-router'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-context'
 import { useFonts } from 'expo-font'
 import * as SplashScreen from 'expo-splash-screen'
@@ -36,21 +37,27 @@ export default function RootLayout() {
   const isAuthenticated = status === 'authenticated'
 
   return (
-    <QueryClientProvider client={queryClient}>
-      {/* initialMetrics: evita el "flash" de insets en 0 (contenido pegado al
-          borde superior, tapado por la barra de estado, que luego "salta" a
-          su posición) — sin esto, react-native-safe-area-context arranca sin
-          insets y los actualiza recién tras la primera medición nativa. */}
-      <SafeAreaProvider initialMetrics={initialWindowMetrics}>
-        <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Protected guard={isAuthenticated}>
-            <Stack.Screen name="(protected)" />
-          </Stack.Protected>
-          <Stack.Protected guard={!isAuthenticated}>
-            <Stack.Screen name="(auth)" />
-          </Stack.Protected>
-        </Stack>
-      </SafeAreaProvider>
-    </QueryClientProvider>
+    // Requerido por react-native-gesture-handler para que CUALQUIER gesto
+    // (Gesture.Pan, etc.) funcione en la app — sin este wrapper en la raíz,
+    // los gestos no responden en ningún lado. Usado por primera vez en el
+    // drag & drop de la isla 5 (DraggableWord).
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <QueryClientProvider client={queryClient}>
+        {/* initialMetrics: evita el "flash" de insets en 0 (contenido pegado al
+            borde superior, tapado por la barra de estado, que luego "salta" a
+            su posición) — sin esto, react-native-safe-area-context arranca sin
+            insets y los actualiza recién tras la primera medición nativa. */}
+        <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Protected guard={isAuthenticated}>
+              <Stack.Screen name="(protected)" />
+            </Stack.Protected>
+            <Stack.Protected guard={!isAuthenticated}>
+              <Stack.Screen name="(auth)" />
+            </Stack.Protected>
+          </Stack>
+        </SafeAreaProvider>
+      </QueryClientProvider>
+    </GestureHandlerRootView>
   )
 }
