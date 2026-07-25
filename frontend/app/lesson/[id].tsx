@@ -1,17 +1,21 @@
 import { useRouter, useLocalSearchParams } from 'expo-router'
-import { View, Text, Pressable, Modal } from 'react-native'
+import { View, Text, Pressable } from 'react-native'
 import { useState, useMemo, useEffect, useCallback } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
 import { MOCK_LESSON_1, MOCK_LESSON_2, MOCK_LESSON_3, MOCK_LESSON_4, MOCK_LESSON_5, type MatchingState } from '@/src/types/lessons'
 import { Image } from 'expo-image'
 import { Button } from '@/src/components/common/Button'
-import { ProgressBar } from '@/src/components/common/ProgressBar'
 import { ContentStep } from '@/src/components/features/lessons/steps/ContentStep'
 import { QuizStep } from '@/src/components/features/lessons/steps/QuizStep'
 import { MatchingStep } from '@/src/components/features/lessons/steps/MatchingStep'
 import { DialogueStep } from '@/src/components/features/lessons/steps/DialogueStep'
-import { RewardStats } from '@/src/components/features/rewards/RewardStats'
+import { LessonHeader } from '@/src/components/features/lessons/LessonHeader'
+import { LessonFooter } from '@/src/components/features/lessons/LessonFooter'
+import { IntroModal } from '@/src/components/features/lessons/IntroModal'
+import { FeedbackModal } from '@/src/components/features/lessons/FeedbackModal'
+import { SettingsModal } from '@/src/components/features/lessons/SettingsModal'
+import { HintModal } from '@/src/components/features/lessons/HintModal'
 import { MOCK_HOME_STATS } from '@/src/constants/home'
 import { LESSON_SHELL } from '@/src/constants/lessons'
 import { updateProgress } from '@/src/services/progress'
@@ -317,6 +321,35 @@ export default function LessonScreen() {
     // Shuffling words for matching exercise is done in the effect that reacts to currentStepIndex
   }, []);
 
+  const dialogueBlanksCount = currentStep?.dialogue?.reduce(
+    (acc, l) => acc + (l.text.match(/\[blank\]/g)?.length || 0),
+    0,
+  ) || 0
+
+  const footerNeedsCheck =
+    ((currentStep?.type === 'quiz' && !!selectedOption) ||
+      (currentStep?.type === 'matching' && !!matchingState.selectedVideo && !!matchingState.selectedWord) ||
+      (currentStep?.type === 'dialogue' && Object.keys(dialogueAnswers).length === dialogueBlanksCount)) &&
+    !correctSteps.has(currentStepIndex)
+
+  const footerLabel = footerNeedsCheck ? 'Comprobar' : 'Siguiente'
+
+  const footerDisabled =
+    (currentStep?.type === 'quiz' && !selectedOption && !correctSteps.has(currentStepIndex)) ||
+    (currentStep?.type === 'content' && !currentStep.options && (watchedOptions[currentStepIndex]?.size || 0) === 0) ||
+    (currentStep?.type === 'content' && !!currentStep.options && (watchedOptions[currentStepIndex]?.size || 0) < currentStep.options.length) ||
+    (currentStep?.type === 'matching' &&
+      !matchingState.selectedVideo &&
+      !matchingState.selectedWord &&
+      matchingState.completedPairs.size < (currentStep.pairs?.length || 0) &&
+      !correctSteps.has(currentStepIndex)) ||
+    (currentStep?.type === 'matching' &&
+      (matchingState.selectedVideo || matchingState.selectedWord) &&
+      !(matchingState.selectedVideo && matchingState.selectedWord) &&
+      !correctSteps.has(currentStepIndex)) ||
+    (currentStep?.type === 'dialogue' &&
+      Object.keys(dialogueAnswers).length < dialogueBlanksCount &&
+      !correctSteps.has(currentStepIndex))
 
   if (showSummary) {
     return (
@@ -388,65 +421,18 @@ export default function LessonScreen() {
       className="flex-1 bg-background overflow-hidden"
       style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
     >
-      {/* HUD Header */}
-      <View className="px-5 py-2 border-b border-black/5">
-        {/* Stats Row */}
-        <View className="flex-row justify-around items-center mb-2">
-          <View className="flex-row items-center gap-1">
-            <View className="w-6 h-6 bg-secondary/20 rounded-full items-center justify-center">
-              <Text className="text-[10px] text-secondary font-bold">XP</Text>
-            </View>
-            <Text className="font-nunito text-xs font-bold text-ink">{MOCK_HOME_STATS.xp}</Text>
-          </View>
-          <View className="flex-row items-center gap-1">
-             <Ionicons name="star" size={16} color="#F7BB18" />
-             <Text className="font-nunito text-xs font-bold text-ink">{MOCK_HOME_STATS.stars}</Text>
-          </View>
-          <View className="flex-row items-center gap-1">
-             <Ionicons name="paw" size={16} color="#A5652E" />
-             <Text className="font-nunito text-xs font-bold text-ink">{MOCK_HOME_STATS.paws}</Text>
-          </View>
-        </View>
+      <LessonHeader
+        stats={MOCK_HOME_STATS}
+        progress={Math.max(0, ((currentStepIndex + 1) / lesson.steps.length) * 100)}
+      />
 
-        {/* Progress Bar at the bottom of header */}
-        <ProgressBar 
-          progress={Math.max(0, ((currentStepIndex + 1) / lesson.steps.length) * 100)} 
-          showPercentage={false}
-          className="h-2"
-        />
-      </View>
-
-      {/* Intro Modal */}
-      <Modal visible={currentStepIndex === -1} transparent animationType="fade">
-        <View className="flex-1 bg-black/50 items-center justify-center px-6">
-          <View className="bg-surface w-full rounded-[40px] p-8 items-center relative overflow-hidden">
-            <View className="bg-accent/20 px-4 py-1 rounded-full mb-4">
-              <Text className="font-nunito text-sm font-bold text-ink">Fácil</Text>
-            </View>
-
-            <View className="items-center mb-6">
-               {/* Island Representation */}
-               <View className="w-32 h-32 bg-accent/10 rounded-full items-center justify-center mb-2">
-                 <Image 
-                    source={require('@/assets/images/lessons/isla_nivel1_presentacion.svg')} 
-                    className="w-24 h-24"
-                    contentFit="contain"
-                 />
-               </View>
-               <View className="bg-primary px-3 py-1 rounded-md rotate-[-5deg]">
-                 <Text className="text-white font-bold text-xs">Nivel {id}</Text>
-               </View>
-            </View>
-
-            <Text className="font-nunito text-3xl font-bold text-ink mb-4">{lesson.title}</Text>
-            <Text className="font-nunito text-base text-muted text-center mb-8 px-4">
-              {lesson.description}
-            </Text>
-
-            <Button label="¡A Jugar!" onPress={handleStart} className="px-10" />
-          </View>
-        </View>
-      </Modal>
+      <IntroModal
+        visible={currentStepIndex === -1}
+        levelId={id}
+        title={lesson.title}
+        description={lesson.description}
+        onStart={handleStart}
+      />
 
       {/* Main Content */}
       {currentStep && (
@@ -479,183 +465,37 @@ export default function LessonScreen() {
           )}
         </View>
       )}
-      {/* Feedback Modals Overlay */}
-      <Modal visible={showFeedback !== null} animationType="slide" presentationStyle="fullScreen">
-        <View
-          className="flex-1 bg-surface"
-          style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
-        >
-          <View className="flex-1 w-full items-center">
-              <Image 
-                source={
-                  showFeedback === 'correct' 
-                    ? require('@/assets/images/lessons/feedback_correcto.svg') 
-                    : require('@/assets/images/lessons/feedback_incorrecto.svg')
-                } 
-                className="w-full h-1/2"
-                contentFit="cover"
-              />
-            <View className="flex-1 w-full px-6 pt-3 pb-4 items-center">
-              <Text className={cn(
-                "font-nunito text-2xl font-bold mb-4",
-                showFeedback === 'correct' ? "text-green-600" : "text-red-600"
-              )}>
-                {showFeedback === 'correct' ? "¡Correcto!" : "Incorrecto"}
-              </Text>
-            {showFeedback === 'correct' ? (
-              <View className="bg-accent/5 p-4 rounded-2xl w-full flex-1">
-                <Text className="font-nunito text-sm text-ink leading-relaxed">
-                  {currentStep?.tip}
-                </Text>
-              </View>
-            ) : (
-              <View className="w-full flex-1">
-                <Text className="font-nunito text-base text-ink mb-1">Puedes intentarlo nuevamente.</Text>
-                <Text className="font-nunito text-sm text-muted mb-4 opacity-70">
-                  Como es tu primer reintento, todavia puedes obtener 75 puntos.
-                </Text>
-                <Text className="font-nunito text-sm font-bold text-ink italic">
-                  Consejo: observa atentamente el video antes de seleccionar la respuesta correcta.
-                </Text>
-              </View>
-            )}
+      <FeedbackModal feedback={showFeedback} tip={currentStep?.tip} onRetry={handleRetry} onNext={handleNext} />
 
-            <View className="w-full gap-3 mt-4">
-              {showFeedback === 'incorrect' && (
-                <Button 
-                  label="Reintentar" 
-                  onPress={handleRetry} 
-                  variant="white"
-                  className="border-2 border-primary"
-                />
-              )}
-              <Button label="Siguiente" onPress={handleNext} />
-            </View>
-          </View>
-          </View>
-        </View>
-      </Modal>
+      <SettingsModal
+        visible={showSettings}
+        isMuted={isMuted}
+        onToggleMute={() => setIsMuted(!isMuted)}
+        onExit={() => {
+          setShowSettings(false)
+          router.back()
+        }}
+        onClose={() => setShowSettings(false)}
+      />
 
-      {/* Settings Modal */}
-      <Modal visible={showSettings} transparent animationType="fade">
-        <View className="flex-1 bg-black/50 items-center justify-center px-6">
-          <View className="bg-surface w-full rounded-[32px] p-6 shadow-xl">
-            <Text className="font-nunito text-xl font-bold text-ink mb-6 text-center">Configuraciones</Text>
-            
-            <Pressable 
-              onPress={() => {
-                setIsMuted(!isMuted);
-                setShowSettings(false);
-              }}
-              className="flex-row items-center p-4 border-b border-black/5"
-            >
-              <Ionicons name={isMuted ? "volume-mute" : "volume-medium"} size={24} color="#6F706F" />
-              <Text className="font-nunito text-base text-ink ml-4">
-                {isMuted ? "Activar sonido" : "Desactivar sonido"}
-              </Text>
-            </Pressable>
+      <HintModal visible={showHint} tip={currentStep?.tip} onClose={() => setShowHint(false)} />
 
-            <Pressable 
-              onPress={() => {
-                setShowSettings(false);
-                router.back();
-              }}
-              className="flex-row items-center p-4"
-            >
-              <Ionicons name="exit-outline" size={24} color="#EF4444" />
-              <Text className="font-nunito text-base text-red-500 ml-4">Salir de la lección</Text>
-            </Pressable>
-
-            <Button 
-              label="Cerrar" 
-              onPress={() => setShowSettings(false)} 
-              variant="white"
-              className="mt-6 border border-black/10"
-            />
-          </View>
-        </View>
-      </Modal>
-
-      {/* Hint Modal */}
-      <Modal visible={showHint} transparent animationType="fade">
-        <View className="flex-1 bg-black/50 items-center justify-center px-6">
-          <View className="bg-surface w-full rounded-[32px] p-6 shadow-xl items-center">
-            <View className="w-16 h-16 bg-accent/20 rounded-full items-center justify-center mb-4">
-              <Ionicons name="bulb" size={32} color="#F7BB18" />
-            </View>
-            <Text className="font-nunito text-xl font-bold text-ink mb-2">Pista</Text>
-            <Text className="font-nunito text-base text-muted text-center mb-8 px-2">
-              {currentStep?.tip || "Observa bien los gestos y la posición de las manos."}
-            </Text>
-            <Button 
-              label="Entendido" 
-              onPress={() => setShowHint(false)} 
-            />
-          </View>
-        </View>
-      </Modal>
-
-      {/* Footer Navigation (only if not showing feedback) */}
       {!showFeedback && currentStepIndex !== -1 && (
-        <View className="px-4 pb-2 pt-2 bg-background border-t border-black/5">
-          <Button 
-            label={
-              ((currentStep?.type === 'quiz' && !!selectedOption) || 
-               (currentStep?.type === 'matching' && matchingState.selectedVideo && matchingState.selectedWord) ||
-               (currentStep?.type === 'dialogue' && Object.keys(dialogueAnswers).length === (currentStep.dialogue?.reduce((acc, l) => acc + (l.text.match(/\[blank\]/g)?.length || 0), 0) || 0)))
-              && !correctSteps.has(currentStepIndex) 
-              ? 'Comprobar' 
-              : 'Siguiente'
-            } 
-            onPress={handleNext}
-            disabled={
-              (currentStep?.type === 'quiz' && !selectedOption && !correctSteps.has(currentStepIndex)) ||
-              (currentStep?.type === 'content' && !currentStep.options && (watchedOptions[currentStepIndex]?.size || 0) === 0) ||
-              (currentStep?.type === 'content' && !!currentStep.options && (watchedOptions[currentStepIndex]?.size || 0) < currentStep.options.length) ||
-              (currentStep?.type === 'matching' && !matchingState.selectedVideo && !matchingState.selectedWord && matchingState.completedPairs.size < (currentStep.pairs?.length || 0) && !correctSteps.has(currentStepIndex)) ||
-              (currentStep?.type === 'matching' && (matchingState.selectedVideo || matchingState.selectedWord) && !(matchingState.selectedVideo && matchingState.selectedWord) && !correctSteps.has(currentStepIndex)) ||
-              (currentStep?.type === 'dialogue' && Object.keys(dialogueAnswers).length < (currentStep.dialogue?.reduce((acc, l) => acc + (l.text.match(/\[blank\]/g)?.length || 0), 0) || 0) && !correctSteps.has(currentStepIndex))
-            }
-          />
-          <View className="flex-row items-center mt-2 h-8">
-             <View className="w-10">
-               {currentStepIndex > 0 && (
-                 <Pressable onPress={handleBack}>
-                   <Ionicons name="arrow-undo-outline" size={24} color="#6F706F" />
-                 </Pressable>
-               )}
-             </View>
-
-             <View className="flex-1 flex-row justify-center items-center gap-12">
-               <Pressable onPress={() => setShowSettings(true)}>
-                 <Ionicons name="settings-sharp" size={24} color="#6F706F" />
-               </Pressable>
-
-               <Pressable onPress={toggleFavorite}>
-                 <Ionicons 
-                   name={favorites.has(currentStep?.id || '') ? "heart" : "heart-outline"} 
-                   size={24} 
-                   color={favorites.has(currentStep?.id || '') ? "#EF4444" : "#6F706F"} 
-                 />
-               </Pressable>
-
-               <Pressable 
-                 onPress={() => {
-                   setShowHint(true);
-                   setHintViewed(prev => ({ ...prev, [currentStepIndex]: true }));
-                 }}
-               >
-                 <Ionicons 
-                   name={hintViewed[currentStepIndex] ? "bulb-outline" : "bulb"} 
-                   size={24} 
-                   color={hintViewed[currentStepIndex] ? "#6F706F" : "#F7BB18"} 
-                 />
-               </Pressable>
-             </View>
-
-             <View className="w-10" />
-          </View>
-        </View>
+        <LessonFooter
+          ctaLabel={footerLabel}
+          ctaDisabled={footerDisabled}
+          onNext={handleNext}
+          showBack={currentStepIndex > 0}
+          onBack={handleBack}
+          onSettings={() => setShowSettings(true)}
+          isFavorite={favorites.has(currentStep?.id || '')}
+          onToggleFavorite={toggleFavorite}
+          hintViewed={!!hintViewed[currentStepIndex]}
+          onHint={() => {
+            setShowHint(true)
+            setHintViewed(prev => ({ ...prev, [currentStepIndex]: true }))
+          }}
+        />
       )}
     </View>
   )
