@@ -7,6 +7,7 @@ import { MOCK_LESSON_1, MOCK_LESSON_2, MOCK_LESSON_3, MOCK_LESSON_4, MOCK_LESSON
 import { Image } from 'expo-image'
 import { Button } from '@/src/components/common/Button'
 import { ProgressBar } from '@/src/components/common/ProgressBar'
+import { LessonVideo } from '@/src/components/features/lessons/LessonVideo'
 import { RewardStats } from '@/src/components/features/rewards/RewardStats'
 import { MOCK_HOME_STATS } from '@/src/constants/home'
 import { updateProgress } from '@/src/services/progress'
@@ -281,6 +282,14 @@ export default function LessonScreen() {
     }
   }
 
+  const markWatched = (key: string) => {
+    setWatchedOptions(prev => {
+      const currentStepWatched = new Set(prev[currentStepIndex] || [])
+      currentStepWatched.add(key)
+      return { ...prev, [currentStepIndex]: currentStepWatched }
+    })
+  }
+
   const toggleFavorite = () => {
     if (!currentStep?.id) return
     setFavorites(prev => {
@@ -442,28 +451,27 @@ export default function LessonScreen() {
         >
           {currentStep.type === 'content' ? (
             <View className="flex-1 w-full">
-              <View className="flex-1 w-full bg-slate-200 rounded-3xl items-center justify-center overflow-hidden border-2 border-slate-300 mb-2 relative">
-                <Ionicons name="videocam-outline" size={60} color="#9BA8B1" />
-                <Text className="font-nunito text-muted mt-2 text-sm">
-                  {selectedOption ? `Video de ${selectedOption}` : 'Mira el video'}
-                </Text>
-                
-                {/* Simulation of "watched" for single video steps */}
-                {!currentStep.options && (
-                  <Pressable 
-                    onPress={() => {
-                      setWatchedOptions(prev => {
-                        const currentStepWatched = new Set(prev[currentStepIndex] || [])
-                        currentStepWatched.add('main')
-                        return { ...prev, [currentStepIndex]: currentStepWatched }
-                      })
-                    }}
-                    className="absolute inset-0 items-center justify-center bg-black/5"
-                  >
-                    <View className="w-16 h-16 bg-white/80 rounded-full items-center justify-center shadow-sm">
-                       <Ionicons name="play" size={32} color="#4A90E2" className="ml-1" />
-                    </View>
-                  </Pressable>
+              <View className="flex-1 w-full items-center justify-center mb-2">
+                {!currentStep.options ? (
+                  <LessonVideo
+                    uri={currentStep.videoUrl!}
+                    onWatched={() => markWatched('main')}
+                    className="h-full max-h-[560px] aspect-[9/16]"
+                  />
+                ) : selectedOption && currentStep.videoUrls?.[selectedOption] ? (
+                  <LessonVideo
+                    key={selectedOption}
+                    uri={currentStep.videoUrls[selectedOption]}
+                    onWatched={() => markWatched(selectedOption)}
+                    className="h-full max-h-[560px] aspect-[9/16]"
+                  />
+                ) : (
+                  <View className="h-full max-h-[560px] aspect-[9/16] items-center justify-center rounded-3xl border-2 border-black/5 bg-surface px-4">
+                    <Ionicons name="videocam-outline" size={60} color="#9BA8B1" />
+                    <Text className="font-nunito text-muted mt-2 text-center text-sm">
+                      Elegí una opción para ver el video
+                    </Text>
+                  </View>
                 )}
               </View>
 
@@ -476,14 +484,7 @@ export default function LessonScreen() {
                   {currentStep.options.map((option) => (
                     <Pressable
                       key={option}
-                      onPress={() => {
-                        setSelectedOption(option)
-                        setWatchedOptions(prev => {
-                          const currentStepWatched = new Set(prev[currentStepIndex] || [])
-                          currentStepWatched.add(option)
-                          return { ...prev, [currentStepIndex]: currentStepWatched }
-                        })
-                      }}
+                      onPress={() => setSelectedOption(option)}
                       className={cn(
                         "flex-1 h-12 rounded-2xl border-2 flex-row items-center justify-center px-4",
                         selectedOption === option 
