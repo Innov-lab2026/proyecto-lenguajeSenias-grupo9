@@ -55,10 +55,10 @@ export function DraggableWord({ word, disabled = false, onDrop }: DraggableWordP
     <GestureDetector gesture={pan}>
       <Animated.View style={animatedStyle}>
         <View
-          className="px-3 py-1 rounded-xl border-2 bg-surface border-black/5"
+          className="px-3 py-1.5 rounded-xl border-2 bg-surface border-black/5"
           style={disabled ? { opacity: 0.2 } : undefined}
         >
-          <Text className="font-nunito text-[10px] font-bold text-ink">{word}</Text>
+          <Text className="font-nunito text-sm md:text-base font-bold text-ink">{word}</Text>
         </View>
       </Animated.View>
     </GestureDetector>

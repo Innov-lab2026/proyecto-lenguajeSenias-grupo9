@@ -18,6 +18,15 @@ export interface LessonStep {
   tip?: string
   contentTitle?: string
 }
+
+/** Estado del ejercicio "matching" (relacionar video con palabra). */
+export interface MatchingState {
+  selectedVideo: string | null
+  selectedWord: string | null
+  completedPairs: Set<string>
+  attempts: Record<string, 'correct' | 'incorrect' | null>
+  shuffledWords: string[]
+}
 /* ... existing code ... */
 export const MOCK_LESSON_5: Lesson = {
   id: 'lesson-5',
@@ -29,13 +38,13 @@ export const MOCK_LESSON_5: Lesson = {
       id: 'step-1-5-content-1',
       type: 'content',
       contentTitle: 'Conversación',
-      videoUrl: 'https://placeholder.com/video-conversation',
+      videoUrl: 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/01_pfseqz.mp4',
     },
     {
       id: 'step-1-5-dialogue',
       type: 'dialogue',
       question: '¿Cómo se completa esta conversación? Arrastra cada palabra a su lugar.',
-      videoUrl: 'https://placeholder.com/video-conversation',
+      videoUrl: 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/02_ztp8b3.mp4',
       options: ['nombre', 'apellido', 'hermana', 'Hola', 'Adiós', 'Lindo', 'feo'],
       dialogue: [
         { speaker: 'Ana', text: 'Hola, mi [blank] es Anna. ¿Cual es tu nombre?' },
@@ -67,19 +76,23 @@ export const MOCK_LESSON_1: Lesson = {
       id: 'step-1-1-content-1',
       type: 'content',
       contentTitle: 'Hola',
-      videoUrl: 'https://placeholder.com/video1',
+      videoUrl: 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/01_pfseqz.mp4',
     },
     {
       id: 'step-1-1-content-2',
       type: 'content',
       contentTitle: 'Adiós',
-      videoUrl: 'https://placeholder.com/video2',
+      videoUrl: 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/02_ztp8b3.mp4',
     },
     {
       id: 'step-1-1-quiz',
       type: 'quiz',
       question: '¿Cuál de estos videos representa la palabra "Hola"?',
       options: ['Hola', 'Adiós'],
+      videoUrls: {
+        'Hola': 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/01_pfseqz.mp4',
+        'Adiós': 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/02_ztp8b3.mp4',
+      },
       correctAnswer: 'Hola',
       tip: '💡 ¿Sabías que...?\n\nEl saludo es la primera forma de iniciar una conversación y demostrar respeto hacia la otra persona.',
     }
@@ -98,15 +111,15 @@ export const MOCK_LESSON_2: Lesson = {
       contentTitle: 'Posesivos',
       options: ['Mío', 'Tuyo'],
       videoUrls: {
-        'Mío': 'https://placeholder.com/video-mio',
-        'Tuyo': 'https://placeholder.com/video-tuyo'
+        'Mío': 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/02_ztp8b3.mp4',
+        'Tuyo': 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/03_jqt9r7.mp4'
       }
     },
     {
       id: 'step-1-2-quiz',
       type: 'quiz',
       question: '¿Qué palabra representa esta seña?',
-      videoUrl: 'https://placeholder.com/video-mio',
+      videoUrl: 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/03_jqt9r7.mp4',
       options: ['Mío', 'Tuyo'],
       correctAnswer: 'Mío',
       tip: '💡 Consejo LSA\n\n"Mío" y "Tuyo" indican a quién pertenece algo. En muchas lenguas de señas, la posesión suele expresarse después del objeto. (ej: "Libro mio")',
@@ -124,13 +137,19 @@ export const MOCK_LESSON_3: Lesson = {
       id: 'step-1-3-content-1',
       type: 'content',
       contentTitle: 'Nombre',
-      videoUrl: 'https://placeholder.com/video-nombre',
+      videoUrl: 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/03_jqt9r7.mp4',
     },
     {
       id: 'step-1-3-quiz',
       type: 'quiz',
       question: '¿Cuál de estos videos representa la palabra "Nombre"?',
       options: ['Mío', 'Nombre', 'Hola', 'Tuyo'],
+      videoUrls: {
+        'Mío': 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/01_pfseqz.mp4',
+        'Nombre': 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/03_jqt9r7.mp4',
+        'Hola': 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/02_ztp8b3.mp4',
+        'Tuyo': 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/01_pfseqz.mp4',
+      },
       correctAnswer: 'Nombre',
       tip: '💡 Tip de Nombre\n\nEn la comunidad sorda, además de deletrear tu nombre, solemos tener una "seña personal" que nos identifica de forma única.',
     }
@@ -149,9 +168,9 @@ export const MOCK_LESSON_4: Lesson = {
       contentTitle: 'Cortesía',
       options: ['Por favor', 'Gracias', 'De nada'],
       videoUrls: {
-        'Por favor': 'https://placeholder.com/video-porfavor',
-        'Gracias': 'https://placeholder.com/video-gracias',
-        'De nada': 'https://placeholder.com/video-denada'
+        'Por favor': 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/01_pfseqz.mp4',
+        'Gracias': 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/02_ztp8b3.mp4',
+        'De nada': 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/03_jqt9r7.mp4'
       }
     },
     {
@@ -159,9 +178,9 @@ export const MOCK_LESSON_4: Lesson = {
       type: 'matching',
       question: 'Relaciona cada video con la frase correspondiente.',
       pairs: [
-        { videoUrl: 'https://placeholder.com/video-porfavor', word: 'Por favor' },
-        { videoUrl: 'https://placeholder.com/video-gracias', word: 'Gracias' },
-        { videoUrl: 'https://placeholder.com/video-denada', word: 'De nada' }
+        { videoUrl: 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/01_pfseqz.mp4', word: 'Por favor' },
+        { videoUrl: 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/02_ztp8b3.mp4', word: 'Gracias' },
+        { videoUrl: 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/03_jqt9r7.mp4', word: 'De nada' }
       ]
     }
   ]

@@ -33,6 +33,16 @@ const PAD_TOP = 32
 /** Aire debajo de la isla 1 (comparte zona con carpi-1). */
 const PAD_BOTTOM = 56
 
+const ISLAND_POSTERS = [
+  require('@/assets/images/home/carteles/cartel1.png'),
+  require('@/assets/images/home/carteles/cartel2.png'),
+  require('@/assets/images/home/carteles/cartel3.png'),
+  require('@/assets/images/home/carteles/cartel4.png'),
+  require('@/assets/images/home/carteles/cartel5.png'),
+]
+const POSTER_WIDTH = 46
+const POSTER_HEIGHT = 58
+
 const CONTENT_HEIGHT = PAD_TOP + 70 + (ISLANDS_PER_MODULE - 1) * STEP + 46 + PAD_BOTTOM
 
 /** Centro (x, y) de una isla dentro del contenido del camino. */
@@ -177,6 +187,7 @@ export function IslandPath({ module, onIslandPress }: IslandPathProps) {
               const center = centers[n - 1]
               const state = getIslandState(module, n)
               const height = ISLAND_WIDTH * getIslandRatio(n, state === 'blocked')
+              const signOnRight = n % 2 === 1
               return (
                 <View
                   key={n}
@@ -191,6 +202,19 @@ export function IslandPath({ module, onIslandPress }: IslandPathProps) {
                     state={state}
                     width={ISLAND_WIDTH}
                     onPress={onIslandPress ? () => onIslandPress(n) : undefined}
+                  />
+                  <Image
+                    source={ISLAND_POSTERS[n - 1]}
+                    style={{
+                      position: 'absolute',
+                      width: POSTER_WIDTH,
+                      height: POSTER_HEIGHT,
+                      top: -POSTER_HEIGHT + 72,
+                      left: signOnRight ? ISLAND_WIDTH - 40 : -8,
+                      zIndex: 10,
+                    }}
+                    contentFit="contain"
+                    accessibilityLabel={`Cartel de la isla ${n}`}
                   />
                 </View>
               )

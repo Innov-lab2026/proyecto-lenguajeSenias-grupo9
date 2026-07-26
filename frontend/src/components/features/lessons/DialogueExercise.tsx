@@ -72,7 +72,7 @@ export function DialogueExercise({
 
   return (
     <View className="flex-1">
-      <Text className="font-nunito text-sm font-bold text-ink text-center mb-2">{question}</Text>
+      <Text className="font-nunito text-base md:text-lg font-bold text-ink text-center mb-2">{question}</Text>
 
       {/* Dialogue Area */}
       <View className="flex-1 bg-surface rounded-2xl border-2 border-black/5 p-3 mb-3">
@@ -86,11 +86,11 @@ export function DialogueExercise({
 
             return (
               <View key={lineIdx} className="mb-2">
-                <Text className="font-nunito text-[10px] font-bold text-secondary mb-0.5">{line.speaker}:</Text>
+                <Text className="font-nunito text-xs md:text-sm font-bold text-secondary mb-0.5">{line.speaker}:</Text>
                 <View className="flex-row flex-wrap items-center">
                   {parts.map((part, partIdx) => (
                     <View key={partIdx} className="flex-row items-center flex-wrap">
-                      <Text className="font-nunito text-xs text-ink">{part}</Text>
+                      <Text className="font-nunito text-sm md:text-base text-ink">{part}</Text>
                       {partIdx < parts.length - 1 &&
                         (() => {
                           const globalIdx = previousLinesBlanks + blankCounter
@@ -103,11 +103,11 @@ export function DialogueExercise({
                               onLayout={() => measureBlank(globalIdx)}
                               onPress={() => clearBlank(globalIdx)}
                               className={cn(
-                                'mx-1 min-w-[50px] h-5 rounded-md border-b-2 items-center justify-center px-1',
+                                'mx-1 min-w-[64px] h-7 rounded-md border-b-2 items-center justify-center px-1',
                                 answers[globalIdx] ? 'bg-accent/20 border-secondary' : 'bg-slate-100 border-slate-300',
                               )}
                             >
-                              <Text className="font-nunito text-[10px] font-bold text-ink">
+                              <Text className="font-nunito text-sm md:text-base font-bold text-ink">
                                 {answers[globalIdx] || ''}
                               </Text>
                             </Pressable>

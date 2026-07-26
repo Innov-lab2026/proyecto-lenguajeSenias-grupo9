@@ -73,7 +73,10 @@ export default function HomeScreen() {
   const handleIslandPress = (islandNumber: number) => {
     const lesson = selectedModuleLessons.find((l) => l.lesson_number === islandNumber)
     if (!lesson) return
-    router.push(`/lesson/${lesson.id}?n=${lesson.lesson_number}`)
+    // `pr` (points_retry) viaja para que el feedback de error pueda mostrar el
+    // número real de puntos que quedan en juego. Es sólo para mostrar: la
+    // recompensa la calcula el server al completar la lección.
+    router.push(`/lesson/${lesson.id}?n=${lesson.lesson_number}&pr=${lesson.points_retry}`)
   }
 
   if (!selectedModule) {
