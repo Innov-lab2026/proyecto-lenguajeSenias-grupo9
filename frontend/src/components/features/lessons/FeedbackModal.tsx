@@ -8,12 +8,14 @@ import { cn } from '@/src/utils/cn'
 interface FeedbackModalProps {
   feedback: 'correct' | 'incorrect' | null
   tip?: string
+  /** Puntos que todavía se pueden ganar en este step pese al error (PUNTOS_CON_ERRORES). */
+  retryPoints?: number
   onRetry: () => void
   onNext: () => void
 }
 
 /** Feedback de correcto/incorrecto tras responder un step: full-screen en mobile, card centrado en desktop. */
-export function FeedbackModal({ feedback, tip, onRetry, onNext }: FeedbackModalProps) {
+export function FeedbackModal({ feedback, tip, retryPoints = 0, onRetry, onNext }: FeedbackModalProps) {
   const { isMobile } = useResponsive()
   const insets = useSafeAreaInsets()
   const isCorrect = feedback === 'correct'
@@ -36,7 +38,7 @@ export function FeedbackModal({ feedback, tip, onRetry, onNext }: FeedbackModalP
         <View className="w-full flex-1">
           <Text className="font-nunito text-base text-ink mb-1">Puedes intentarlo nuevamente.</Text>
           <Text className="font-nunito text-sm text-muted mb-4 opacity-70">
-            Como es tu primer reintento, todavia puedes obtener 75 puntos.
+            Como es tu primer reintento, todavia puedes obtener {retryPoints} puntos.
           </Text>
           <Text className="font-nunito text-sm font-bold text-ink italic">
             Consejo: observa atentamente el video antes de seleccionar la respuesta correcta.
