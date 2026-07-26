@@ -6,11 +6,16 @@ frontend a ese backend, y dejar jugable de punta a punta el Módulo 1 (incluyend
 real en la isla 5).
 
 **Estado al escribir esto:** implementado, compilando y verificado contra la base real
-(smoke tests manuales, con limpieza de datos de prueba después). **Nada de esto está
-commiteado ni deployado todavía** — ver §7.
+(smoke tests manuales, con limpieza de datos de prueba después), y **ya commiteado en
+`test`** (`eecf851`, merge de `review-lessons-ui`). **Todavía sin deployar** — ver §7.
 
 **No cubre:** el refresh de sesión / manejo de tokens (`fix(auth): renovar la sesión con
 refresh token...`, ya commiteado). Ver el historial de git para eso.
+
+**Actualizado tras el merge de `review-lessons-ui`:** la pantalla de lección se reescribió
+por completo (video real con expo-video, layout responsive, extracción en 13 componentes).
+Ver §6.4-bis y `DOCS/LESSONS_UI_IMPLEMENTATION.md` para el detalle de esa parte — este
+documento se actualizó para no seguir describiendo el runner viejo.
 
 ---
 
@@ -274,8 +279,14 @@ trigger siempre crea la fila, pero por las dudas), normaliza a stats en cero.
 
 ### 6.4. Runner de lección (`app/lesson/[id].tsx`)
 
+> Esta sección describe la lógica de negocio del runner (de dónde sale cada dato), que sigue
+> vigente tal cual tras el merge de `review-lessons-ui`. La **UI** de la pantalla (video real,
+> layout responsive, extracción en componentes) se describe en §6.4-bis.
+
 - `id` (ruta) = UUID real de la lección, para `completeLesson`. `n` (query param) =
-  `lesson_number`, decide qué `MOCK_LESSON_*` mostrar.
+  `lesson_number`, decide qué `MOCK_LESSON_*` mostrar. `pr` (query param, agregado al mergear
+  la UI nueva) = `points_retry` de la lección: sólo para que el modal de feedback muestre
+  cuántos puntos se pueden ganar todavía tras un error — no reemplaza el cálculo del server.
 - **Se eliminó todo el cálculo de recompensa del cliente** (arrays `xpValues`/
   `pointsNoErrors`/`pointsWithErrors` hardcodeados, con un bug de indexación conocido). La
   economía la calcula y persiste el server.
@@ -291,6 +302,33 @@ trigger siempre crea la fila, pero por las dudas), normaliza a stats en cero.
   otorgó un logro nuevo.
 - El HUD superior (XP/puntos/señas durante el juego) pasó de `MOCK_HOME_STATS` (nunca
   reflejaba al usuario real) a `useStats()`.
+
+### 6.4-bis. UI del runner: video real + layout responsive (merge de `review-lessons-ui`)
+
+La pantalla se reescribió en paralelo, en otra rama, y se mergeó sobre esta implementación.
+Detalle completo, gotchas de plataforma y verificación en
+`DOCS/LESSONS_UI_IMPLEMENTATION.md` — acá sólo el resumen de qué cambió respecto a lo
+descripto en el resto de este documento:
+
+- **Los videos ya no son un ícono placeholder.** Se integró **expo-video** (`~3.0.16`) y los
+  6 lugares donde debía haber una seña (content, quiz, matching, diálogo) reproducen video
+  real. El gating de "ya viste el video" depende del evento `playToEnd`, no de un tap
+  simulado.
+- **13 componentes nuevos** en `src/components/features/lessons/` (`LessonVideo`,
+  `LessonHeader`, `LessonFooter`, `LessonSummary`, 4 modales, 3 `steps/*`) — `[id].tsx` quedó
+  como orquestador (estado + reglas de negocio), sin JSX de las pantallas.
+  **`DialogueExercise`/`DraggableWord` (drag & drop, §6.5) se conservaron tal cual** — la
+  otra rama traía su propia versión de diálogo (tap-para-seleccionar) y se descartó a favor
+  de ésta al resolver el merge.
+- **Layout responsive.** Antes todo ocupaba el ancho completo en desktop (modales de
+  ~1800px, CTA de punta a punta); ahora hay topes por zona (`max-w-5xl` la columna,
+  `max-w-md` los modales, `max-w-sm` el CTA) y el marco de video es vertical 9:16 (los videos
+  de LSA son verticales, no horizontales).
+- **El texto de feedback tras un error ya no dice "75 puntos" fijo** — lee el `pr` real de la
+  lección (ver arriba). Sigue siendo sólo informativo: la recompensa la calcula el server.
+- **Los 3 videos de Cloudinary son de prueba** (señas sueltas del abecedario, cargadas para
+  validar que el reproductor anda) — no corresponden semánticamente a "Hola"/"Mío"/etc.
+  Reemplazarlos por contenido real sigue pendiente (§7.2).
 
 ### 6.5. Drag & drop real — isla 5
 
@@ -325,9 +363,8 @@ posible a futuro.
 
 ### 7.1. Bloqueante para que esto llegue a producción
 
-- **Nada de esto está commiteado.** Todo el trabajo de este documento vive sin commitear en
-  el working tree (`git status` lo confirma). El backend deployado en Vercel
-  (`carpiseniasback.vercel.app`) sigue corriendo el código viejo.
+- **Ya está commiteado** (`test`, `eecf851`), pero **sin deployar todavía**. El backend
+  deployado en Vercel (`carpiseniasback.vercel.app`) sigue corriendo el código viejo.
 - Consecuencia práctica ahora mismo: probar desde **Expo Go** requiere apuntar
   `EXPO_PUBLIC_API_URL` a la IP de LAN de la máquina que corre el backend local (`localhost`
   no sirve desde un dispositivo físico — ver la sesión de debugging correspondiente). Una vez
@@ -351,9 +388,10 @@ posible a futuro.
   backend real requeriría modelar `videos`/opciones/respuesta-correcta por ejercicio en la
   base — hoy sólo existe `lesson_signs` (qué señas acredita), no la estructura completa del
   ejercicio. Es una pieza de arquitectura nueva, no una extensión chica.
-- **Reproducción de video real.** Todos los "videos" son un ícono placeholder
-  (`videocam-outline`). `expo-video` (o similar) nunca se integró — sigue siendo el mayor
-  riesgo técnico pendiente del proyecto.
+- **Reproducción de video: resuelta, con videos de prueba.** `expo-video` ya está integrado
+  y los 6 lugares reproducen video real (§6.4-bis) — dejó de ser el riesgo técnico pendiente.
+  Lo que falta es reemplazar los 3 videos de Cloudinary (de prueba, sin relación semántica con
+  el ejercicio) por el contenido definitivo de cada seña.
 - **Hover feedback en el drag de la isla 5** (§6.5) — pulido opcional.
 - **Cascada de desbloqueo entre módulos** (§6.3) — la lógica de "el módulo N se abre si el
   N-1 está 100% completo" no está implementada más allá del primer módulo; hoy no hay con qué
@@ -363,5 +401,6 @@ posible a futuro.
 
 - `profiles.first_name`/`last_name`: el schema los agregó pero `handle_new_user()` no los
   llena (sólo `full_name`). Quedan `null`.
-- 5 warnings de lint preexistentes en `app/lesson/[id].tsx` (imports sin usar, dos
-  `exhaustive-deps`) — no introducidos por este trabajo, no tocados.
+- 2 warnings de lint preexistentes en `app/lesson/[id].tsx` (`exhaustive-deps` en los dos
+  `useEffect` de arranque de step / guardado de progreso) — no introducidos por este trabajo,
+  no tocados.
