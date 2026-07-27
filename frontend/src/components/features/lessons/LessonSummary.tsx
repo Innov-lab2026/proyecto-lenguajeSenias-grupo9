@@ -1,7 +1,9 @@
+import { useEffect, useState } from 'react'
 import { Pressable, Text, View } from 'react-native'
 import { Image } from 'expo-image'
 import { Ionicons } from '@expo/vector-icons'
 import { Button } from '@/src/components/common/Button'
+import { StatItem } from '@/src/components/features/home/stats'
 import type { CompleteLessonResult } from '@/src/types/progress'
 
 interface LessonSummaryProps {
@@ -15,6 +17,9 @@ interface LessonSummaryProps {
   insets: { top: number; bottom: number }
 }
 
+/** Respiro antes de "revelar" la recompensa (que se note que apareció, no que ya estaba). */
+const REVEAL_DELAY_MS = 300
+
 /** Pantalla de resumen al terminar la lección: recompensa del server + desbloqueo del próximo nivel. */
 export function LessonSummary({ result, isPending, nextLevel, onClose, onContinue, insets }: LessonSummaryProps) {
   // El server responde success:false cuando la lección ya estaba completada:
@@ -22,6 +27,21 @@ export function LessonSummary({ result, isPending, nextLevel, onClose, onContinu
   const alreadyCompleted = result != null && !result.success
   const earnedAchievements = result?.earned_achievements ?? []
   const showUnlock = !alreadyCompleted && nextLevel !== null
+
+  // StatItem sólo anima cuando su `value` sube mientras está montado. La
+  // respuesta del server puede llegar tan rápido que el 0 inicial no alcance a
+  // pintarse (mock resuelve en el acto), así que el salto a los valores reales
+  // se agenda explícitamente en vez de depender de cuándo resuelva la request.
+  // Ya completada ⇒ earned_* viene en 0 y no hay nada que animar.
+  const [revealed, setRevealed] = useState({ xp: 0, points: 0, signs: 0 })
+
+  useEffect(() => {
+    if (result == null) return
+    const timeout = setTimeout(() => {
+      setRevealed({ xp: result.earned_xp, points: result.earned_points, signs: result.earned_signs })
+    }, REVEAL_DELAY_MS)
+    return () => clearTimeout(timeout)
+  }, [result])
 
   return (
     <View
@@ -55,21 +75,13 @@ export function LessonSummary({ result, isPending, nextLevel, onClose, onContinu
 
       <View className="w-full max-w-md flex-row justify-between gap-2 mt-auto mb-4">
         <View className="flex-1 min-h-[116px] bg-surface rounded-2xl border-2 border-[#4A90E2] items-center justify-center px-1">
-          <View className="w-8 h-8 rounded-full bg-secondary/20 items-center justify-center mb-1">
-            <Text className="font-nunito text-xs font-bold text-secondary">XP</Text>
-          </View>
-          <Text className="font-nunito text-xs font-bold text-ink mb-1">Experiencia</Text>
-          <Text className="font-nunito text-2xl font-bold text-ink">{result?.earned_xp ?? 0}</Text>
+          <StatItem kind="xp" label="Experiencia" value={revealed.xp} layout="column" showLabel badgeSize={34} valueClassName="text-2xl" />
         </View>
         <View className="flex-1 min-h-[116px] bg-surface rounded-2xl border-2 border-[#4A90E2] items-center justify-center px-1">
-          <Ionicons name="star" size={30} color="#F7BB18" />
-          <Text className="font-nunito text-xs font-bold text-ink mb-1">Puntos</Text>
-          <Text className="font-nunito text-2xl font-bold text-ink">+{result?.earned_points ?? 0}</Text>
+          <StatItem kind="star" label="Puntos" value={revealed.points} layout="column" showLabel badgeSize={34} valueClassName="text-2xl" prefix="+" />
         </View>
         <View className="flex-1 min-h-[116px] bg-surface rounded-2xl border-2 border-[#4A90E2] items-center justify-center px-1">
-          <Ionicons name="paw" size={30} color="#A5652E" />
-          <Text className="font-nunito text-xs font-bold text-ink mb-1">Señas</Text>
-          <Text className="font-nunito text-2xl font-bold text-ink">{result?.earned_signs ?? 0}</Text>
+          <StatItem kind="paw" label="Señas" value={revealed.signs} layout="column" showLabel badgeSize={34} valueClassName="text-2xl" />
         </View>
       </View>
 

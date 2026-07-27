@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { View, ActivityIndicator } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { useRouter } from 'expo-router'
+import { useFocusEffect, useRouter } from 'expo-router'
 import { StatsHeader } from '@/src/components/features/home/StatsHeader'
 import { ModuleTabs } from '@/src/components/features/home/ModuleTabs'
 import { IslandPath } from '@/src/components/features/home/IslandPath'
@@ -23,6 +23,20 @@ export default function HomeScreen() {
   const modulesQuery = useModules()
   const statsQuery = useStats()
   const completedLessonsQuery = useCompletedLessons()
+
+  // El home NO se desmonta al entrar a una lección (el Stack raíz la apila
+  // encima, no la reemplaza) — vuelve a quedar visible con router.back() sin
+  // pasar por un mount nuevo, así que el refetch-on-mount de useStats no
+  // alcanza para traer el total actualizado. refetch() explícito al ganar
+  // foco cubre ese caso; como llega mientras la pantalla ya es visible, el
+  // valor previo sigue sembrado en StatItem y el salto al total real dispara
+  // la animación (ver DOCS/LESSONS_UI_IMPLEMENTATION.md).
+  const { refetch: refetchStats } = statsQuery
+  useFocusEffect(
+    useCallback(() => {
+      refetchStats()
+    }, [refetchStats])
+  )
 
   const sortedModules = [...(modulesQuery.data ?? [])].sort((a, b) => a.order - b.order)
   const effectiveSelectedId = selectedModuleId ?? sortedModules[0]?.id

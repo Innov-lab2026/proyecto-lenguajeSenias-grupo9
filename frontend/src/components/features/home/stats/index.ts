@@ -1,3 +1,5 @@
 export { XpIcon, StarIcon, PawIcon } from './StatIcon'
 export { StatBadge } from './StatBadge'
+export { StatItem } from './StatItem'
+export type { StatItemProps } from './StatItem'
 export type { StatKind } from './useStatIdle'
