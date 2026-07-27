@@ -1,8 +1,19 @@
-import { supabase } from '../config/supabaseClient'
+import { supabaseAdmin } from '../config/supabaseClient'
 
-export const getUserProgressService = async (userId: string) => {
-  const { data, error } = await supabase
-    .from('user_progress')
+export const getUserStatsService = async (userId: string) => {
+  const { data, error } = await supabaseAdmin
+    .from('user_stats')
+    .select('*')
+    .eq('user_id', userId)
+    .maybeSingle()
+
+  if (error) throw new Error(error.message)
+  return data
+}
+
+export const getCompletedLessonsService = async (userId: string) => {
+  const { data, error } = await supabaseAdmin
+    .from('user_lessons_completed')
     .select('*')
     .eq('user_id', userId)
 
@@ -10,55 +21,45 @@ export const getUserProgressService = async (userId: string) => {
   return data
 }
 
-export const updateProgressService = async (
-  userId: string, 
-  moduleId: string, 
-  completedIslands?: number, 
-  xpGain?: number, 
-  starsGain?: number
-) => {
-  // Primero intentamos obtener el progreso actual para este módulo
-  const { data: current, error: fetchError } = await supabase
-    .from('user_progress')
-    .select('*')
-    .eq('user_id', userId)
-    .eq('module_id', moduleId)
-    .single()
+interface CompleteLessonResult {
+  success: boolean
+  message?: string
+  earned_xp: number
+  earned_points: number
+  earned_signs: number
+}
 
-  if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 is "not found"
-    throw new Error(fetchError.message)
-  }
+/**
+ * Llama a la RPC `complete_user_lesson`, que calcula la recompensa y registra
+ * todo (lección completada, señas nuevas, stats) en una sola transacción del
+ * lado de la base. `p_user_id` va explícito porque este cliente es
+ * `supabaseAdmin` (service_role) — no hay JWT de usuario del cual la base
+ * pueda leer `auth.uid()`. El EXECUTE de la RPC está restringido a
+ * service_role (ver la migración), así que sólo este servicio puede llamarla.
+ */
+export const completeLessonService = async (
+  userId: string,
+  lessonId: string,
+  isPerfect: boolean,
+): Promise<CompleteLessonResult> => {
+  const { data, error } = await supabaseAdmin.rpc('complete_user_lesson', {
+    p_lesson_id: lessonId,
+    p_user_id: userId,
+    p_is_perfect: isPerfect,
+  })
 
-  if (current) {
-    const { data, error } = await supabase
-      .from('user_progress')
-      .update({
-        completed_islands: completedIslands !== undefined ? Math.max(current.completed_islands, completedIslands) : current.completed_islands,
-        total_xp: current.total_xp + (xpGain ?? 0),
-        total_stars: current.total_stars + (starsGain ?? 0),
-        last_updated: new Date()
-      })
-      .eq('id', current.id)
-      .select()
-      .single()
+  if (error) throw new Error(error.message)
+  return data as CompleteLessonResult
+}
 
-    if (error) throw new Error(error.message)
-    return data
-  } else {
-    // Si no existe, lo creamos
-    const { data, error } = await supabase
-      .from('user_progress')
-      .insert({
-        user_id: userId,
-        module_id: moduleId,
-        completed_islands: completedIslands ?? 0,
-        total_xp: xpGain ?? 0,
-        total_stars: starsGain ?? 0
-      })
-      .select()
-      .single()
+interface GrantedAchievement {
+  id: string
+  name: string
+}
 
-    if (error) throw new Error(error.message)
-    return data
-  }
+/** Logros recién otorgados tras completar una lección (ver evaluate_achievements). */
+export const evaluateAchievementsService = async (userId: string): Promise<GrantedAchievement[]> => {
+  const { data, error } = await supabaseAdmin.rpc('evaluate_achievements', { p_user_id: userId })
+  if (error) throw new Error(error.message)
+  return (data ?? []) as GrantedAchievement[]
 }

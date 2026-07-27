@@ -2,12 +2,15 @@ import { useEffect, useRef, useState } from 'react'
 import { ScrollView, View } from 'react-native'
 import { Image } from 'expo-image'
 import Svg, { Path } from 'react-native-svg'
-import Animated, { 
-  useAnimatedStyle, 
-  withSpring, 
+import Animated, {
+  useAnimatedStyle,
+  withSpring,
   useSharedValue,
   useDerivedValue,
-  interpolate
+  interpolate,
+  FadeIn,
+  FadeOut,
+  runOnJS
 } from 'react-native-reanimated'
 import { Island } from './Island'
 import { getIslandRatio } from './islands'
@@ -34,14 +37,23 @@ const PAD_TOP = 32
 const PAD_BOTTOM = 56
 
 const ISLAND_POSTERS = [
-  require('@/assets/images/home/carteles/cartel1.png'),
-  require('@/assets/images/home/carteles/cartel2.png'),
-  require('@/assets/images/home/carteles/cartel3.png'),
-  require('@/assets/images/home/carteles/cartel4.png'),
-  require('@/assets/images/home/carteles/cartel5.png'),
+  require('@/assets/images/home/carteles/cartel1.svg'),
+  require('@/assets/images/home/carteles/cartel2.svg'),
+  require('@/assets/images/home/carteles/cartel3.svg'),
+  require('@/assets/images/home/carteles/cartel4.svg'),
+  require('@/assets/images/home/carteles/cartel5.svg'),
 ]
-const POSTER_WIDTH = 46
-const POSTER_HEIGHT = 58
+const POSTER_WIDTH = 36
+const POSTER_HEIGHT = 48
+
+// Desplazamientos verticales personalizados para cada cartel (1 a 5) para compensar
+const POSTER_TOP_OFFSETS: Record<number, number> = {
+  1: -POSTER_HEIGHT + 42,
+  2: -POSTER_HEIGHT + 42,
+  3: -POSTER_HEIGHT + 42,
+  4: -POSTER_HEIGHT + 46,
+  5: -POSTER_HEIGHT + 60,
+}
 
 const CONTENT_HEIGHT = PAD_TOP + 70 + (ISLANDS_PER_MODULE - 1) * STEP + 46 + PAD_BOTTOM
 
@@ -74,71 +86,168 @@ function buildRiverPath(points: { x: number; y: number }[]): string {
 export function IslandPath({ module, onIslandPress }: IslandPathProps) {
   const scrollRef = useRef<ScrollView>(null)
   const [width, setWidth] = useState<number | null>(null)
+  const [isAnimating, setIsAnimating] = useState(false)
   const { isMobile, isTablet } = useResponsive()
 
   const islandNumbers = Array.from({ length: ISLANDS_PER_MODULE }, (_, i) => i + 1)
   const centers = width ? islandNumbers.map((n) => getIslandCenter(n, width)) : []
 
-  // La isla actual donde debe estar el carpincho (1 a 5)
+  // Altura de cada isla según su estado actual (bloqueada o viva)
+  const islandHeights = width
+    ? islandNumbers.map((n) => {
+      const state = getIslandState(module, n)
+      return ISLAND_WIDTH * getIslandRatio(n, state === 'blocked')
+    })
+    : []
+
+  // La isla actual donde debe estar el avatar (1 a 5)
   const targetIsland = Math.min(module.completedIslands + 1, ISLANDS_PER_MODULE)
-  
-  // Posición inicial del ScrollView basada en la isla destino
-  const initialScrollY = centers.length > 0 
-    ? Math.max(0, centers[ISLANDS_PER_MODULE - targetIsland].y - 300) 
+
+  // Posición inicial del ScrollView basada en la isla de destino
+  const initialScrollY = centers.length > 0
+    ? Math.max(0, centers[ISLANDS_PER_MODULE - targetIsland].y - 300)
     : CONTENT_HEIGHT
 
-  // Progreso animado entre islas (0 a ISLANDS_PER_MODULE - 1)
-  const animProgress = useSharedValue(Math.max(0, targetIsland - 1))
+  // El progreso inicial en reposo del avatar según las islas completadas:
+  // - Si completó 0 islas: se ubica en el fondo de la isla 1 (valor 0).
+  // - Si completó C > 0 islas: se ubica en la cima de la isla C (valor C - 0.5).
+  const getRestingProgress = (completed: number) => {
+    if (completed === 0) return 0
+    return (completed - 1) + 0.5
+  }
+
+  const restingProgress = getRestingProgress(module.completedIslands)
+
+  // Progreso animado en el camino (0 a 4.5)
+  const animProgress = useSharedValue(restingProgress)
 
   useEffect(() => {
     if (width && centers.length > 0) {
-      animProgress.value = withSpring(targetIsland - 1, { damping: 15, stiffness: 60 })
-      
-      // Hacer scroll hasta la posición del avatar
+      const targetResting = getRestingProgress(module.completedIslands)
+      animProgress.value = withSpring(targetResting, { damping: 15, stiffness: 60 })
+
+      // Hacer scroll hasta la posición de la isla destino
+      const targetIsland = Math.min(module.completedIslands + 1, ISLANDS_PER_MODULE)
       const targetCenter = centers[targetIsland - 1]
       if (targetCenter) {
         // Centrar aproximadamente la isla en la pantalla
-        scrollRef.current?.scrollTo({ 
-          y: Math.max(0, targetCenter.y - 300), 
-          animated: true 
+        scrollRef.current?.scrollTo({
+          y: Math.max(0, targetCenter.y - 300),
+          animated: true
         })
       }
     }
-  }, [targetIsland, width, centers])
+    // El efecto solo debe dispararse si cambia completedIslands o el ancho (width)
+  }, [module.completedIslands, width])
+
+  // Obtiene las coordenadas (x, y) de Carpi en función de su progreso en el camino (0 a 4.5).
+  // Los comentarios en español explican las matemáticas aplicadas.
+  const getAvatarPosition = (stateProgress: number) => {
+    'worklet';
+    if (!centers || centers.length === 0 || islandHeights.length === 0) return { x: 0, y: 0 }
+
+    // Clampeamos el progreso para que no se salga de los límites definidos
+    const progress = Math.min(Math.max(0, stateProgress), 4.5)
+    const k = Math.min(Math.max(0, Math.floor(progress)), centers.length - 1)
+    const diff = progress - k
+
+    // Si es la última isla, o si estamos en la fase vertical de la isla (de bottom a top)
+    if (k >= centers.length - 1 || diff <= 0.5) {
+      const w = Math.min(1, diff / 0.5)
+      const center = centers[k]
+      const height = islandHeights[k]
+      // Posición delantera/inferior de la isla k + 1 (más abajo, en el agua)
+      const bottomY = center.y + height / 2 + 15
+      // Posición trasera/superior de la isla k + 1 (más abajo, en el borde de la isla)
+      const topY = center.y - height / 2 + 48
+      return {
+        x: center.x,
+        y: bottomY + w * (topY - bottomY)
+      }
+    } else {
+      // Viajando por el río (curva Bezier) entre la cima de la isla k + 1 y la base de la isla k + 2
+      const u = (diff - 0.5) / 0.5
+      const localT = 0.2 + u * 0.6 // Mapea u (0 a 1) en el rango Bezier (0.2 a 0.8)
+
+      const p0 = centers[k]
+      const p3 = centers[k + 1]
+      if (!p0 || !p3) return { x: 0, y: 0 }
+
+      const midY = (p0.y + p3.y) / 2
+      const p1 = { x: p0.x, y: midY }
+      const p2 = { x: p3.x, y: midY }
+
+      const mt = 1 - localT
+      const x = mt * mt * mt * p0.x + 3 * mt * mt * localT * p1.x + 3 * mt * localT * localT * p2.x + localT * localT * localT * p3.x
+      const y = mt * mt * mt * p0.y + 3 * mt * mt * localT * p1.y + 3 * mt * localT * localT * p2.y + localT * localT * localT * p3.y
+
+      return { x, y }
+    }
+  }
 
   const animatedCarpiStyle = useAnimatedStyle(() => {
-    // Si no hay centros aún, mantenemos invisible
-    if (!centers || centers.length === 0) {
+    if (!centers || centers.length === 0 || islandHeights.length === 0) {
       return { opacity: 0 }
     }
 
     const tTotal = animProgress.value
-    
-    // Clampeamos el valor para evitar desbordes de índice
-    const index = Math.min(Math.max(0, Math.floor(tTotal)), centers.length - 2)
-    const t = tTotal - index
+    const progress = Math.min(Math.max(0, tTotal), 4.5)
+    const k = Math.min(Math.max(0, Math.floor(progress)), centers.length - 1)
+    const diff = progress - k
 
-    const p0 = centers[index]
-    const p3 = centers[index + 1]
-
-    if (!p0 || !p3) return { opacity: 0 }
-
-    const midY = (p0.y + p3.y) / 2
-    const p1 = { x: p0.x, y: midY }
-    const p2 = { x: p3.x, y: midY }
-
-    const mt = 1 - t
-    const x = mt * mt * mt * p0.x + 3 * mt * mt * t * p1.x + 3 * mt * t * t * p2.x + t * t * t * p3.x
-    const y = mt * mt * mt * p0.y + 3 * mt * mt * t * p1.y + 3 * mt * t * t * p2.y + t * t * t * p3.y
+    const pos = getAvatarPosition(tTotal)
+    // zIndex dinámico: si está en la parte superior/trasera (diff >= 0.4) o en el río, va detrás de la isla (zIndex = 5).
+    // Si está en la parte inferior/delantera (diff < 0.4), va delante de la isla (zIndex = 20).
+    const zIndexVal = diff < 0.4 ? 20 : 5
 
     return {
       opacity: 1,
+      zIndex: zIndexVal,
       transform: [
-        { translateX: x - 28 },
-        { translateY: y - 45 }
+        { translateX: pos.x - 28 },
+        { translateY: pos.y - 45 }
       ]
     }
   })
+
+  // Controlador al presionar una isla con animación de recorrido de Carpi
+  const handleIslandPress = (n: number) => {
+    console.log('[IslandPath] handleIslandPress clicked for:', n, 'completedIslands:', module.completedIslands, 'current progress:', animProgress.value);
+    if (!onIslandPress || isAnimating) return
+
+    const completed = module.completedIslands
+    // Si hace click en la siguiente lección activa (completed + 1)
+    if (n === completed + 1) {
+      const targetProgress = n - 1 // parte inferior de la isla n
+      console.log('[IslandPath] Target progress:', targetProgress, 'Current progress:', animProgress.value);
+
+      // Si ya está en la posición de destino, abrimos la lección inmediatamente
+      if (Math.abs(animProgress.value - targetProgress) < 0.01) {
+        console.log('[IslandPath] Already at target, opening immediately');
+        onIslandPress(n)
+        return
+      }
+
+      setIsAnimating(true)
+      animProgress.value = withSpring(targetProgress, { damping: 15, stiffness: 60 })
+      console.log('[IslandPath] Started spring animation to:', targetProgress);
+
+      // Usamos un temporizador seguro en el hilo de JS para evitar problemas de callbacks en React Native Web
+      setTimeout(() => {
+        console.log('[IslandPath] Timer finished, opening lesson:', n);
+        handleAnimationComplete(n)
+      }, 650)
+    } else {
+      // Para lecciones ya completadas, se abre inmediatamente
+      console.log('[IslandPath] Completed lesson, opening immediately');
+      onIslandPress(n)
+    }
+  }
+
+  const handleAnimationComplete = (n: number) => {
+    setIsAnimating(false)
+    onIslandPress?.(n)
+  }
 
   return (
     <View
@@ -174,7 +283,6 @@ export function IslandPath({ module, onIslandPress }: IslandPathProps) {
                 style={[
                   {
                     position: 'absolute',
-                    zIndex: 20,
                   },
                   animatedCarpiStyle
                 ]}
@@ -187,7 +295,9 @@ export function IslandPath({ module, onIslandPress }: IslandPathProps) {
               const center = centers[n - 1]
               const state = getIslandState(module, n)
               const height = ISLAND_WIDTH * getIslandRatio(n, state === 'blocked')
-              const signOnRight = n % 2 === 1
+              // Los carteles 1, 3 y 5 deben estar en el lado superior izquierdo, mientras que el 2 y 4 en el lado superior derecho.
+              // Por lo tanto, signOnRight (lado derecho) debe ser verdadero para números de islas pares.
+              const signOnRight = n % 2 === 0
               return (
                 <View
                   key={n}
@@ -195,27 +305,40 @@ export function IslandPath({ module, onIslandPress }: IslandPathProps) {
                     position: 'absolute',
                     left: center.x - ISLAND_WIDTH / 2,
                     top: center.y - height / 2,
+                    zIndex: 10, // Para permitir que el avatar quede detrás (zIndex = 5) o delante (zIndex = 20)
                   }}
                 >
                   <Island
                     number={n}
                     state={state}
                     width={ISLAND_WIDTH}
-                    onPress={onIslandPress ? () => onIslandPress(n) : undefined}
+                    onPress={onIslandPress ? () => handleIslandPress(n) : undefined}
                   />
-                  <Image
-                    source={ISLAND_POSTERS[n - 1]}
-                    style={{
-                      position: 'absolute',
-                      width: POSTER_WIDTH,
-                      height: POSTER_HEIGHT,
-                      top: -POSTER_HEIGHT + 72,
-                      left: signOnRight ? ISLAND_WIDTH - 40 : -8,
-                      zIndex: 10,
-                    }}
-                    contentFit="contain"
-                    accessibilityLabel={`Cartel de la isla ${n}`}
-                  />
+                  {/* El cartel solo se muestra con animación si la isla está activa (disponible) */}
+                  {state === 'available' && (
+                    <Animated.View
+                      entering={FadeIn.duration(400)}
+                      exiting={FadeOut.duration(300)}
+                      style={{
+                        position: 'absolute',
+                        width: POSTER_WIDTH,
+                        height: POSTER_HEIGHT,
+                        top: POSTER_TOP_OFFSETS[n] ?? -POSTER_HEIGHT + 42,
+                        left: signOnRight ? ISLAND_WIDTH - 20 : -8,
+                        zIndex: 10,
+                      }}
+                    >
+                      <Image
+                        source={ISLAND_POSTERS[n - 1]}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                        }}
+                        contentFit="contain"
+                        accessibilityLabel={`Cartel de la isla ${n}`}
+                      />
+                    </Animated.View>
+                  )}
                 </View>
               )
             })}

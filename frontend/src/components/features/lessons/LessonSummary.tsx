@@ -1,20 +1,48 @@
+import { useEffect, useState } from 'react'
 import { Pressable, Text, View } from 'react-native'
 import { Image } from 'expo-image'
 import { Ionicons } from '@expo/vector-icons'
 import { Button } from '@/src/components/common/Button'
+import { StatItem } from '@/src/components/features/home/stats'
+import type { CompleteLessonResult } from '@/src/types/progress'
 
 interface LessonSummaryProps {
-  earnedStats: { xp: number; stars: number }
-  signCount: number
-  nextLevel: number
-  isSaving: boolean
+  /** Respuesta de completeLesson. `undefined` mientras la request está en vuelo. */
+  result?: CompleteLessonResult
+  isPending: boolean
+  /** Próximo nivel a desbloquear, o `null` si es la última lección del módulo. */
+  nextLevel: number | null
   onClose: () => void
   onContinue: () => void
   insets: { top: number; bottom: number }
 }
 
-/** Pantalla de resumen al terminar la lección: puntaje ganado + desbloqueo del próximo nivel. */
-export function LessonSummary({ earnedStats, signCount, nextLevel, isSaving, onClose, onContinue, insets }: LessonSummaryProps) {
+/** Respiro antes de "revelar" la recompensa (que se note que apareció, no que ya estaba). */
+const REVEAL_DELAY_MS = 300
+
+/** Pantalla de resumen al terminar la lección: recompensa del server + desbloqueo del próximo nivel. */
+export function LessonSummary({ result, isPending, nextLevel, onClose, onContinue, insets }: LessonSummaryProps) {
+  // El server responde success:false cuando la lección ya estaba completada:
+  // no hay recompensa nueva que mostrar, sólo se reconoce la revisita.
+  const alreadyCompleted = result != null && !result.success
+  const earnedAchievements = result?.earned_achievements ?? []
+  const showUnlock = !alreadyCompleted && nextLevel !== null
+
+  // StatItem sólo anima cuando su `value` sube mientras está montado. La
+  // respuesta del server puede llegar tan rápido que el 0 inicial no alcance a
+  // pintarse (mock resuelve en el acto), así que el salto a los valores reales
+  // se agenda explícitamente en vez de depender de cuándo resuelva la request.
+  // Ya completada ⇒ earned_* viene en 0 y no hay nada que animar.
+  const [revealed, setRevealed] = useState({ xp: 0, points: 0, signs: 0 })
+
+  useEffect(() => {
+    if (result == null) return
+    const timeout = setTimeout(() => {
+      setRevealed({ xp: result.earned_xp, points: result.earned_points, signs: result.earned_signs })
+    }, REVEAL_DELAY_MS)
+    return () => clearTimeout(timeout)
+  }, [result])
+
   return (
     <View
       className="flex-1 bg-[#EAF8FF] items-center justify-start px-4 overflow-hidden"
@@ -31,47 +59,51 @@ export function LessonSummary({ earnedStats, signCount, nextLevel, isSaving, onC
           contentFit="contain"
         />
 
-        <Text className="font-nunito text-4xl font-bold text-ink mb-0">¡Estuviste increíble!</Text>
-        <Text className="font-nunito text-lg text-muted mb-2">Completaste tu primera lección</Text>
+        <Text className="font-nunito text-4xl font-bold text-ink mb-0 text-center">
+          {alreadyCompleted ? '¡De nuevo por acá!' : '¡Estuviste increíble!'}
+        </Text>
+        <Text className="font-nunito text-lg text-muted mb-2 text-center">
+          {alreadyCompleted ? 'Ya habías completado esta lección.' : 'Completaste la lección'}
+        </Text>
+
+        {earnedAchievements.length > 0 ? (
+          <Text className="font-nunito text-base font-bold text-secondary text-center px-4">
+            ¡Nuevo logro! {earnedAchievements.map((a) => a.name).join(', ')}
+          </Text>
+        ) : null}
       </View>
 
       <View className="w-full max-w-md flex-row justify-between gap-2 mt-auto mb-4">
         <View className="flex-1 min-h-[116px] bg-surface rounded-2xl border-2 border-[#4A90E2] items-center justify-center px-1">
-          <View className="w-8 h-8 rounded-full bg-secondary/20 items-center justify-center mb-1">
-            <Text className="font-nunito text-xs font-bold text-secondary">XP</Text>
-          </View>
-          <Text className="font-nunito text-xs font-bold text-ink mb-1">Experiencia</Text>
-          <Text className="font-nunito text-2xl font-bold text-ink">{earnedStats.xp}</Text>
+          <StatItem kind="xp" label="Experiencia" value={revealed.xp} layout="column" showLabel badgeSize={34} valueClassName="text-2xl" />
         </View>
         <View className="flex-1 min-h-[116px] bg-surface rounded-2xl border-2 border-[#4A90E2] items-center justify-center px-1">
-          <Ionicons name="star" size={30} color="#F7BB18" />
-          <Text className="font-nunito text-xs font-bold text-ink mb-1">Puntos</Text>
-          <Text className="font-nunito text-2xl font-bold text-ink">+{earnedStats.stars}</Text>
+          <StatItem kind="star" label="Puntos" value={revealed.points} layout="column" showLabel badgeSize={34} valueClassName="text-2xl" prefix="+" />
         </View>
         <View className="flex-1 min-h-[116px] bg-surface rounded-2xl border-2 border-[#4A90E2] items-center justify-center px-1">
-          <Ionicons name="paw" size={30} color="#A5652E" />
-          <Text className="font-nunito text-xs font-bold text-ink mb-1">Señas</Text>
-          <Text className="font-nunito text-2xl font-bold text-ink">{signCount}</Text>
+          <StatItem kind="paw" label="Señas" value={revealed.signs} layout="column" showLabel badgeSize={34} valueClassName="text-2xl" />
         </View>
       </View>
 
       <View className="h-[22%] min-h-[150px] self-stretch -mx-4 bg-[#67AEF5] items-center justify-end pb-5 relative">
-        <View className="items-center z-10 mb-3">
-          <Image
-            source={require('@/assets/images/lessons/candado_abierto.svg')}
-            className="w-16 h-16"
-            contentFit="contain"
-          />
-          <Text className="font-nunito text-base font-bold text-ink text-center leading-4">
-            Nivel {nextLevel}
-            {'\n'}desbloqueado
-          </Text>
-        </View>
+        {showUnlock ? (
+          <View className="items-center z-10 mb-3">
+            <Image
+              source={require('@/assets/images/lessons/candado_abierto.svg')}
+              className="w-16 h-16"
+              contentFit="contain"
+            />
+            <Text className="font-nunito text-base font-bold text-ink text-center leading-4">
+              Nivel {nextLevel}
+              {'\n'}desbloqueado
+            </Text>
+          </View>
+        ) : null}
         <Button
-          label={isSaving ? 'Guardando...' : 'Continuar'}
+          label={isPending ? 'Guardando...' : 'Continuar'}
           onPress={onContinue}
           className="w-40 z-10"
-          disabled={isSaving}
+          disabled={isPending}
         />
       </View>
     </View>

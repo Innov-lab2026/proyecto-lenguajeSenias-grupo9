@@ -22,6 +22,8 @@ export const teamData = {
         description: "Desarrollamos la interfaz web y mobile de la plataforma con foco en accesibilidad y rendimiento. Integramos los módulos de aprendizaje y la práctica de señas en una experiencia fluida.",
         members: [
             { name: "Ezequiel Oliver", linkedin: "https://www.linkedin.com/in/ezequiel-oliver/", github: "https://github.com/Oliver-92" },
+            { name: "María Cerpa", linkedin: "", github: "" },
+            { name: "Juan Martinez", linkedin: "", github: "" },
             { name: "Roberto Bezerra", linkedin: "https://www.linkedin.com/in/rbezerra18/", github: "https://github.com/rbezerra18" }
         ]
     },
