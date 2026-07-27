@@ -26,16 +26,18 @@ export default function HomeScreen() {
 
   // El home NO se desmonta al entrar a una lección (el Stack raíz la apila
   // encima, no la reemplaza) — vuelve a quedar visible con router.back() sin
-  // pasar por un mount nuevo, así que el refetch-on-mount de useStats no
-  // alcanza para traer el total actualizado. refetch() explícito al ganar
-  // foco cubre ese caso; como llega mientras la pantalla ya es visible, el
-  // valor previo sigue sembrado en StatItem y el salto al total real dispara
-  // la animación (ver DOCS/LESSONS_UI_IMPLEMENTATION.md).
+  // pasar por un mount nuevo. Por eso el refetch-on-mount de estas queries no
+  // alcanza: refetch() explícito al ganar foco trae el progreso actualizado
+  // (stats Y lecciones completadas, esta última la que desbloquea la
+  // siguiente isla) cada vez que se vuelve a ver el home, sin depender de un
+  // reload manual (ver DOCS/LESSONS_UI_IMPLEMENTATION.md).
   const { refetch: refetchStats } = statsQuery
+  const { refetch: refetchCompletedLessons } = completedLessonsQuery
   useFocusEffect(
     useCallback(() => {
       refetchStats()
-    }, [refetchStats])
+      refetchCompletedLessons()
+    }, [refetchStats, refetchCompletedLessons])
   )
 
   const sortedModules = [...(modulesQuery.data ?? [])].sort((a, b) => a.order - b.order)

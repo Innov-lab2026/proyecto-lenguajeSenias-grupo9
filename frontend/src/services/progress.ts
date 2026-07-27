@@ -32,7 +32,13 @@ export async function getStats(): Promise<UserStats> {
 }
 
 export async function getCompletedLessons(): Promise<CompletedLesson[]> {
-  if (USE_MOCK_AUTH) return mockCompleted
+  // Copia nueva, no la referencia de mockCompleted: como completeLesson()
+  // muta ese array in-place (push), devolver la misma referencia hace que
+  // React Query (y la memoización automática de React Compiler) lo vean
+  // "sin cambios" entre refetches, aunque el contenido sí cambió — eso
+  // dejaba la isla siguiente sin desbloquear hasta recargar. mockStats no
+  // tenía este problema porque se reasigna (spread) en vez de mutarse.
+  if (USE_MOCK_AUTH) return [...mockCompleted]
 
   const { data } = await http.get<{ data: CompletedLesson[] }>('/lessons/completed')
   return data.data
