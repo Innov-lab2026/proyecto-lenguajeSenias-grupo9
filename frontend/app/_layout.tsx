@@ -51,6 +51,13 @@ export default function RootLayout() {
           <Stack screenOptions={{ headerShown: false }}>
             <Stack.Protected guard={isAuthenticated}>
               <Stack.Screen name="(protected)" />
+              {/* Fuera de (protected) a propósito: pantalla inmersiva, sin
+                  SideBar/BottomBar. Declarada acá para que quede protegida
+                  igual — antes no estaba en ningún Stack.Protected y el
+                  routing por archivos la registraba accesible sin sesión.
+                  Nota: al no colgar de (protected) tampoco pasa por el gate
+                  de perfil completo; sólo se llega desde el home, que sí. */}
+              <Stack.Screen name="lesson/[id]" />
             </Stack.Protected>
             <Stack.Protected guard={!isAuthenticated}>
               <Stack.Screen name="(auth)" />
