@@ -13,7 +13,7 @@ export default function LetterScreen() {
   const [isFavorite, setIsFavorite] = useState(false)
   const [showPractice, setShowPractice] = useState(false)
 
-  const practiceUrl = 'https://huggingface.co/spaces/matiascodeds/lsa-fingerspelling'
+  const practiceUrl = 'https://matiascodeds-lsa-fingerspelling.hf.space'
 
   const handleOpenPractice = () => {
     if (Platform.OS === 'web') {
