@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { Alert, View, ActivityIndicator } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { StatsHeader } from '@/src/components/features/home/StatsHeader'
@@ -18,6 +18,13 @@ export default function HomeScreen() {
   const [progress, setProgress] = useState<UserProgress[]>([])
   const [stats, setStats] = useState(MOCK_HOME_STATS)
   const [loading, setLoading] = useState(true)
+  // Ref (no state): necesitamos leer "ya cargamos alguna vez" dentro de un
+  // useCallback con deps [] sin que ese closure quede pegado al `progress`
+  // del primer render (ese bug hacía que "progress.length === 0" diera
+  // siempre true, mostrando el spinner en cada regreso al home — eso
+  // desmonta StatsHeader y lo remonta ya con el valor final, matando la
+  // animación de conteo que se dispara cuando `value` sube).
+  const hasLoadedOnce = useRef(false)
 
   const insets = useSafeAreaInsets()
 
@@ -25,24 +32,28 @@ export default function HomeScreen() {
     useCallback(() => {
       const fetchProgress = async () => {
         try {
-          // No mostramos loading si ya tenemos datos para evitar parpadeos al volver
-          if (progress.length === 0) setLoading(true)
-          
+          // Sólo en la primera carga: los regresos posteriores actualizan
+          // `stats` con StatsHeader montado, para que se vea la animación.
+          if (!hasLoadedOnce.current) setLoading(true)
+
           const data = await getUserProgress()
           setProgress(data)
-          
+
           const totalXp = data.reduce((acc, p) => acc + p.total_xp, 0)
           const totalStars = data.reduce((acc, p) => acc + p.total_stars, 0)
-          
+          const totalSigns = data.reduce((acc, p) => acc + p.total_signs, 0)
+
           setStats(prev => ({
             ...prev,
             xp: totalXp || prev.xp,
-            stars: totalStars || prev.stars
+            stars: totalStars || prev.stars,
+            paws: totalSigns || prev.paws
           }))
         } catch (error) {
           console.error('Error fetching progress:', error)
         } finally {
           setLoading(false)
+          hasLoadedOnce.current = true
         }
       }
       fetchProgress()

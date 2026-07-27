@@ -7,12 +7,13 @@ export interface UserProgress {
   completed_islands: number
   total_xp: number
   total_stars: number
+  total_signs: number
 }
 
-/** Progreso mock para desarrollo sin backend. */
+/** Progreso mock para desarrollo sin backend: usuario nuevo, todo en cero. */
 const MOCK_PROGRESS: UserProgress[] = [
-  { module_id: 'alfabeto-1', completed_islands: 2, total_xp: 300, total_stars: 45 },
-  { module_id: 'numeros-1', completed_islands: 0, total_xp: 0, total_stars: 0 },
+  { module_id: 'alfabeto-1', completed_islands: 0, total_xp: 0, total_stars: 0, total_signs: 0 },
+  { module_id: 'numeros-1', completed_islands: 0, total_xp: 0, total_stars: 0, total_signs: 0 },
 ]
 
 export async function getUserProgress(): Promise<UserProgress[]> {
@@ -29,6 +30,7 @@ export interface UpdateProgressPayload {
   completed_islands?: number
   xp_gain?: number
   stars_gain?: number
+  signs_gain?: number
 }
 
 export async function updateProgress(payload: UpdateProgressPayload): Promise<UserProgress> {
@@ -40,13 +42,15 @@ export async function updateProgress(payload: UpdateProgressPayload): Promise<Us
       }
       existing.total_xp += payload.xp_gain ?? 0
       existing.total_stars += payload.stars_gain ?? 0
+      existing.total_signs += payload.signs_gain ?? 0
       return existing
     }
     const newEntry = {
       module_id: payload.module_id,
       completed_islands: payload.completed_islands ?? 0,
       total_xp: payload.xp_gain ?? 0,
-      total_stars: payload.stars_gain ?? 0
+      total_stars: payload.stars_gain ?? 0,
+      total_signs: payload.signs_gain ?? 0
     }
     MOCK_PROGRESS.push(newEntry)
     return newEntry
