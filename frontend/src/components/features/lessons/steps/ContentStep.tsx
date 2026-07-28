@@ -11,6 +11,17 @@ interface ContentStepProps {
   onWatched: (key: string) => void
 }
 
+const OPTION_EMOJIS: Record<string, string> = {
+  // Lección 2
+  'Bien': '😊',
+  'Más o menos': '😐',
+  'Mal': '😢',
+  // Lección 4
+  'Por favor': '🙏',
+  'Gracias': '🙌',
+  'De nada': '🤝',
+}
+
 /** Step "content": muestra una seña (video único) o un selector de señas relacionadas. */
 export function ContentStep({ step, selectedOption, onSelectOption, onWatched }: ContentStepProps) {
   return (
@@ -44,25 +55,34 @@ export function ContentStep({ step, selectedOption, onSelectOption, onWatched }:
       </Text>
 
       {step.options && (
-        <View className="flex-col md:flex-row gap-2 mb-2">
-          {step.options.map((option) => (
-            <Pressable
-              key={option}
-              onPress={() => onSelectOption(option)}
-              className={cn(
-                'flex-1 h-12 rounded-2xl border-2 flex-row items-center justify-center px-4',
-                selectedOption === option ? 'bg-accent/20 border-secondary' : 'bg-surface border-black/5',
-              )}
-            >
-              <Ionicons
-                name="play"
-                size={16}
-                color={selectedOption === option ? '#4A90E2' : '#9BA8B1'}
-                style={{ marginRight: 8 }}
-              />
-              <Text className="font-nunito text-sm font-bold text-ink">{option}</Text>
-            </Pressable>
-          ))}
+        <View className="flex-row gap-2.5 mb-2 w-full max-w-md self-center">
+          {step.options.map((option) => {
+            const emoji = OPTION_EMOJIS[option]
+            return (
+              <Pressable
+                key={option}
+                onPress={() => onSelectOption(option)}
+                className={cn(
+                  'flex-1 py-3 rounded-2xl border-2 items-center justify-center',
+                  selectedOption === option ? 'bg-accent/20 border-secondary' : 'bg-surface border-black/5',
+                )}
+              >
+                {emoji ? (
+                  <Text className="text-2xl mb-1">{emoji}</Text>
+                ) : (
+                  <Ionicons
+                    name="play"
+                    size={16}
+                    color={selectedOption === option ? '#4A90E2' : '#9BA8B1'}
+                    style={{ marginBottom: 4 }}
+                  />
+                )}
+                <Text className="font-nunito text-xs md:text-sm font-bold text-ink text-center px-1">
+                  {option}
+                </Text>
+              </Pressable>
+            )
+          })}
         </View>
       )}
     </View>

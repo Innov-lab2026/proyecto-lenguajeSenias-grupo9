@@ -146,9 +146,13 @@ export function useLessonEngine(id: string | string[] | undefined) {
       setShowFeedback(null)
       setStepAnswers(prev => ({ ...prev, [currentStepIndex]: selectedOption }))
 
-      const hasErrors = (retryCount[currentStepIndex] || 0) > 0
+      const errors = retryCount[currentStepIndex] || 0
       const xpGain = XP_POR_STEP[lessonIndex]
-      const starsGain = hasErrors ? PUNTOS_CON_ERRORES[lessonIndex] : PUNTOS_SIN_ERRORES[lessonIndex]
+      const starsGain = errors === 0
+        ? PUNTOS_SIN_ERRORES[lessonIndex]
+        : errors === 1
+          ? PUNTOS_CON_ERRORES[lessonIndex]
+          : 0
 
       if (!correctSteps.has(currentStepIndex)) {
         setEarnedStats(prev => ({
@@ -200,9 +204,10 @@ export function useLessonEngine(id: string | string[] | undefined) {
         } else {
           setMatchingState(prev => ({
             ...prev,
-            attempts: { ...prev.attempts, [prev.selectedWord!]: 'incorrect' }
+            attempts: { ...prev.attempts, [prev.selectedWord!]: 'incorrect' },
+            selectedVideo: null,
+            selectedWord: null
           }))
-          setShowFeedback('incorrect')
           setRetryCount(prev => ({
             ...prev,
             [currentStepIndex]: (prev[currentStepIndex] || 0) + 1
@@ -251,7 +256,23 @@ export function useLessonEngine(id: string | string[] | undefined) {
   const handleRetry = () => {
     setShowFeedback(null)
     setSelectedOption(null)
-    setDialogueAnswers({})
+    
+    if (currentStep?.type === 'dialogue' && currentStep.correctAnswer) {
+      const correctAnswersArray = currentStep.correctAnswer.split('|')
+      setDialogueAnswers(prev => {
+        const newAnswers: Record<number, string> = {}
+        Object.keys(prev).forEach(key => {
+          const idx = Number(key)
+          if (prev[idx] === correctAnswersArray[idx]) {
+            newAnswers[idx] = prev[idx]
+          }
+        })
+        return newAnswers
+      })
+    } else {
+      setDialogueAnswers({})
+    }
+
     setSelectedWordForDialogue(null)
     setMatchingState({
       selectedVideo: null,
@@ -303,10 +324,20 @@ export function useLessonEngine(id: string | string[] | undefined) {
   const handleMatchSelection = (type: 'video' | 'word', value: string) => {
     if (showFeedback || correctSteps.has(currentStepIndex)) return
 
-    setMatchingState(prev => ({
-      ...prev,
-      [type === 'video' ? 'selectedVideo' : 'selectedWord']: value
-    }))
+    setMatchingState(prev => {
+      const newAttempts = { ...prev.attempts }
+      // Limpia todas las respuestas marcadas como incorrectas al hacer una nueva selección
+      Object.keys(newAttempts).forEach(key => {
+        if (newAttempts[key] === 'incorrect') {
+          newAttempts[key] = null
+        }
+      })
+      return {
+        ...prev,
+        [type === 'video' ? 'selectedVideo' : 'selectedWord']: value,
+        attempts: newAttempts
+      }
+    })
   }
 
   const dialogueBlanksCount = currentStep?.dialogue?.reduce(
@@ -362,6 +393,7 @@ export function useLessonEngine(id: string | string[] | undefined) {
     showSummary,
     isSaving,
     earnedStats,
+    currentStepErrorCount: retryCount[currentStepIndex] || 0,
 
     isMuted,
     setIsMuted,

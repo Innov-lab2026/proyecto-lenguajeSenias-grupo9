@@ -19,43 +19,12 @@ export interface LessonStep {
   contentTitle?: string
 }
 
-/** Estado del ejercicio "matching" (relacionar video con palabra). */
 export interface MatchingState {
   selectedVideo: string | null
   selectedWord: string | null
   completedPairs: Set<string>
   attempts: Record<string, 'correct' | 'incorrect' | null>
   shuffledWords: string[]
-}
-/* ... existing code ... */
-export const MOCK_LESSON_5: Lesson = {
-  id: 'lesson-5',
-  moduleId: 'modulo-1',
-  title: 'Conversación',
-  description: 'Practica una conversación básica con saludos y nombres.',
-  steps: [
-    {
-      id: 'step-1-5-content-1',
-      type: 'content',
-      contentTitle: 'Conversación',
-      videoUrl: 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/01_pfseqz.mp4',
-    },
-    {
-      id: 'step-1-5-dialogue',
-      type: 'dialogue',
-      question: '¿Cómo se completa esta conversación? Arrastra cada palabra a su lugar.',
-      videoUrl: 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/02_ztp8b3.mp4',
-      options: ['nombre', 'apellido', 'hermana', 'Hola', 'Adiós', 'Lindo', 'feo'],
-      dialogue: [
-        { speaker: 'Ana', text: 'Hola, mi [blank] es Anna. ¿Cual es tu nombre?' },
-        { speaker: 'Juan', text: '[blank] Ana, soy Juan.' },
-        { speaker: 'Ana', text: '[blank] nombre! Adiós Juan.' },
-        { speaker: 'Juan', text: '[blank] Ana, tambien el tuyo.' }
-      ],
-      // We need to store the correct answers in order or by index
-      correctAnswer: 'nombre|Hola|Lindo|Adiós'
-    }
-  ]
 }
 
 export interface Lesson {
@@ -69,32 +38,32 @@ export interface Lesson {
 export const MOCK_LESSON_1: Lesson = {
   id: 'lesson-1',
   moduleId: 'modulo-1',
-  title: 'Saludos',
-  description: 'Aprende los saludos básicos en lengua de señas.',
+  title: 'Presentarte',
+  description: 'Aprendé las señas para comenzar una conversación.',
   steps: [
     {
       id: 'step-1-1-content-1',
       type: 'content',
-      contentTitle: 'Hola',
+      contentTitle: '¿Comó estás?',
       videoUrl: 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/01_pfseqz.mp4',
     },
     {
       id: 'step-1-1-content-2',
       type: 'content',
-      contentTitle: 'Adiós',
+      contentTitle: '¿Comó te llamás?',
       videoUrl: 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/02_ztp8b3.mp4',
     },
     {
       id: 'step-1-1-quiz',
       type: 'quiz',
-      question: '¿Cuál de estos videos representa la palabra "Hola"?',
-      options: ['Hola', 'Adiós'],
+      question: 'Selecioná el video que representa la seña: "¿Comó te llamás?"',
+      options: ['¿Comó estás?', '¿Comó te llamás?'],
       videoUrls: {
-        'Hola': 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/01_pfseqz.mp4',
-        'Adiós': 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/02_ztp8b3.mp4',
+        '¿Comó estás?': 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/01_pfseqz.mp4',
+        '¿Comó te llamás?': 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/02_ztp8b3.mp4',
       },
-      correctAnswer: 'Hola',
-      tip: '💡 ¿Sabías que...?\n\nEl saludo es la primera forma de iniciar una conversación y demostrar respeto hacia la otra persona.',
+      correctAnswer: '¿Comó te llamás?',
+      tip: 'Observá la posición y el movimiento de las manos antes de responder.',
     }
   ]
 }
@@ -102,27 +71,28 @@ export const MOCK_LESSON_1: Lesson = {
 export const MOCK_LESSON_2: Lesson = {
   id: 'lesson-2',
   moduleId: 'modulo-1',
-  title: 'Posesivos',
-  description: 'Aprende a indicar posesión: Mío y Tuyo.',
+  title: '¿Cómo te sentís?',
+  description: 'Expresá tu estado de ánimo con señas básicas.',
   steps: [
     {
       id: 'step-1-2-content-interactive',
       type: 'content',
-      contentTitle: 'Posesivos',
-      options: ['Mío', 'Tuyo'],
+      contentTitle: '¿Cómo te sentís?',
+      options: ['Bien', 'Más o menos', 'Mal'],
       videoUrls: {
-        'Mío': 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/02_ztp8b3.mp4',
-        'Tuyo': 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/03_jqt9r7.mp4'
+        'Bien': 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/02_ztp8b3.mp4',
+        'Más o menos': 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/03_jqt9r7.mp4',
+        'Mal': 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/03_jqt9r7.mp4'
       }
     },
     {
       id: 'step-1-2-quiz',
       type: 'quiz',
       question: '¿Qué palabra representa esta seña?',
-      videoUrl: 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/03_jqt9r7.mp4',
-      options: ['Mío', 'Tuyo'],
-      correctAnswer: 'Mío',
-      tip: '💡 Consejo LSA\n\n"Mío" y "Tuyo" indican a quién pertenece algo. En muchas lenguas de señas, la posesión suele expresarse después del objeto. (ej: "Libro mio")',
+      videoUrl: 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/02_ztp8b3.mp4',
+      options: ['Bien', 'Más o menos', 'Mal'],
+      correctAnswer: 'Bien',
+      tip: 'Observá la posición y el movimiento de las manos antes de responder.',
     }
   ]
 }
@@ -130,28 +100,22 @@ export const MOCK_LESSON_2: Lesson = {
 export const MOCK_LESSON_3: Lesson = {
   id: 'lesson-3',
   moduleId: 'modulo-1',
-  title: 'Identidad',
-  description: 'Aprende a decir tu nombre en lengua de señas.',
+  title: 'Desafío',
+  description: '¡Demostrá lo que ya aprendiste!',
   steps: [
-    {
-      id: 'step-1-3-content-1',
-      type: 'content',
-      contentTitle: 'Nombre',
-      videoUrl: 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/03_jqt9r7.mp4',
-    },
     {
       id: 'step-1-3-quiz',
       type: 'quiz',
-      question: '¿Cuál de estos videos representa la palabra "Nombre"?',
-      options: ['Mío', 'Nombre', 'Hola', 'Tuyo'],
+      question: '¿Cuál videos representa “Más o menos”?',
+      options: ['¿Comó estás?', '¿Comó te llamás?', 'Bien', 'Más o menos'],
       videoUrls: {
-        'Mío': 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/01_pfseqz.mp4',
-        'Nombre': 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/03_jqt9r7.mp4',
-        'Hola': 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/02_ztp8b3.mp4',
-        'Tuyo': 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/01_pfseqz.mp4',
+        '¿Comó estás?': 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/01_pfseqz.mp4',
+        '¿Comó te llamás?': 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/03_jqt9r7.mp4',
+        'Bien': 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/02_ztp8b3.mp4',
+        'Más o menos': 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/03_jqt9r7.mp4',
       },
-      correctAnswer: 'Nombre',
-      tip: '💡 Tip de Nombre\n\nEn la comunidad sorda, además de deletrear tu nombre, solemos tener una "seña personal" que nos identifica de forma única.',
+      correctAnswer: 'Más o menos',
+      tip: 'Observá la posición y el movimiento de las manos antes de responder.',
     }
   ]
 }
@@ -160,7 +124,7 @@ export const MOCK_LESSON_4: Lesson = {
   id: 'lesson-4',
   moduleId: 'modulo-1',
   title: 'Cortesía',
-  description: 'Las palabras mágicas: Por favor, Gracias y De nada.',
+  description: 'Aprendé expresiones para comunicarte con respeto.',
   steps: [
     {
       id: 'step-1-4-content-interactive',
@@ -176,12 +140,43 @@ export const MOCK_LESSON_4: Lesson = {
     {
       id: 'step-1-4-matching',
       type: 'matching',
-      question: 'Relaciona cada video con la frase correspondiente.',
+      question: 'Uní cada video con la palabra correcta.',
       pairs: [
         { videoUrl: 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/01_pfseqz.mp4', word: 'Por favor' },
         { videoUrl: 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/02_ztp8b3.mp4', word: 'Gracias' },
         { videoUrl: 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/03_jqt9r7.mp4', word: 'De nada' }
       ]
+    }
+  ]
+}
+
+export const MOCK_LESSON_5: Lesson = {
+  id: 'lesson-5',
+  moduleId: 'modulo-1',
+  title: 'Conversar',
+  description: 'Combiná las señas aprendidas para mantener una conversación.',
+  steps: [
+    {
+      id: 'step-1-5-content-1',
+      type: 'content',
+      contentTitle: 'Conversar',
+      videoUrl: 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/01_pfseqz.mp4',
+    },
+    {
+      id: 'step-1-5-dialogue',
+      type: 'dialogue',
+      question: 'Completá la conversación arrastrando cada palabra a su lugar.',
+      videoUrl: 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/02_ztp8b3.mp4',
+      options: ['¿cómo te llamás?', 'Bien', 'De nada', 'Adiós', 'Por favor'],
+      dialogue: [
+        { speaker: 'Ana', text: 'Hola, [blank].' },
+        { speaker: 'Juan', text: 'Hola, soy Juan. ¿Y vos?' },
+        { speaker: 'Ana', text: 'Ana. ¿Cómo estás?' },
+        { speaker: 'Juan', text: '[blank], gracias.' },
+        { speaker: 'Ana', text: '[blank].' }
+      ],
+      // Poner las respuestas en orden
+      correctAnswer: '¿cómo te llamás?|Bien|De nada'
     }
   ]
 }

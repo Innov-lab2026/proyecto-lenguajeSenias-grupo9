@@ -1,5 +1,5 @@
 import { Fragment } from 'react'
-import { Pressable, Text, View } from 'react-native'
+import { Pressable, ScrollView, Text, View } from 'react-native'
 import type { LessonStep } from '@/src/types/lessons'
 import { LessonVideo } from '@/src/components/features/lessons/LessonVideo'
 import { cn } from '@/src/utils/cn'
@@ -19,14 +19,14 @@ export function DialogueStep({ step, dialogueAnswers, selectedBlankId, onSelectB
     <View className="flex-1 w-full">
       {step.videoUrl && (
         <View className="w-full items-center justify-center mb-2">
-          <LessonVideo uri={step.videoUrl} className="h-[200px] aspect-[9/16]" />
+          <LessonVideo uri={step.videoUrl} className="h-[235px] aspect-[9/16]" />
         </View>
       )}
 
       <Text className="font-nunito text-base md:text-lg font-bold text-ink text-center mb-2">{step.question}</Text>
 
       {/* Dialogue Area */}
-      <View className="flex-[1.5] bg-surface rounded-2xl border-2 border-black/5 p-3 mb-2">
+      <ScrollView className="flex-1 bg-surface rounded-2xl border-2 border-black/5 p-3 mb-2" showsVerticalScrollIndicator={false}>
         {step.dialogue?.map((line, lineIdx) => {
           const parts = line.text.split('[blank]')
           let blankCounter = 0
@@ -38,8 +38,16 @@ export function DialogueStep({ step, dialogueAnswers, selectedBlankId, onSelectB
           return (
             <View
               key={lineIdx}
-              className={cn('flex-row flex-wrap items-center mb-2', line.speaker === 'Ana' ? 'justify-start' : 'justify-end')}
+              className={cn('w-full mb-2', line.speaker === 'Ana' ? 'items-start' : 'items-end')}
             >
+              <Text
+                className={cn(
+                  'font-nunito font-bold text-xs mb-0.5 px-1',
+                  line.speaker === 'Ana' ? 'text-secondary' : 'text-ink/50'
+                )}
+              >
+                {line.speaker}
+              </Text>
               <View
                 className={cn(
                   'max-w-[90%] rounded-xl p-2 flex-row flex-wrap items-center gap-1',
@@ -74,7 +82,7 @@ export function DialogueStep({ step, dialogueAnswers, selectedBlankId, onSelectB
             </View>
           )
         })}
-      </View>
+      </ScrollView>
 
       {/* Word Bank */}
       <View className="flex-row flex-wrap gap-1.5 justify-center mb-2">

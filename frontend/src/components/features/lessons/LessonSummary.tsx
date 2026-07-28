@@ -4,8 +4,10 @@ import { Image } from 'expo-image'
 import { Ionicons } from '@expo/vector-icons'
 import { Button } from '@/src/components/common/Button'
 import { StatItem } from '@/src/components/features/home/stats'
+import { LESSON_SUMMARY_CONFIG } from '@/src/constants/lessons'
 
 interface LessonSummaryProps {
+  lessonId: string
   earnedStats: { xp: number; stars: number }
   signCount: number
   nextLevel: number
@@ -18,8 +20,15 @@ interface LessonSummaryProps {
 /** Respiro antes de "revelar" el puntaje ganado (que se note que apareció, no que ya estaba). */
 const REVEAL_DELAY_MS = 300
 
+const DEFAULT_FOOTER_BG = '#67AEF5'
+
 /** Pantalla de resumen al terminar la lección: puntaje ganado + desbloqueo del próximo nivel. */
-export function LessonSummary({ earnedStats, signCount, nextLevel, isSaving, onClose, onContinue, insets }: LessonSummaryProps) {
+export function LessonSummary({ lessonId, earnedStats, signCount, nextLevel, isSaving, onClose, onContinue, insets }: LessonSummaryProps) {
+  const config = LESSON_SUMMARY_CONFIG[lessonId] ?? LESSON_SUMMARY_CONFIG['1']
+  const footerBg = config.footerBg ?? DEFAULT_FOOTER_BG
+  // Determinar si el footer es oscuro para usar texto blanco
+  const isDarkFooter = footerBg !== DEFAULT_FOOTER_BG
+
   // StatItem sólo anima cuando su `value` sube mientras está montado — si
   // esta pantalla mostrara earnedStats/signCount directamente, ya montaría
   // con el valor final y no habría delta que animar. Arranca en 0 y sube al
@@ -50,8 +59,8 @@ export function LessonSummary({ earnedStats, signCount, nextLevel, isSaving, onC
           contentFit="contain"
         />
 
-        <Text className="font-nunito text-4xl font-bold text-ink mb-0">¡Estuviste increíble!</Text>
-        <Text className="font-nunito text-lg text-muted mb-2">Completaste tu primera lección</Text>
+        <Text className="font-nunito text-4xl font-bold text-ink mb-0">{config.title}</Text>
+        <Text className="font-nunito text-lg text-muted mb-2">{config.subtitle}</Text>
       </View>
 
       <View className="w-full max-w-md flex-row justify-between gap-2 mt-auto mb-4">
@@ -66,16 +75,21 @@ export function LessonSummary({ earnedStats, signCount, nextLevel, isSaving, onC
         </View>
       </View>
 
-      <View className="h-[22%] min-h-[150px] self-stretch -mx-4 bg-[#67AEF5] items-center justify-end pb-5 relative">
+      <View
+        className="h-[22%] min-h-[150px] self-stretch -mx-4 items-center justify-end pb-5 relative"
+        style={{ backgroundColor: footerBg }}
+      >
         <View className="items-center z-10 mb-3">
           <Image
             source={require('@/assets/images/lessons/candado_abierto.svg')}
             className="w-16 h-16"
             contentFit="contain"
           />
-          <Text className="font-nunito text-base font-bold text-ink text-center leading-4">
-            Nivel {nextLevel}
-            {'\n'}desbloqueado
+          <Text
+            className="font-nunito text-base font-bold text-center leading-4"
+            style={{ color: isDarkFooter ? '#FFFFFF' : '#1F2937' }}
+          >
+            {config.unlockLabel}
           </Text>
         </View>
         <Button

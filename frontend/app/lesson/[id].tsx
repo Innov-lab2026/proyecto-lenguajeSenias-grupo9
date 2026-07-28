@@ -38,6 +38,7 @@ export default function LessonScreen() {
     showSummary,
     isSaving,
     earnedStats,
+    currentStepErrorCount,
     isMuted,
     setIsMuted,
     showSettings,
@@ -65,6 +66,7 @@ export default function LessonScreen() {
   if (showSummary) {
     return (
       <LessonSummary
+        lessonId={String(id)}
         earnedStats={earnedStats}
         signCount={signCount}
         nextLevel={nextLevel}
@@ -96,6 +98,7 @@ export default function LessonScreen() {
         title={lesson.title}
         description={lesson.description}
         onStart={handleStart}
+        onExit={() => router.back()}
       />
 
       {/* Contenido del step actual */}
@@ -133,6 +136,9 @@ export default function LessonScreen() {
         feedback={showFeedback}
         tip={currentStep?.tip}
         retryPoints={retryPoints}
+        errorCount={currentStepErrorCount}
+        stepType={currentStep?.type}
+        lessonId={String(id)}
         onRetry={handleRetry}
         onNext={handleNext}
       />

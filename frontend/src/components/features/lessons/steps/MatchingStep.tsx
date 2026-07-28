@@ -15,7 +15,7 @@ export function MatchingStep({ step, matchingState, onSelect }: MatchingStepProp
   return (
     <View className="flex-1 w-full">
       {/* Preview del video seleccionado */}
-      <View className="flex-1 w-full items-center justify-center mb-2">
+      <View className="flex-[2.5] w-full items-center justify-center mb-2">
         {matchingState.selectedVideo ? (
           <LessonVideo
             key={matchingState.selectedVideo}
@@ -32,7 +32,7 @@ export function MatchingStep({ step, matchingState, onSelect }: MatchingStepProp
 
       <Text className="font-nunito text-base md:text-lg font-bold text-ink text-center mb-2">{step.question}</Text>
 
-      <View className="flex-row justify-between gap-4 mb-2 w-full max-w-2xl self-center flex-[1.5]">
+      <View className="flex-row justify-between gap-4 mb-2 w-full max-w-2xl self-center flex-1">
         {/* Columna de Videos */}
         <View className="w-[45%] justify-between py-1">
           {step.pairs?.map((pair, index) => (

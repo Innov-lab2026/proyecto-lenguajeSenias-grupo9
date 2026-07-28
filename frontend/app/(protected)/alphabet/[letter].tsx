@@ -46,10 +46,10 @@ export default function LetterScreen() {
             hitSlop={8}
             className="h-10 w-10 items-center justify-center rounded-full bg-surface shadow-sm shadow-black/10 web:hover:bg-muted/10"
           >
-            <Ionicons 
-              name={isFavorite ? "heart" : "heart-outline"} 
-              size={22} 
-              color={isFavorite ? "#EF4444" : "#1F2937"} 
+            <Ionicons
+              name={isFavorite ? "heart" : "heart-outline"}
+              size={22}
+              color={isFavorite ? "#EF4444" : "#1F2937"}
             />
           </Pressable>
         </View>
@@ -86,7 +86,7 @@ export default function LetterScreen() {
         <SafeAreaView className="flex-1 bg-surface">
           <View className="h-14 flex-row items-center justify-between px-5 border-b border-black/5">
             <Text className="font-nunito text-lg font-bold text-ink">Práctica de Señas</Text>
-            <Pressable 
+            <Pressable
               onPress={() => setShowPractice(false)}
               className="p-1"
               accessibilityRole="button"
@@ -95,16 +95,16 @@ export default function LetterScreen() {
               <Ionicons name="close" size={28} color="#1F2937" />
             </Pressable>
           </View>
-          
+
           {Platform.OS === 'web' ? (
-            <iframe 
-              src={practiceUrl} 
+            <iframe
+              src={practiceUrl}
               allow="camera; microphone"
               style={{ flex: 1, border: 'none', width: '100%', height: '100%' }}
               title="Práctica de Señas"
             />
           ) : (
-            <WebView 
+            <WebView
               source={{ uri: practiceUrl }}
               className="flex-1"
               startInLoadingState
@@ -119,4 +119,5 @@ export default function LetterScreen() {
       </Modal>
     </SafeAreaView>
   )
+
 }

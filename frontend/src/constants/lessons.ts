@@ -16,3 +16,46 @@ export const PUNTOS_CON_ERRORES = [50, 50, 75, 100, 125]
  * las señas enseñadas son las mismas, haya costado o no acertar el ejercicio.
  */
 export const SEÑAS_POR_STEP = [2, 2, 1, 3, 4]
+
+/**
+ * Configuración personalizada de la pantalla de resumen por lección.
+ * - title / subtitle: textos principales de felicitación.
+ * - unlockLabel: texto que aparece debajo del candado.
+ * - footerBg: color de fondo de la zona inferior (por defecto celeste).
+ */
+export interface LessonSummaryConfig {
+  title: string
+  subtitle: string
+  unlockLabel: string
+  /** Color de fondo de la sección inferior. Por defecto '#67AEF5'. */
+  footerBg?: string
+}
+
+export const LESSON_SUMMARY_CONFIG: Record<string, LessonSummaryConfig> = {
+  '1': {
+    title: '¡Excelente trabajo!',
+    subtitle: 'Completaste tu primera lección',
+    unlockLabel: 'Nivel 2\ndesbloqueado',
+  },
+  '2': {
+    title: '¡Excelente trabajo!',
+    subtitle: 'completaste nivel 2',
+    unlockLabel: 'Nivel 3\ndesbloqueado',
+  },
+  '3': {
+    title: '¡Excelente trabajo!',
+    subtitle: 'completaste nivel 3',
+    unlockLabel: 'Nivel 4\ndesbloqueado',
+  },
+  '4': {
+    title: '¡Excelente trabajo!',
+    subtitle: 'completaste nivel 4',
+    unlockLabel: 'Nivel 5\ndesbloqueado',
+  },
+  '5': {
+    title: '¡Excelente trabajo!',
+    subtitle: 'Completaste módulo 1.',
+    unlockLabel: '¡Módulo 2\ndesbloqueado!',
+    footerBg: '#3B7DD8',
+  },
+}
