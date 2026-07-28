@@ -1,4 +1,4 @@
-import { useRef, type Dispatch, type SetStateAction } from 'react'
+import { useEffect, useRef, type Dispatch, type SetStateAction } from 'react'
 import { Pressable, ScrollView, Text, View } from 'react-native'
 import { cn } from '@/src/utils/cn'
 import type { DialogueLine } from '@/src/types/lessons'
@@ -28,9 +28,13 @@ interface WindowRect {
  * palabras y el área de diálogo (que además scrollea) NO comparten un mismo
  * padre de coordenadas locales.
  *
- * Cada blanco se re-mide en su propio onLayout, así que si completar un
- * blanco cambia el ancho de la línea (y reordena los siguientes), las
- * medidas quedan solas al día — no hace falta re-medir todo a mano.
+ * Completar un blanco cambia el ancho de esa línea y puede empujar hacia
+ * abajo las líneas siguientes — mueve a los demás blancos de posición SIN
+ * cambiarles el tamaño. En React Native Web, onLayout está implementado con
+ * ResizeObserver, que sólo detecta cambios de tamaño, no de posición: el
+ * onLayout individual de esos blancos nunca vuelve a dispararse, sus
+ * coordenadas quedan viejas, y soltar ahí no encuentra ningún blanco (el
+ * effect de abajo, atado a `answers`, re-mide todos después de cada cambio).
  */
 export function DialogueExercise({
   question,
@@ -47,6 +51,10 @@ export function DialogueExercise({
       blankRects.current[globalIdx] = { x, y, width, height }
     })
   }
+
+  useEffect(() => {
+    Object.keys(blankRefs.current).forEach((key) => measureBlank(Number(key)))
+  }, [answers])
 
   const handleDrop = (word: string, absoluteX: number, absoluteY: number) => {
     const target = Object.entries(blankRects.current).find(([, rect]) =>
