@@ -10,6 +10,7 @@ interface CompositionStepProps {
   onAddWord: (optionIdx: number) => void
   onRemoveWord: (blankIdx: number) => void
   isLocked: boolean
+  muted?: boolean
 }
 
 /** Step "composition": formar una frase a partir del banco de palabras en el orden correcto. */
@@ -19,6 +20,7 @@ export function CompositionStep({
   onAddWord,
   onRemoveWord,
   isLocked,
+  muted = false,
 }: CompositionStepProps) {
   const parts = step.sentence?.split('[blank]') || []
   let blankCounter = 0
@@ -28,7 +30,7 @@ export function CompositionStep({
       {step.videoUrl && (
         <View className="w-full flex-1 items-center justify-center mb-4" style={{ maxHeight: '50%' }}>
           {/* El video principal del step */}
-          <LessonVideo uri={step.videoUrl} className="flex-1 w-full aspect-[9/16]" />
+          <LessonVideo uri={step.videoUrl} muted={muted} className="flex-1 w-full aspect-[9/16]" />
         </View>
       )}
 

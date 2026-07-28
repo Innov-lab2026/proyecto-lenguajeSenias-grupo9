@@ -1,13 +1,28 @@
 import { useEffect, useState } from 'react'
-import { MOCK_LESSON_1, MOCK_LESSON_2, MOCK_LESSON_3, MOCK_LESSON_4, MOCK_LESSON_5, type MatchingState } from '@/src/types/lessons'
+import { LESSON_CONTENT, type Lesson, type MatchingState } from '@/src/types/lessons'
 import { LESSONS_POR_MODULO } from '@/src/constants/lessons'
 import { useCompleteLesson } from './useCompleteLesson'
 
 interface UseLessonEngineArgs {
   /** UUID real de la lección (el que consume completeLesson). */
   lessonId: string
-  /** 1 a 5: la isla dentro del módulo. Decide qué contenido mock se muestra. */
+  /** 1 a 5: la isla dentro del módulo. Sólo para mostrar "Nivel N" y el desbloqueo. */
   lessonNumber: number
+  /** `lessons.content_key` de la DB: con qué contenido se arma el ejercicio. */
+  contentKey: string | null
+}
+
+/** Placeholder para que el hook no tenga que lidiar con `lesson` nulo. La pantalla corta antes (ver `hasContent`). */
+const EMPTY_LESSON: Lesson = { title: '', description: '', steps: [] }
+
+/** Normaliza una frase de `composition` para compararla: sin espacios, signos ni mayúsculas. */
+function normalizeComposition(value: string): string {
+  return value.toLowerCase().replace(/[¿?¡!.,\s]/g, '')
+}
+
+/** Cantidad de huecos `[blank]` de un step `composition`. */
+function countBlanks(sentence: string | undefined): number {
+  return sentence?.match(/\[blank\]/g)?.length ?? 0
 }
 
 /**
@@ -20,14 +35,12 @@ interface UseLessonEngineArgs {
  * `completeLesson` y el server decide y persiste cuánto se ganó. Este hook
  * sólo informa qué pasó (`isPerfect`) y expone el resultado.
  */
-export function useLessonEngine({ lessonId, lessonNumber }: UseLessonEngineArgs) {
-  const lesson = (() => {
-    if (lessonNumber === 2) return MOCK_LESSON_2
-    if (lessonNumber === 3) return MOCK_LESSON_3
-    if (lessonNumber === 4) return MOCK_LESSON_4
-    if (lessonNumber === 5) return MOCK_LESSON_5
-    return MOCK_LESSON_1
-  })()
+export function useLessonEngine({ lessonId, lessonNumber, contentKey }: UseLessonEngineArgs) {
+  // Sin fallback a otra lección: mostrar contenido ajeno cuando falta el propio
+  // confunde más de lo que ayuda. `hasContent` deja que la pantalla avise.
+  const content = contentKey ? LESSON_CONTENT[contentKey] : undefined
+  const hasContent = content != null
+  const lesson = content ?? EMPTY_LESSON
 
   const completeLessonMutation = useCompleteLesson()
 
@@ -45,6 +58,8 @@ export function useLessonEngine({ lessonId, lessonNumber }: UseLessonEngineArgs)
   const [favorites, setFavorites] = useState<Set<string>>(new Set())
   const [watchedOptions, setWatchedOptions] = useState<Record<number, Set<string>>>({})
   const [dialogueAnswers, setDialogueAnswers] = useState<Record<number, string>>({})
+  // Por step: qué índice de `options` ocupa cada hueco de la frase (null = vacío).
+  const [compositionAnswers, setCompositionAnswers] = useState<Record<number, (number | null)[]>>({})
   const [shuffledQuizOptions, setShuffledQuizOptions] = useState<Record<number, string[]>>({})
   const [matchingState, setMatchingState] = useState<MatchingState>({
     selectedVideo: null,
@@ -197,6 +212,26 @@ export function useLessonEngine({ lessonId, lessonNumber }: UseLessonEngineArgs)
           [currentStepIndex]: (prev[currentStepIndex] || 0) + 1
         }))
       }
+    } else if (currentStep.type === 'composition') {
+      // Se compara la frase armada contra correctAnswer ignorando espacios,
+      // mayúsculas y puntuación: el banco de palabras no incluye los signos
+      // (van fijos en `sentence`) y hay ejercicios que arman una palabra
+      // letra por letra, donde no hay espacios que respetar.
+      const answers = compositionAnswers[currentStepIndex] || []
+      const built = answers
+        .map(idx => (idx !== null && idx !== undefined ? currentStep.options?.[idx] : ''))
+        .filter(Boolean)
+        .join('')
+
+      if (normalizeComposition(built) === normalizeComposition(currentStep.correctAnswer || '')) {
+        setShowFeedback('correct')
+      } else {
+        setShowFeedback('incorrect')
+        setRetryCount(prev => ({
+          ...prev,
+          [currentStepIndex]: (prev[currentStepIndex] || 0) + 1
+        }))
+      }
     } else {
       // Step de quiz
       if (selectedOption === currentStep.correctAnswer) {
@@ -215,6 +250,29 @@ export function useLessonEngine({ lessonId, lessonNumber }: UseLessonEngineArgs)
     setShowFeedback(null)
     setSelectedOption(null)
     setDialogueAnswers({})
+
+    // En composition no se borra todo: se conservan las palabras que ya estaban
+    // en su lugar y sólo se vacían las mal ubicadas, para no obligar a rehacer
+    // una frase larga desde cero.
+    if (currentStep?.type === 'composition') {
+      const options = currentStep.options ?? []
+      const correct = currentStep.correctAnswer ?? ''
+      // Una palabra por hueco, salvo que la respuesta no tenga espacios: ahí el
+      // ejercicio se arma letra por letra (ej. "teléfono").
+      const expected = correct.includes(' ')
+        ? correct.split(' ').map(normalizeComposition).filter(Boolean)
+        : correct.split('').map(normalizeComposition).filter(Boolean)
+
+      setCompositionAnswers(prev => ({
+        ...prev,
+        [currentStepIndex]: (prev[currentStepIndex] ?? []).map((optionIdx, blankIdx) => {
+          if (optionIdx === null || optionIdx === undefined) return null
+          const word = options[optionIdx]
+          return word && normalizeComposition(word) === expected[blankIdx] ? optionIdx : null
+        })
+      }))
+    }
+
     setMatchingState({
       selectedVideo: null,
       selectedWord: null,
@@ -256,6 +314,33 @@ export function useLessonEngine({ lessonId, lessonNumber }: UseLessonEngineArgs)
     })
   }
 
+  /** Coloca la opción tocada en el primer hueco libre de la frase. */
+  const handleAddWordToComposition = (optionIdx: number) => {
+    if (showFeedback || correctSteps.has(currentStepIndex)) return
+
+    const blankCount = countBlanks(currentStep?.sentence)
+    setCompositionAnswers(prev => {
+      const answers = prev[currentStepIndex] ? [...prev[currentStepIndex]] : Array(blankCount).fill(null)
+      const firstFree = answers.indexOf(null)
+      if (firstFree === -1) return prev
+
+      answers[firstFree] = optionIdx
+      return { ...prev, [currentStepIndex]: answers }
+    })
+  }
+
+  /** Devuelve al banco la palabra de un hueco. */
+  const handleRemoveWordFromComposition = (blankIdx: number) => {
+    if (showFeedback || correctSteps.has(currentStepIndex)) return
+
+    const blankCount = countBlanks(currentStep?.sentence)
+    setCompositionAnswers(prev => {
+      const answers = prev[currentStepIndex] ? [...prev[currentStepIndex]] : Array(blankCount).fill(null)
+      answers[blankIdx] = null
+      return { ...prev, [currentStepIndex]: answers }
+    })
+  }
+
   const handleMatchSelection = (type: 'video' | 'word', value: string) => {
     if (showFeedback || correctSteps.has(currentStepIndex)) return
 
@@ -265,10 +350,17 @@ export function useLessonEngine({ lessonId, lessonNumber }: UseLessonEngineArgs)
     }))
   }
 
+  const compositionBlankCount = countBlanks(currentStep?.sentence)
+  const isCompositionFilled =
+    currentStep?.type === 'composition' &&
+    compositionBlankCount > 0 &&
+    (compositionAnswers[currentStepIndex] ?? Array(compositionBlankCount).fill(null)).every(idx => idx !== null)
+
   const footerNeedsCheck =
     ((currentStep?.type === 'quiz' && !!selectedOption) ||
       (currentStep?.type === 'matching' && !!matchingState.selectedVideo && !!matchingState.selectedWord) ||
-      (currentStep?.type === 'dialogue' && Object.keys(dialogueAnswers).length === dialogueBlanksCount)) &&
+      (currentStep?.type === 'dialogue' && Object.keys(dialogueAnswers).length === dialogueBlanksCount) ||
+      (currentStep?.type === 'composition' && isCompositionFilled)) &&
     !correctSteps.has(currentStepIndex)
 
   const footerLabel = footerNeedsCheck ? 'Comprobar' : 'Siguiente'
@@ -288,6 +380,9 @@ export function useLessonEngine({ lessonId, lessonNumber }: UseLessonEngineArgs)
       !correctSteps.has(currentStepIndex)) ||
     (currentStep?.type === 'dialogue' &&
       Object.keys(dialogueAnswers).length < dialogueBlanksCount &&
+      !correctSteps.has(currentStepIndex)) ||
+    (currentStep?.type === 'composition' &&
+      !isCompositionFilled &&
       !correctSteps.has(currentStepIndex))
 
   /** Próximo nivel a desbloquear, o `null` si es la última lección del módulo. */
@@ -295,6 +390,8 @@ export function useLessonEngine({ lessonId, lessonNumber }: UseLessonEngineArgs)
 
   return {
     lesson,
+    /** false si la lección no tiene contenido cargado para su `content_key`. */
+    hasContent,
     currentStep,
     currentStepIndex,
     isLastStep,
@@ -304,11 +401,14 @@ export function useLessonEngine({ lessonId, lessonNumber }: UseLessonEngineArgs)
     matchingState,
     dialogueAnswers,
     setDialogueAnswers,
+    compositionAnswers,
     shuffledQuizOptions,
     correctSteps,
 
     showFeedback,
     showSummary,
+    /** Errores acumulados en el step actual (cambia el tono del feedback). */
+    currentStepErrorCount: retryCount[currentStepIndex] ?? 0,
     /** Resultado de completeLesson: `undefined` mientras la request está en vuelo. */
     completionResult: completeLessonMutation.data,
     isSaving: completeLessonMutation.isPending,
@@ -334,5 +434,7 @@ export function useLessonEngine({ lessonId, lessonNumber }: UseLessonEngineArgs)
     markWatched,
     toggleFavorite,
     handleMatchSelection,
+    handleAddWordToComposition,
+    handleRemoveWordFromComposition,
   }
 }
