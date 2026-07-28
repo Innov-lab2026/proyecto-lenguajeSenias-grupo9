@@ -26,6 +26,19 @@ export interface LessonMeta {
   order: number
 }
 
+/**
+ * Fila de `public.videos`. El abecedario matchea por `title` (una letra,
+ * ej. "A") contra `letter`; las lecciones referencian por `id` desde
+ * `lesson_signs`, no por este tipo.
+ */
+export interface Video {
+  id: string
+  title: string
+  url: string
+  signs_reward: number
+  created_at: string
+}
+
 /** Fila de `public.user_stats`. */
 export interface UserStats {
   user_id: string

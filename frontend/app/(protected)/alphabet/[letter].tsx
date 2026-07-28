@@ -1,9 +1,11 @@
 import { useState } from 'react'
-import { Pressable, ScrollView, Text, View, Modal, ActivityIndicator, Platform } from 'react-native'
+import { Pressable, Text, View, Modal, ActivityIndicator, Platform } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { Button } from '@/src/components/common/Button'
+import { LessonVideo } from '@/src/components/features/lessons/LessonVideo'
+import { useVideos } from '@/src/hooks/features/alphabet/useVideos'
 import { WebView } from 'react-native-webview'
 
 export default function LetterScreen() {
@@ -12,6 +14,10 @@ export default function LetterScreen() {
   const letter = Array.isArray(params.letter) ? params.letter[0] : params.letter
   const [isFavorite, setIsFavorite] = useState(false)
   const [showPractice, setShowPractice] = useState(false)
+
+  const videosQuery = useVideos()
+  // Match por título exacto (mayúsculas): así están cargados en la DB.
+  const video = videosQuery.data?.find((v) => v.title.trim().toUpperCase() === letter?.toUpperCase())
 
   const practiceUrl = 'https://matiascodeds-lsa-fingerspelling.hf.space'
 
@@ -57,12 +63,25 @@ export default function LetterScreen() {
         {/* Content Area */}
         <View className="flex-1 items-center justify-center py-2">
           <View className="w-full flex-1 max-h-[85%] rounded-[40px] border border-muted/20 bg-surface p-2 shadow-sm relative">
-            <View className="flex-1 items-center justify-center rounded-[32px] border border-dashed border-muted/40 bg-muted/10 overflow-hidden">
-              <Ionicons name="videocam-outline" size={80} color="#9BA8B1" />
-              <Text className="px-4 mt-4 text-center font-nunito text-sm text-muted">
-                {'Aquí aparecerá el video de la seña.'}
-              </Text>
-            </View>
+            {video ? (
+              <LessonVideo
+                uri={video.url}
+                className="flex-1 w-full rounded-[32px]"
+              />
+            ) : (
+              <View className="flex-1 items-center justify-center rounded-[32px] border border-dashed border-muted/40 bg-muted/10 overflow-hidden">
+                <Ionicons
+                  name={videosQuery.isPending ? 'hourglass-outline' : 'videocam-outline'}
+                  size={80}
+                  color="#9BA8B1"
+                />
+                <Text className="px-4 mt-4 text-center font-nunito text-sm text-muted">
+                  {videosQuery.isPending
+                    ? 'Cargando video...'
+                    : 'Todavía no hay un video grabado para esta letra.'}
+                </Text>
+              </View>
+            )}
           </View>
         </View>
 
