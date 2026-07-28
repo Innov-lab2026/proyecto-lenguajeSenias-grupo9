@@ -11,7 +11,7 @@ interface FeedbackModalProps {
   /** Puntos que todavía se pueden ganar en este step pese al error (PUNTOS_CON_ERRORES). */
   retryPoints?: number
   errorCount?: number
-  stepType?: 'content' | 'quiz' | 'matching' | 'dialogue'
+  stepType?: 'content' | 'quiz' | 'matching' | 'dialogue' | 'composition'
   lessonId?: string
   onRetry: () => void
   onNext: () => void
@@ -42,6 +42,31 @@ const LESSON_POSITIVE_FEEDBACKS: Record<string, { title: string; hintTitle: stri
     title: '¡Bien Hecho!\nCompletaste la conversación correctamente.',
     hintTitle: '¿Sabías que...?',
     hintText: 'Combinar señas en una conversación te ayuda a comunicarte de forma más natural en LSA.',
+  },
+  '6': {
+    title: '¡Excelente!\nFormaste la pregunta correctamente.',
+    hintTitle: '¿Sabías que...?',
+    hintText: 'El orden de las señas puede variar, pero el contexto y la expresión ayudan a comprender el mensaje.',
+  },
+  '7': {
+    title: '¡Excelente!\nReconociste el nombre correctamente.',
+    hintTitle: '¿Sabías que...?',
+    hintText: 'En LSA, los nombres propios suelen deletrearse usando el alfabeto manual.',
+  },
+  '8': {
+    title: '¡Excelente!\nIdentificaste la seña correctamente.',
+    hintTitle: '¿Sabías que...?',
+    hintText: 'Las preguntas permiten iniciar y mantener una conversación en LSA.',
+  },
+  '9': {
+    title: '¡Excelente!\nFormaste la palabra correctamente.',
+    hintTitle: '¿Sabías que...?',
+    hintText: 'Aprender palabras de uso cotidiano te ayuda a comunicarte con mayor fluidez en LSA.\n📖 ¿Querés seguir practicando?\nPodés consultar el ABC desde el menú de la aplicación.',
+  },
+  '10': {
+    title: '¡Excelente!\nCompletaste la conversación correctamente.',
+    hintTitle: '¿Sabías que...?',
+    hintText: 'Combinar palabras y frases en contexto te ayuda a comunicarte con mayor naturalidad en LSA.',
   },
 }
 
@@ -78,6 +103,8 @@ export function FeedbackModal({
           return '¡Impresionante! Relacionaste todas las señas correctamente.'
         case 'dialogue':
           return '¡Buen trabajo! Lograste completar la conversación correctamente.'
+        case 'composition':
+          return '¡Excelente! Formaste la pregunta correctamente.'
         default:
           return '¡Excelente! Has respondido correctamente.'
       }
@@ -91,6 +118,8 @@ export function FeedbackModal({
             return 'Sigue intentándolo para relacionar las señas de forma correcta.'
           case 'dialogue':
             return 'Sigue intentándolo para completar la conversación.'
+          case 'composition':
+            return 'Sigue intentándolo para ordenar la pregunta de forma correcta.'
           default:
             return 'Vuelve a intentarlo para aprender la respuesta.'
         }
@@ -103,8 +132,9 @@ export function FeedbackModal({
             return 'La relación seleccionada no es correcta.'
           case 'dialogue':
             return 'Algunas palabras no están en la posición correcta.'
+          case 'composition':
+            return 'Algunas palabras no están en la posición correcta.'
           default:
-            return 'La respuesta seleccionada es incorrecta.'
         }
       }
     }

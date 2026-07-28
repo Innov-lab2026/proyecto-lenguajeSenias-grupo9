@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import { MOCK_LESSON_1, MOCK_LESSON_2, MOCK_LESSON_3, MOCK_LESSON_4, MOCK_LESSON_5, type MatchingState } from '@/src/types/lessons'
+import { MOCK_LESSON_1, MOCK_LESSON_2, MOCK_LESSON_3, MOCK_LESSON_4, MOCK_LESSON_5, MOCK_LESSON_6, MOCK_LESSON_7, MOCK_LESSON_8, MOCK_LESSON_9, MOCK_LESSON_10, type MatchingState } from '@/src/types/lessons'
 import { XP_POR_STEP, PUNTOS_SIN_ERRORES, PUNTOS_CON_ERRORES, SEÑAS_POR_STEP } from '@/src/constants/lessons'
-import { updateProgress } from '@/src/services/progress'
+import { getUserProgress, updateProgress } from '@/src/services/progress'
 
 /**
  * Máquina de estados de la lección: qué step se muestra, respuestas, puntaje
@@ -15,7 +15,12 @@ export function useLessonEngine(id: string | string[] | undefined) {
     if (id === '2') return MOCK_LESSON_2
     if (id === '3') return MOCK_LESSON_3
     if (id === '4') return MOCK_LESSON_4
-    return MOCK_LESSON_5
+    if (id === '5') return MOCK_LESSON_5
+    if (id === '6') return MOCK_LESSON_6
+    if (id === '7') return MOCK_LESSON_7
+    if (id === '8') return MOCK_LESSON_8
+    if (id === '9') return MOCK_LESSON_9
+    return MOCK_LESSON_10
   })()
 
   // XP_POR_STEP / PUNTOS_* están definidos por lección (coincide con xp_reward/
@@ -29,8 +34,40 @@ export function useLessonEngine(id: string | string[] | undefined) {
     if (id === '2') return 1
     if (id === '3') return 2
     if (id === '4') return 3
-    return 4
+    if (id === '5') return 4
+    if (id === '6') return 5
+    if (id === '7') return 6
+    if (id === '8') return 7
+    if (id === '10') return 9
+    return 9
   })()
+
+  const relativeIsland = (() => {
+    const numId = Number(id)
+    if (lesson.moduleId === 'modulo-1') return numId
+    if (lesson.moduleId === 'modulo-2') return numId - 5
+    if (lesson.moduleId === 'modulo-3') return numId - 10
+    return numId
+  })()
+
+  const [completedIslands, setCompletedIslands] = useState<number | null>(null)
+
+  useEffect(() => {
+    const fetchProgress = async () => {
+      try {
+        const data = await getUserProgress()
+        const prog = data.find(p => p.module_id === lesson.moduleId)
+        setCompletedIslands(prog ? prog.completed_islands : 0)
+      } catch (error) {
+        console.error('Error fetching progress in engine:', error)
+      }
+    }
+    fetchProgress()
+  }, [lesson.moduleId])
+
+  const isRepeating = completedIslands !== null && completedIslands >= relativeIsland
+  const retryPoints = isRepeating ? 0 : PUNTOS_CON_ERRORES[lessonIndex]
+  const signCount = isRepeating ? 0 : SEÑAS_POR_STEP[lessonIndex]
 
   const [currentStepIndex, setCurrentStepIndex] = useState(-1) // -1 = modal de intro
   const [selectedOption, setSelectedOption] = useState<string | null>(null)
@@ -49,6 +86,7 @@ export function useLessonEngine(id: string | string[] | undefined) {
   const [watchedOptions, setWatchedOptions] = useState<Record<number, Set<string>>>({})
   const [dialogueAnswers, setDialogueAnswers] = useState<Record<number, string>>({})
   const [selectedWordForDialogue, setSelectedWordForDialogue] = useState<string | null>(null)
+  const [compositionAnswers, setCompositionAnswers] = useState<Record<number, (number | null)[]>>({})
   const [shuffledQuizOptions, setShuffledQuizOptions] = useState<Record<number, string[]>>({})
   const [matchingState, setMatchingState] = useState<MatchingState>({
     selectedVideo: null,
@@ -65,10 +103,10 @@ export function useLessonEngine(id: string | string[] | undefined) {
         try {
           await updateProgress({
             module_id: lesson.moduleId,
-            completed_islands: Number(id), // Suponemos que id es el número de isla
+            completed_islands: relativeIsland,
             xp_gain: earnedStats.xp,
             stars_gain: earnedStats.stars,
-            signs_gain: SEÑAS_POR_STEP[lessonIndex]
+            signs_gain: signCount
           })
         } catch (error) {
           console.error('Error saving progress:', error)
@@ -148,11 +186,13 @@ export function useLessonEngine(id: string | string[] | undefined) {
 
       const errors = retryCount[currentStepIndex] || 0
       const xpGain = XP_POR_STEP[lessonIndex]
-      const starsGain = errors === 0
-        ? PUNTOS_SIN_ERRORES[lessonIndex]
-        : errors === 1
-          ? PUNTOS_CON_ERRORES[lessonIndex]
-          : 0
+      const starsGain = isRepeating
+        ? 0
+        : errors === 0
+          ? PUNTOS_SIN_ERRORES[lessonIndex]
+          : errors === 1
+            ? PUNTOS_CON_ERRORES[lessonIndex]
+            : 0
 
       if (!correctSteps.has(currentStepIndex)) {
         setEarnedStats(prev => ({
@@ -238,6 +278,25 @@ export function useLessonEngine(id: string | string[] | undefined) {
         }))
         setEarnedStats(prev => ({ ...prev, accuracy: Math.max(0, prev.accuracy - 20) }))
       }
+    } else if (currentStep.type === 'composition') {
+      const stepAnswers = compositionAnswers[currentStepIndex] || []
+      const selectedWords = stepAnswers
+        .map(idx => (idx !== null && idx !== undefined ? currentStep.options?.[idx] : ''))
+        .filter(Boolean)
+      const combined = selectedWords.join('')
+      const normalizedSelected = combined.toLowerCase().replace(/[¿?.,!\s]/g, '')
+      const normalizedCorrect = (currentStep.correctAnswer || '').toLowerCase().replace(/[¿?.,!\s]/g, '')
+
+      if (normalizedSelected === normalizedCorrect) {
+        setShowFeedback('correct')
+      } else {
+        setShowFeedback('incorrect')
+        setRetryCount(prev => ({
+          ...prev,
+          [currentStepIndex]: (prev[currentStepIndex] || 0) + 1
+        }))
+        setEarnedStats(prev => ({ ...prev, accuracy: Math.max(0, prev.accuracy - 20) }))
+      }
     } else {
       // Step de quiz
       if (selectedOption === currentStep.correctAnswer) {
@@ -256,7 +315,7 @@ export function useLessonEngine(id: string | string[] | undefined) {
   const handleRetry = () => {
     setShowFeedback(null)
     setSelectedOption(null)
-    
+
     if (currentStep?.type === 'dialogue' && currentStep.correctAnswer) {
       const correctAnswersArray = currentStep.correctAnswer.split('|')
       setDialogueAnswers(prev => {
@@ -271,6 +330,37 @@ export function useLessonEngine(id: string | string[] | undefined) {
       })
     } else {
       setDialogueAnswers({})
+    }
+
+    if (currentStep?.type === 'composition') {
+      const options = currentStep.options || []
+      const cleanWord = (w: string) => w.toLowerCase().replace(/[¿?.,!]/g, '').trim()
+      const hasSpaces = (currentStep.correctAnswer || '').trim().includes(' ')
+      const correctWords = hasSpaces
+        ? (currentStep.correctAnswer || '').split(' ').map(cleanWord).filter(Boolean)
+        : (currentStep.correctAnswer || '').split('').map(cleanWord).filter(Boolean)
+
+      setCompositionAnswers(prev => {
+        const currentAnswers = prev[currentStepIndex] || []
+        const newAnswers = currentAnswers.map((idx, i) => {
+          if (idx === null || idx === undefined) return null
+
+          const selectedWord = options[idx]
+          const isCorrect = selectedWord && cleanWord(selectedWord) === correctWords[i]
+          return isCorrect ? idx : null
+        })
+        return {
+          ...prev,
+          [currentStepIndex]: newAnswers
+        }
+      })
+    } else {
+      // No reseteamos por completo, pero si no es composition, limpiamos sus respuestas del step actual
+      setCompositionAnswers(prev => {
+        const copy = { ...prev }
+        delete copy[currentStepIndex]
+        return copy
+      })
     }
 
     setSelectedWordForDialogue(null)
@@ -340,15 +430,57 @@ export function useLessonEngine(id: string | string[] | undefined) {
     })
   }
 
+  const handleAddWordToComposition = (optionIdx: number) => {
+    if (showFeedback || correctSteps.has(currentStepIndex)) return
+
+    const blankCount = currentStep?.sentence?.match(/\[blank\]/g)?.length || 0
+    setCompositionAnswers(prev => {
+      const currentAnswers = prev[currentStepIndex]
+        ? [...prev[currentStepIndex]]
+        : Array(blankCount).fill(null)
+
+      const firstNullIdx = currentAnswers.indexOf(null)
+      if (firstNullIdx !== -1) {
+        currentAnswers[firstNullIdx] = optionIdx
+      }
+      return {
+        ...prev,
+        [currentStepIndex]: currentAnswers
+      }
+    })
+  }
+
+  const handleRemoveWordFromComposition = (blankIdx: number) => {
+    if (showFeedback || correctSteps.has(currentStepIndex)) return
+
+    const blankCount = currentStep?.sentence?.match(/\[blank\]/g)?.length || 0
+    setCompositionAnswers(prev => {
+      const currentAnswers = prev[currentStepIndex]
+        ? [...prev[currentStepIndex]]
+        : Array(blankCount).fill(null)
+
+      currentAnswers[blankIdx] = null
+      return {
+        ...prev,
+        [currentStepIndex]: currentAnswers
+      }
+    })
+  }
+
   const dialogueBlanksCount = currentStep?.dialogue?.reduce(
     (acc, l) => acc + (l.text.match(/\[blank\]/g)?.length || 0),
     0,
   ) || 0
 
+  const compositionBlankCount = currentStep?.sentence?.match(/\[blank\]/g)?.length || 0
+  const isCompositionStepFilled = currentStep?.type === 'composition' &&
+    (compositionAnswers[currentStepIndex] || Array(compositionBlankCount).fill(null)).every(idx => idx !== null)
+
   const footerNeedsCheck =
     ((currentStep?.type === 'quiz' && !!selectedOption) ||
       (currentStep?.type === 'matching' && !!matchingState.selectedVideo && !!matchingState.selectedWord) ||
-      (currentStep?.type === 'dialogue' && Object.keys(dialogueAnswers).length === dialogueBlanksCount)) &&
+      (currentStep?.type === 'dialogue' && Object.keys(dialogueAnswers).length === dialogueBlanksCount) ||
+      (currentStep?.type === 'composition' && isCompositionStepFilled)) &&
     !correctSteps.has(currentStepIndex)
 
   const footerLabel = footerNeedsCheck ? 'Comprobar' : 'Siguiente'
@@ -368,10 +500,11 @@ export function useLessonEngine(id: string | string[] | undefined) {
       !correctSteps.has(currentStepIndex)) ||
     (currentStep?.type === 'dialogue' &&
       Object.keys(dialogueAnswers).length < dialogueBlanksCount &&
+      !correctSteps.has(currentStepIndex)) ||
+    (currentStep?.type === 'composition' &&
+      !isCompositionStepFilled &&
       !correctSteps.has(currentStepIndex))
 
-  const retryPoints = PUNTOS_CON_ERRORES[lessonIndex]
-  const signCount = SEÑAS_POR_STEP[lessonIndex]
   const nextLevel = Number(id) + 1
 
   return {
@@ -386,6 +519,7 @@ export function useLessonEngine(id: string | string[] | undefined) {
     dialogueAnswers,
     selectedWordForDialogue,
     setSelectedWordForDialogue,
+    compositionAnswers,
     shuffledQuizOptions,
     correctSteps,
 
@@ -419,5 +553,7 @@ export function useLessonEngine(id: string | string[] | undefined) {
     handleSelectWordForDialogue,
     toggleFavorite,
     handleMatchSelection,
+    handleAddWordToComposition,
+    handleRemoveWordFromComposition,
   }
 }

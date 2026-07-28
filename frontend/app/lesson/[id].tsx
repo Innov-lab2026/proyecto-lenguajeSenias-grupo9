@@ -5,6 +5,7 @@ import { ContentStep } from '@/src/components/features/lessons/steps/ContentStep
 import { QuizStep } from '@/src/components/features/lessons/steps/QuizStep'
 import { MatchingStep } from '@/src/components/features/lessons/steps/MatchingStep'
 import { DialogueStep } from '@/src/components/features/lessons/steps/DialogueStep'
+import { CompositionStep } from '@/src/components/features/lessons/steps/CompositionStep'
 import { LessonSummary } from '@/src/components/features/lessons/LessonSummary'
 import { LessonHeader } from '@/src/components/features/lessons/LessonHeader'
 import { LessonFooter } from '@/src/components/features/lessons/LessonFooter'
@@ -61,6 +62,9 @@ export default function LessonScreen() {
     handleSelectWordForDialogue,
     toggleFavorite,
     handleMatchSelection,
+    compositionAnswers,
+    handleAddWordToComposition,
+    handleRemoveWordFromComposition,
   } = useLessonEngine(id)
 
   if (showSummary) {
@@ -121,6 +125,14 @@ export default function LessonScreen() {
               onSelectBlank={setSelectedWordForDialogue}
               onSelectWord={handleSelectWordForDialogue}
             />
+          ) : currentStep.type === 'composition' ? (
+            <CompositionStep
+              step={currentStep}
+              compositionAnswers={compositionAnswers[currentStepIndex] || []}
+              onAddWord={handleAddWordToComposition}
+              onRemoveWord={handleRemoveWordFromComposition}
+              isLocked={correctSteps.has(currentStepIndex)}
+            />
           ) : (
             <QuizStep
               step={currentStep}
@@ -169,7 +181,7 @@ export default function LessonScreen() {
           hintViewed={!!hintViewed[currentStepIndex]}
           onHint={() => {
             setShowHint(true)
-            setHintViewed(prev => ({ ...prev, [currentStepIndex]: true }))
+            setHintViewed((prev: Record<number, boolean>) => ({ ...prev, [currentStepIndex]: true }))
           }}
         />
       )}

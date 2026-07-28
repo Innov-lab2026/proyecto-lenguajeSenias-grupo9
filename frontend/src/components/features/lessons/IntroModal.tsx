@@ -15,6 +15,11 @@ const INTRO_IMAGES: Record<string, ImageSource> = {
   '3': require('@/assets/images/lessons/isla_nivel3_presentacion.svg'),
   '4': require('@/assets/images/lessons/isla_nivel4_presentacion.svg'),
   '5': require('@/assets/images/lessons/isla_nivel5_presentacion.svg'),
+  '6': require('@/assets/images/lessons/isla_nivel1_presentacion.svg'),
+  '7': require('@/assets/images/lessons/isla_nivel1_presentacion.svg'),
+  '8': require('@/assets/images/lessons/isla_nivel1_presentacion.svg'),
+  '9': require('@/assets/images/lessons/isla_nivel1_presentacion.svg'),
+  '10': require('@/assets/images/lessons/isla_nivel1_presentacion.svg'),
 }
 
 interface IntroModalProps {

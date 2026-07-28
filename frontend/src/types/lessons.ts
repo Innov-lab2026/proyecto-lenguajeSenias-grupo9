@@ -1,4 +1,4 @@
-export type StepType = 'content' | 'quiz' | 'matching' | 'dialogue'
+export type StepType = 'content' | 'quiz' | 'matching' | 'dialogue' | 'composition'
 
 export interface DialogueLine {
   speaker: string
@@ -17,6 +17,7 @@ export interface LessonStep {
   correctAnswer?: string
   tip?: string
   contentTitle?: string
+  sentence?: string // e.g., '¿ [blank] [blank] [blank] [blank] ?.'
 }
 
 export interface MatchingState {
@@ -177,6 +178,137 @@ export const MOCK_LESSON_5: Lesson = {
       ],
       // Poner las respuestas en orden
       correctAnswer: '¿cómo te llamás?|Bien|De nada'
+    }
+  ]
+}
+
+export const MOCK_LESSON_6: Lesson = {
+  id: 'lesson-6',
+  moduleId: 'modulo-2',
+  title: 'Presentaciones',
+  description: 'Aprendé a formar tus primeras frases en LSA.',
+  steps: [
+    {
+      id: 'step-2-1-composition-1',
+      type: 'composition',
+      question: 'Formá la pregunta arrastrando cada palabra a su lugar',
+      videoUrl: 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/01_pfseqz.mp4',
+      options: ['apellido', 'dirección', 'Cuál', 'nombre', 'tu', 'edad', 'es'],
+      sentence: '¿ [blank] [blank] [blank] [blank] ?.',
+      correctAnswer: '¿Cuál es tu nombre?.'
+    }
+  ]
+}
+
+export const MOCK_LESSON_7: Lesson = {
+  id: 'lesson-7',
+  moduleId: 'modulo-2',
+  title: 'Nombres',
+  description: 'Aprendé a reconocer nombres deletreados en LSA.',
+  steps: [
+    {
+      id: 'step-2-2-content-interactive',
+      type: 'content',
+      contentTitle: 'Observá los siguientes nombres.',
+      options: ['Kai', 'Sol', 'Ana'],
+      videoUrls: {
+        'Kai': 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/02_ztp8b3.mp4',
+        'Sol': 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/03_jqt9r7.mp4',
+        'Ana': 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/03_jqt9r7.mp4'
+      }
+    },
+    {
+      id: 'step-2-2-quiz',
+      type: 'quiz',
+      question: '¿Qué nombre representa esta seña?',
+      videoUrl: 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/02_ztp8b3.mp4',
+      options: ['Kai', 'Sol', 'Ana'],
+      correctAnswer: 'Kai',
+      tip: 'Puedes consultar el ABC desde el menú de la aplicación. ¡Practica tu nombre!.',
+    }
+  ]
+}
+
+export const MOCK_LESSON_8: Lesson = {
+  id: 'lesson-8',
+  moduleId: 'modulo-2',
+  title: 'Preguntar',
+  description: 'Aprendé a preguntar el nombre de otra persona.',
+  steps: [
+    {
+      id: 'step-2-3-content-interactive',
+      type: 'content',
+      contentTitle: 'Observá la siguiente seña.\n¿Cómo te llamás?',
+      videoUrl: 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/02_ztp8b3.mp4',
+    },
+    {
+      id: 'step-2-3-quiz',
+      type: 'quiz',
+      question: '¿Cuál es la manera correcta de preguntar: "¿Cómo te llamás?"',
+      videoUrl: 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/02_ztp8b3.mp4',
+      options: ['Como1', 'Como2'],
+      correctAnswer: 'Como1',
+      tip: 'Puedes consultar el ABC desde el menú de la aplicación. ¡Practica tu nombre!.',
+    }
+  ]
+}
+
+export const MOCK_LESSON_9: Lesson = {
+  id: 'lesson-9',
+  moduleId: 'modulo-2',
+  title: 'Objetos',
+  description: 'Aprendé nuevas palabras de uso cotidiano.',
+  steps: [
+    {
+      id: 'step-2-4-content-interactive',
+      type: 'content',
+      contentTitle: 'Observá las siguientes señas.',
+      options: ['Luz', 'Casa', 'Teléfono'],
+      videoUrls: {
+        'Luz': 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/02_ztp8b3.mp4',
+        'Casa': 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/03_jqt9r7.mp4',
+        'Teléfono': 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/03_jqt9r7.mp4'
+      }
+    },
+    {
+      id: 'step-2-4-composition-1',
+      type: 'composition',
+      question: '¿Qué palabra representa esta seña?\nOrdená las letras para formar la palabra correcta.',
+      videoUrl: 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/01_pfseqz.mp4',
+      options: ['d', 'o', 'é', 't', 'l', 'a', 'n', 'e', 'c', 'o', 'f'],
+      sentence: '[blank] [blank] [blank] [blank] [blank] [blank] [blank] [blank]',
+      correctAnswer: 'teléfono'
+    }
+  ]
+}
+
+export const MOCK_LESSON_10: Lesson = {
+  id: 'lesson-10',
+  moduleId: 'modulo-2',
+  title: 'Conversar',
+  description: 'Combiná las frases aprendidas para mantener una conversación.',
+  steps: [
+    {
+      id: 'step-2-5-content-1',
+      type: 'content',
+      contentTitle: 'Conversar',
+      videoUrl: 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/01_pfseqz.mp4',
+    },
+    {
+      id: 'step-2-5-dialogue',
+      type: 'dialogue',
+      question: 'Completá la conversación arrastrando cada palabra a su lugar.',
+      videoUrl: 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/02_ztp8b3.mp4',
+      options: ['Hola, ¿cómo te llamás?', 'Hola, ¿cómo estás?', 'teléfono', '¡Gracias!', 'Luz', 'Adiós'],
+      dialogue: [
+        { speaker: 'Ana', text: '[blank].' },
+        { speaker: 'Juan', text: 'Hola, Ana. Bien, ¿Y vos?' },
+        { speaker: 'Ana', text: 'Necesito un [blank]. ¿Podrás prestarme uno?' },
+        { speaker: 'Juan', text: 'Persupuesto, aquí tienes.' },
+        { speaker: 'Ana', text: '[blank]' }
+      ],
+      // Poner las respuestas en orden
+      correctAnswer: 'Hola, ¿cómo estás?|teléfono|¡Gracias!'
     }
   ]
 }

@@ -37,12 +37,15 @@ export async function updateProgress(payload: UpdateProgressPayload): Promise<Us
   if (USE_MOCK_AUTH) {
     const existing = MOCK_PROGRESS.find(p => p.module_id === payload.module_id)
     if (existing) {
+      const isRepeating = payload.completed_islands !== undefined && payload.completed_islands <= existing.completed_islands
       if (payload.completed_islands !== undefined) {
         existing.completed_islands = Math.max(existing.completed_islands, payload.completed_islands)
       }
       existing.total_xp += payload.xp_gain ?? 0
-      existing.total_stars += payload.stars_gain ?? 0
-      existing.total_signs += payload.signs_gain ?? 0
+      if (!isRepeating) {
+        existing.total_stars += payload.stars_gain ?? 0
+        existing.total_signs += payload.signs_gain ?? 0
+      }
       return existing
     }
     const newEntry = {

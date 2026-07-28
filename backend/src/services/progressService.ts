@@ -30,12 +30,13 @@ export const updateProgressService = async (
   }
 
   if (current) {
+    const isRepeating = completedIslands !== undefined && completedIslands <= current.completed_islands
     const { data, error } = await supabase
       .from('user_progress')
       .update({
         completed_islands: completedIslands !== undefined ? Math.max(current.completed_islands, completedIslands) : current.completed_islands,
         total_xp: current.total_xp + (xpGain ?? 0),
-        total_stars: current.total_stars + (starsGain ?? 0),
+        total_stars: current.total_stars + (isRepeating ? 0 : (starsGain ?? 0)),
         last_updated: new Date()
       })
       .eq('id', current.id)

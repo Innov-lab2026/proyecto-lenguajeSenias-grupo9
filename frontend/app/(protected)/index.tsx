@@ -6,7 +6,7 @@ import { ModuleTabs } from '@/src/components/features/home/ModuleTabs'
 import { IslandPath } from '@/src/components/features/home/IslandPath'
 import { LockedModuleView } from '@/src/components/features/home/LockedModuleView'
 import { ProgressBar } from '@/src/components/common/ProgressBar'
-import { MOCK_HOME_STATS, MOCK_HOME_MODULES } from '@/src/constants/home'
+import { MOCK_HOME_STATS, MOCK_HOME_MODULES, ISLANDS_PER_MODULE } from '@/src/constants/home'
 import { getModuleProgress, getLockedModuleMessage } from '@/src/utils/home'
 import { getUserProgress, type UserProgress } from '@/src/services/progress'
 
@@ -61,11 +61,24 @@ export default function HomeScreen() {
   )
 
   // Mapear los módulos mock con el progreso real
-  const modulesWithProgress = MOCK_HOME_MODULES.map(m => {
+  const modulesWithProgress = MOCK_HOME_MODULES.map((m, index) => {
     const p = progress.find(prog => prog.module_id === m.id)
+    const completedIslands = p ? p.completed_islands : 0
+
+    // El módulo 1 siempre está unlocked.
+    // Los siguientes módulos se desbloquean si el anterior completó todas sus islas.
+    let state = m.state
+    if (index > 0) {
+      const prevModule = MOCK_HOME_MODULES[index - 1]
+      const prevProgress = progress.find(prog => prog.module_id === prevModule.id)
+      const prevCompleted = prevProgress ? prevProgress.completed_islands : 0
+      state = prevCompleted >= ISLANDS_PER_MODULE ? 'unlocked' : 'locked'
+    }
+
     return {
       ...m,
-      completedIslands: p ? p.completed_islands : 0
+      completedIslands,
+      state
     }
   })
 
@@ -100,7 +113,10 @@ export default function HomeScreen() {
         {selectedModule.state === 'unlocked' ? (
           <IslandPath
             module={selectedModule}
-            onIslandPress={(n) => router.push(`/lesson/${n}`)}
+            onIslandPress={(n) => {
+              const moduleOffset = selectedModule.id === 'modulo-1' ? 0 : selectedModule.id === 'modulo-2' ? 5 : 10
+              router.push(`/lesson/${moduleOffset + n}`)
+            }}
           />
         ) : (
           <LockedModuleView message={getLockedModuleMessage(modulesWithProgress, selectedModule)} />
