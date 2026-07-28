@@ -8,10 +8,11 @@ interface MatchingStepProps {
   step: LessonStep
   matchingState: MatchingState
   onSelect: (type: 'video' | 'word', value: string) => void
+  muted?: boolean
 }
 
 /** Step "matching": relacionar cada video con su palabra correspondiente. */
-export function MatchingStep({ step, matchingState, onSelect }: MatchingStepProps) {
+export function MatchingStep({ step, matchingState, onSelect, muted = false }: MatchingStepProps) {
   return (
     <View className="flex-1 w-full">
       {/* Preview del video seleccionado */}
@@ -20,6 +21,7 @@ export function MatchingStep({ step, matchingState, onSelect }: MatchingStepProp
           <LessonVideo
             key={matchingState.selectedVideo}
             uri={matchingState.selectedVideo}
+            muted={muted}
             className="h-full max-h-[400px] aspect-[9/16]"
           />
         ) : (

@@ -152,12 +152,14 @@ export default function LessonScreen() {
               selectedOption={selectedOption}
               onSelectOption={setSelectedOption}
               onWatched={markWatched}
+              muted={isMuted}
             />
           ) : currentStep.type === 'matching' ? (
             <MatchingStep
               step={currentStep}
               matchingState={matchingState}
               onSelect={handleMatchSelection}
+              muted={isMuted}
             />
           ) : currentStep.type === 'composition' ? (
             <CompositionStep
@@ -191,6 +193,7 @@ export default function LessonScreen() {
               selectedOption={selectedOption}
               onSelectOption={setSelectedOption}
               isLocked={correctSteps.has(currentStepIndex)}
+              muted={isMuted}
             />
           )}
         </View>

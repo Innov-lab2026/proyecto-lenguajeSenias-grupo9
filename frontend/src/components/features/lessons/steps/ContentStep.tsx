@@ -9,16 +9,18 @@ interface ContentStepProps {
   selectedOption: string | null
   onSelectOption: (option: string) => void
   onWatched: (key: string) => void
+  muted?: boolean
 }
 
 /** Step "content": muestra una seña (video único) o un selector de señas relacionadas. */
-export function ContentStep({ step, selectedOption, onSelectOption, onWatched }: ContentStepProps) {
+export function ContentStep({ step, selectedOption, onSelectOption, onWatched, muted = false }: ContentStepProps) {
   return (
     <View className="flex-1 w-full">
       <View className="flex-1 w-full items-center justify-center mb-2">
         {!step.options ? (
           <LessonVideo
             uri={step.videoUrl!}
+            muted={muted}
             onWatched={() => onWatched('main')}
             className="h-full max-h-[560px] aspect-[9/16]"
           />
@@ -26,6 +28,7 @@ export function ContentStep({ step, selectedOption, onSelectOption, onWatched }:
           <LessonVideo
             key={selectedOption}
             uri={step.videoUrls[selectedOption]}
+            muted={muted}
             onWatched={() => onWatched(selectedOption)}
             className="h-full max-h-[560px] aspect-[9/16]"
           />

@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { ActivityIndicator, Pressable, View } from 'react-native'
 import { useEvent, useEventListener } from 'expo'
 import { useVideoPlayer, VideoView } from 'expo-video'
@@ -9,7 +9,7 @@ interface LessonVideoProps {
   uri: string
   muted?: boolean
   autoPlay?: boolean
-  /** Se dispara cada vez que el video llega al final (loop incluido). */
+  /** Se dispara al llegar al final del video. */
   onWatched?: () => void
   className?: string
   /** Reduce el tamaño de los overlays (loading/play) para usarlo en grillas chicas. */
@@ -25,7 +25,7 @@ interface LessonVideoProps {
 /** Marco de video vertical reutilizable para los steps de una lección (ver local/LESSON_UI_PLAN.md). */
 export function LessonVideo({
   uri,
-  muted = true,
+  muted = false,
   autoPlay = true,
   onWatched,
   className,
@@ -39,24 +39,50 @@ export function LessonVideo({
   const { status } = useEvent(player, 'statusChange', { status: player.status })
   const { isPlaying } = useEvent(player, 'playingChange', { isPlaying: player.playing })
 
+  // El video queda en el último frame al terminar (no hay loop). Se guarda en
+  // ref, no en estado: el efecto de `autoPlay` lo lee para decidir entre play()
+  // y replay(), y como dependencia se reactivaría en bucle al marcarse.
+  const hasEnded = useRef(false)
+
+  // El callback de useVideoPlayer sólo corre al crear el player, así que un
+  // cambio posterior de `muted` (el toggle de Configuraciones) no llegaría solo.
+  useEffect(() => {
+    player.muted = muted
+  }, [muted, player])
+
   // Reactivo a `autoPlay` (no solo al montar): en el quiz de opciones-video hay varios
   // LessonVideo montados a la vez y solo el seleccionado debe reproducir.
   useEffect(() => {
-    if (autoPlay) player.play()
-    else player.pause()
+    if (!autoPlay) {
+      player.pause()
+      return
+    }
+    // Re-seleccionar una opción ya vista tiene que volver a reproducirla:
+    // play() sobre un video terminado no hace nada.
+    if (hasEnded.current) {
+      hasEnded.current = false
+      player.replay()
+    } else {
+      player.play()
+    }
   }, [autoPlay, player])
 
-  // Loop manual (en vez de player.loop = true): en web, un <video loop> nativo nunca
-  // dispara el evento "ended", así que playToEnd no llega y el gating de "ya lo viste"
-  // queda roto. Reiniciando a mano con replay() el evento se emite en las dos plataformas.
   useEventListener(player, 'playToEnd', () => {
     onWatched?.()
-    player.replay()
+    hasEnded.current = true
   })
 
   const togglePlayback = () => {
-    if (player.playing) player.pause()
-    else player.play()
+    if (player.playing) {
+      player.pause()
+      return
+    }
+    if (hasEnded.current) {
+      hasEnded.current = false
+      player.replay()
+      return
+    }
+    player.play()
   }
 
   if (status === 'error') {

@@ -11,15 +11,16 @@ interface QuizStepProps {
   onSelectOption: (option: string) => void
   /** true cuando el step ya fue respondido correctamente (deshabilita la selección). */
   isLocked: boolean
+  muted?: boolean
 }
 
 /** Step "quiz": video principal + opciones de texto, o una grilla de videos para elegir. */
-export function QuizStep({ step, options, selectedOption, onSelectOption, isLocked }: QuizStepProps) {
+export function QuizStep({ step, options, selectedOption, onSelectOption, isLocked, muted = false }: QuizStepProps) {
   if (step.videoUrl) {
     return (
       <View className="flex-1 w-full">
         <View className="flex-1 w-full items-center justify-center mb-2">
-          <LessonVideo uri={step.videoUrl} className="h-full max-h-[560px] aspect-[9/16]" />
+          <LessonVideo uri={step.videoUrl} muted={muted} className="h-full max-h-[560px] aspect-[9/16]" />
         </View>
 
         <Text className="font-nunito text-lg md:text-xl font-bold text-ink text-center mb-2">{step.question}</Text>
@@ -61,6 +62,7 @@ export function QuizStep({ step, options, selectedOption, onSelectOption, isLock
             <View className="w-full h-full min-h-[160px] rounded-xl overflow-hidden relative">
               <LessonVideo
                 uri={step.videoUrls?.[option] ?? ''}
+                muted={muted}
                 autoPlay={selectedOption === option}
                 interactive={false}
                 compact
