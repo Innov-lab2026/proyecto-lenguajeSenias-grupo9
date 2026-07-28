@@ -35,22 +35,22 @@ export const LESSON_SUMMARY_CONFIG: Record<string, LessonSummaryConfig> = {
   '1': {
     title: '¡Excelente trabajo!',
     subtitle: 'Completaste tu primera lección',
-    unlockLabel: 'Nivel 2\ndesbloqueado',
+    unlockLabel: '¡Nivel 2\ndesbloqueado!',
   },
   '2': {
     title: '¡Excelente trabajo!',
     subtitle: 'Completaste nivel 2',
-    unlockLabel: 'Nivel 3\ndesbloqueado',
+    unlockLabel: '¡Nivel 3\ndesbloqueado!',
   },
   '3': {
     title: '¡Excelente trabajo!',
     subtitle: 'Completaste nivel 3',
-    unlockLabel: 'Nivel 4\ndesbloqueado',
+    unlockLabel: '¡Nivel 4\ndesbloqueado!',
   },
   '4': {
     title: '¡Excelente trabajo!',
     subtitle: 'Completaste nivel 4',
-    unlockLabel: 'Nivel 5\ndesbloqueado',
+    unlockLabel: '¡Nivel 5\ndesbloqueado!',
   },
   '5': {
     title: '¡Excelente trabalho!',
@@ -61,27 +61,27 @@ export const LESSON_SUMMARY_CONFIG: Record<string, LessonSummaryConfig> = {
   '6': {
     title: '¡Excelente trabajo!',
     subtitle: 'Completaste nivel 6',
-    unlockLabel: 'Nivel 7\ndesbloqueado',
+    unlockLabel: '¡Nivel 7\ndesbloqueado!',
   },
   '7': {
     title: '¡Excelente trabajo!',
     subtitle: 'Completaste nivel 7',
-    unlockLabel: 'Nivel 8\ndesbloqueado',
+    unlockLabel: '¡Nivel 8\ndesbloqueado!',
   },
   '8': {
     title: '¡Excelente trabajo!',
     subtitle: 'Completaste nivel 8',
-    unlockLabel: 'Nivel 9\ndesbloqueado',
+    unlockLabel: '¡Nivel 9\ndesbloqueado!',
   },
   '9': {
     title: '¡Excelente trabajo!',
     subtitle: 'Completaste nivel 9',
-    unlockLabel: 'Nivel 10\ndesbloqueado',
+    unlockLabel: '¡Nivel 10\ndesbloqueado!',
   },
   '10': {
     title: '¡Excelente trabajo!',
     subtitle: 'Completaste nivel 10',
-    unlockLabel: 'Módulo 3\ndesbloqueado',
+    unlockLabel: '¡Módulo 3\ndesbloqueado!',
     footerBg: '#3B7DD8',
   },
 }

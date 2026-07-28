@@ -45,25 +45,25 @@ export const MOCK_LESSON_1: Lesson = {
     {
       id: 'step-1-1-content-1',
       type: 'content',
-      contentTitle: '¿Comó estás?',
+      contentTitle: '¿Cómo estás?',
       videoUrl: 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/01_pfseqz.mp4',
     },
     {
       id: 'step-1-1-content-2',
       type: 'content',
-      contentTitle: '¿Comó te llamás?',
+      contentTitle: '¿Cómo te llamás?',
       videoUrl: 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/02_ztp8b3.mp4',
     },
     {
       id: 'step-1-1-quiz',
       type: 'quiz',
-      question: 'Selecioná el video que representa la seña: "¿Comó te llamás?"',
-      options: ['¿Comó estás?', '¿Comó te llamás?'],
+      question: 'Selecioná el video que representa la seña: "¿Cómo te llamás?"',
+      options: ['¿Cómo estás?', '¿Cómo te llamás?'],
       videoUrls: {
-        '¿Comó estás?': 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/01_pfseqz.mp4',
-        '¿Comó te llamás?': 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/02_ztp8b3.mp4',
+        '¿Cómo estás?': 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/01_pfseqz.mp4',
+        '¿Cómo te llamás?': 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/02_ztp8b3.mp4',
       },
-      correctAnswer: '¿Comó te llamás?',
+      correctAnswer: '¿Cómo te llamás?',
       tip: 'Observá la posición y el movimiento de las manos antes de responder.',
     }
   ]
@@ -108,10 +108,10 @@ export const MOCK_LESSON_3: Lesson = {
       id: 'step-1-3-quiz',
       type: 'quiz',
       question: '¿Cuál videos representa “Más o menos”?',
-      options: ['¿Comó estás?', '¿Comó te llamás?', 'Bien', 'Más o menos'],
+      options: ['¿Cómo estás?', '¿Cómo te llamás?', 'Bien', 'Más o menos'],
       videoUrls: {
-        '¿Comó estás?': 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/01_pfseqz.mp4',
-        '¿Comó te llamás?': 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/03_jqt9r7.mp4',
+        '¿Cómo estás?': 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/01_pfseqz.mp4',
+        '¿Cómo te llamás?': 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/03_jqt9r7.mp4',
         'Bien': 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/02_ztp8b3.mp4',
         'Más o menos': 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/03_jqt9r7.mp4',
       },

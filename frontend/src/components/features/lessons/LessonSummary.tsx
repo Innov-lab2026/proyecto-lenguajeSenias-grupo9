@@ -54,7 +54,7 @@ export function LessonSummary({ lessonId, earnedStats, signCount, nextLevel, isS
 
       <View className="flex-1 w-full max-w-md items-center justify-center">
         <Image
-          source={require('@/assets/images/lessons/carpi_victory.png')}
+          source={require('@/assets/images/lessons/carpi_victory.svg')}
           className="w-full max-w-[280px] h-[50%] max-h-[250px] mb-4 self-center"
           contentFit="contain"
         />
