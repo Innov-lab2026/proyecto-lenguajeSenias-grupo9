@@ -4,9 +4,12 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
 import { cn } from '@/src/utils/cn'
 
+// Orden tradicional del alfabeto español (el que usan las cartillas de LSA):
+// CH, LL y RR son letras propias del abecedario dactilológico, con seña
+// distinta a la de sus letras sueltas — van intercaladas, no al final.
 const LSA_ALPHABET = [
-  'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
-  'N', 'Ñ', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+  'A', 'B', 'C', 'CH', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'LL', 'M',
+  'N', 'Ñ', 'O', 'P', 'Q', 'R', 'RR', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
 ]
 
 function getNumColumns(width: number): number {
