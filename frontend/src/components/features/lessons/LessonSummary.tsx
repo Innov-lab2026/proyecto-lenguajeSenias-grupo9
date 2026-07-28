@@ -41,7 +41,7 @@ export function LessonSummary({ result, isPending, nextLevel, contentKey, onClos
 
   // La lección de cierre de módulo no tiene "nivel siguiente", pero igual
   // anuncia algo; por eso el label puede venir de la config.
-  const unlockLabel = config.unlockLabel ?? (nextLevel !== null ? `Nivel ${nextLevel}\ndesbloqueado` : null)
+  const unlockLabel = config.unlockLabel ?? (nextLevel !== null ? `¡Nivel ${nextLevel}\ndesbloqueado!` : null)
   const showUnlock = !alreadyCompleted && unlockLabel !== null
 
   // StatItem sólo anima cuando su `value` sube mientras está montado. La
@@ -70,7 +70,7 @@ export function LessonSummary({ result, isPending, nextLevel, contentKey, onClos
 
       <View className="flex-1 w-full max-w-md items-center justify-center">
         <Image
-          source={require('@/assets/images/lessons/carpi_victory.png')}
+          source={require('@/assets/images/lessons/carpi_victory.svg')}
           className="w-full max-w-[280px] h-[50%] max-h-[250px] mb-4 self-center"
           contentFit="contain"
         />
