@@ -14,6 +14,21 @@ let mockStats: UserStats = {
 }
 const mockCompleted: CompletedLesson[] = []
 
+/**
+ * Acredita recompensas sobre el progreso mock. Vive acá porque `mockStats` es
+ * la fuente del mock de `getStats`, pero también la usa el abecedario
+ * (`services/alphabet.ts`): completar una letra mueve los mismos contadores.
+ * Reasigna (spread) en vez de mutar, para que React Query vea el cambio.
+ */
+export function creditMockStats(xp: number, points: number, signs: number) {
+  mockStats = {
+    ...mockStats,
+    total_xp: mockStats.total_xp + xp,
+    total_points: mockStats.total_points + points,
+    total_signs: mockStats.total_signs + signs,
+  }
+}
+
 export async function getStats(): Promise<UserStats> {
   if (USE_MOCK_AUTH) return mockStats
 
@@ -71,12 +86,7 @@ export async function completeLesson(lessonId: string, isPerfect: boolean): Prom
       earned_xp: earnedXp,
       earned_points: earnedPoints,
     })
-    mockStats = {
-      ...mockStats,
-      total_xp: mockStats.total_xp + earnedXp,
-      total_points: mockStats.total_points + earnedPoints,
-      total_signs: mockStats.total_signs + earnedSigns,
-    }
+    creditMockStats(earnedXp, earnedPoints, earnedSigns)
 
     return {
       success: true,

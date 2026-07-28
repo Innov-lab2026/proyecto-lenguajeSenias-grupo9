@@ -58,6 +58,27 @@ export interface CompletedLesson {
   earned_points: number
 }
 
+/** Fila de `public.user_alphabet_progress`. */
+export interface AlphabetLetterProgress {
+  user_id: string
+  /** Puede tener más de un carácter: CH, LL y RR son letras propias del abecedario LSA. */
+  letter: string
+  completed_at: string
+  earned_xp: number
+  earned_points: number
+  earned_signs: number
+}
+
+/** Respuesta de `POST /api/alphabet/:letter/complete`. */
+export interface CompleteLetterResult {
+  success: boolean
+  /** Presente cuando `success` es false (ej. "Letter already completed"). */
+  message?: string
+  earned_xp: number
+  earned_points: number
+  earned_signs: number
+}
+
 export interface EarnedAchievement {
   id: string
   name: string

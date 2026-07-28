@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { FlatList, Pressable, Text, View, useWindowDimensions } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
+import { useAlphabetProgress } from '@/src/hooks/features/alphabet/useAlphabetProgress'
 import { cn } from '@/src/utils/cn'
 
 // Orden tradicional del alfabeto español (el que usan las cartillas de LSA):
@@ -18,14 +19,17 @@ function getNumColumns(width: number): number {
   return 4
 }
 
-const visitedLettersCache: string[] = []
-
 export default function AlphabetScreen() {
   const router = useRouter()
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null)
-  const [visitedLetters, setVisitedLetters] = useState<string[]>(() => [...visitedLettersCache])
   const [contentWidth, setContentWidth] = useState<number | null>(null)
   const { width } = useWindowDimensions()
+
+  // Las letras vistas vienen del server (user_alphabet_progress): así el color
+  // sobrevive a recargar la app y a cambiar de dispositivo. La marca la hace la
+  // pantalla de la letra, no esta — acá sólo se lee.
+  const progressQuery = useAlphabetProgress()
+  const visitedLetters = new Set(progressQuery.data?.map((p) => p.letter))
 
   const hasMeasuredWidth = contentWidth !== null
   const availableWidth = contentWidth ?? width
@@ -37,18 +41,8 @@ export default function AlphabetScreen() {
 
   const handleLetterPress = (letter: string) => {
     setSelectedLetter(letter)
-    setVisitedLetters((current) => {
-      if (current.includes(letter)) return current
-      const next = [...current, letter]
-      visitedLettersCache.splice(0, visitedLettersCache.length, ...next)
-      return next
-    })
     router.push({ pathname: '/alphabet/[letter]', params: { letter } })
   }
-
-  useEffect(() => {
-    setVisitedLetters([...visitedLettersCache])
-  }, [])
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
@@ -74,7 +68,7 @@ export default function AlphabetScreen() {
             style={{ flex: 1 }}
             renderItem={({ item: letter }) => {
               const isSelected = selectedLetter === letter
-              const isVisited = visitedLetters.includes(letter)
+              const isVisited = visitedLetters.has(letter)
 
               return (
                 <Pressable

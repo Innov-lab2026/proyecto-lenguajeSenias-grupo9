@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Pressable, Text, View, Modal, ActivityIndicator, Platform } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useLocalSearchParams, useRouter } from 'expo-router'
@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { Button } from '@/src/components/common/Button'
 import { LessonVideo } from '@/src/components/features/lessons/LessonVideo'
 import { useVideos } from '@/src/hooks/features/alphabet/useVideos'
+import { useCompleteLetter } from '@/src/hooks/features/alphabet/useCompleteLetter'
 import { WebView } from 'react-native-webview'
 
 export default function LetterScreen() {
@@ -18,6 +19,31 @@ export default function LetterScreen() {
   const videosQuery = useVideos()
   // Match por título exacto (mayúsculas): así están cargados en la DB.
   const video = videosQuery.data?.find((v) => v.title.trim().toUpperCase() === letter?.toUpperCase())
+
+  // Marcar la letra como vista: recién cuando existe el video, no al entrar.
+  // Hay letras sin grabar (la Y, hoy) y no tiene sentido acreditarlas por
+  // mostrar el placeholder de "todavía no hay video".
+  //
+  // Se dispara una vez por visita, sin chequear antes si ya estaba: la RPC es
+  // idempotente (devuelve success: false y no acredita de nuevo), así que el
+  // costo de revisitar es un POST de más, no progreso duplicado.
+  const { mutate: markLetterSeen, error: markLetterError } = useCompleteLetter()
+
+  // Depende de `video?.id` y no de `video`: un refetch del catálogo devuelve
+  // objetos nuevos con el mismo contenido, y eso volvería a disparar el efecto.
+  const videoId = video?.id
+
+  useEffect(() => {
+    if (!letter || !videoId) return
+    markLetterSeen(letter, {
+      onError: (err) => {
+        // El detalle técnico (puede ser un error crudo de Postgres, ej. si la
+        // migración de CH/LL/RR todavía no corrió) queda sólo en consola —
+        // nunca se muestra tal cual al usuario.
+        console.error('[alphabet] no se pudo registrar la letra vista:', err)
+      },
+    })
+  }, [letter, videoId, markLetterSeen])
 
   const practiceUrl = 'https://matiascodeds-lsa-fingerspelling.hf.space'
 
@@ -59,6 +85,17 @@ export default function LetterScreen() {
             />
           </Pressable>
         </View>
+
+        {/* No bloquea la pantalla: el video se puede seguir viendo igual,
+            sólo falló acreditar el progreso de esta letra. */}
+        {markLetterError ? (
+          <View className="mt-4 flex-row items-center gap-2 rounded-2xl bg-red-50 px-4 py-3">
+            <Ionicons name="alert-circle-outline" size={18} color="#EF4444" />
+            <Text className="flex-1 font-nunito text-xs font-bold text-red-600">
+              No pudimos guardar tu progreso en esta letra. Podés seguir viendo el video igual.
+            </Text>
+          </View>
+        ) : null}
 
         {/* Content Area */}
         <View className="flex-1 items-center justify-center py-2">
