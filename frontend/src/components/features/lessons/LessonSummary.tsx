@@ -4,7 +4,9 @@ import { Image } from 'expo-image'
 import { Ionicons } from '@expo/vector-icons'
 import { Button } from '@/src/components/common/Button'
 import { StatItem } from '@/src/components/features/home/stats'
+import { LESSON_SUMMARY_CONFIG } from '@/src/constants/lessons'
 import type { CompleteLessonResult } from '@/src/types/progress'
+import { cn } from '@/src/utils/cn'
 
 interface LessonSummaryProps {
   /** Respuesta de completeLesson. `undefined` mientras la request está en vuelo. */
@@ -12,6 +14,8 @@ interface LessonSummaryProps {
   isPending: boolean
   /** Próximo nivel a desbloquear, o `null` si es la última lección del módulo. */
   nextLevel: number | null
+  /** `lessons.content_key`: elige los textos y el color de cierre de la lección. */
+  contentKey?: string | null
   onClose: () => void
   onContinue: () => void
   insets: { top: number; bottom: number }
@@ -20,13 +24,25 @@ interface LessonSummaryProps {
 /** Respiro antes de "revelar" la recompensa (que se note que apareció, no que ya estaba). */
 const REVEAL_DELAY_MS = 300
 
+/** Celeste por defecto de la franja inferior (las lecciones de cierre lo pisan). */
+const DEFAULT_FOOTER_BG = '#67AEF5'
+
 /** Pantalla de resumen al terminar la lección: recompensa del server + desbloqueo del próximo nivel. */
-export function LessonSummary({ result, isPending, nextLevel, onClose, onContinue, insets }: LessonSummaryProps) {
+export function LessonSummary({ result, isPending, nextLevel, contentKey, onClose, onContinue, insets }: LessonSummaryProps) {
   // El server responde success:false cuando la lección ya estaba completada:
   // no hay recompensa nueva que mostrar, sólo se reconoce la revisita.
   const alreadyCompleted = result != null && !result.success
   const earnedAchievements = result?.earned_achievements ?? []
-  const showUnlock = !alreadyCompleted && nextLevel !== null
+
+  const config = (contentKey ? LESSON_SUMMARY_CONFIG[contentKey] : undefined) ?? {}
+  const footerBg = config.footerBg ?? DEFAULT_FOOTER_BG
+  // Fondo oscuro (cierre de módulo) ⇒ el texto del candado va en blanco.
+  const isDarkFooter = footerBg !== DEFAULT_FOOTER_BG
+
+  // La lección de cierre de módulo no tiene "nivel siguiente", pero igual
+  // anuncia algo; por eso el label puede venir de la config.
+  const unlockLabel = config.unlockLabel ?? (nextLevel !== null ? `Nivel ${nextLevel}\ndesbloqueado` : null)
+  const showUnlock = !alreadyCompleted && unlockLabel !== null
 
   // StatItem sólo anima cuando su `value` sube mientras está montado. La
   // respuesta del server puede llegar tan rápido que el 0 inicial no alcance a
@@ -60,10 +76,10 @@ export function LessonSummary({ result, isPending, nextLevel, onClose, onContinu
         />
 
         <Text className="font-nunito text-4xl font-bold text-ink mb-0 text-center">
-          {alreadyCompleted ? '¡De nuevo por acá!' : '¡Estuviste increíble!'}
+          {alreadyCompleted ? '¡De nuevo por acá!' : config.title ?? '¡Estuviste increíble!'}
         </Text>
         <Text className="font-nunito text-lg text-muted mb-2 text-center">
-          {alreadyCompleted ? 'Ya habías completado esta lección.' : 'Completaste la lección'}
+          {alreadyCompleted ? 'Ya habías completado esta lección.' : config.subtitle ?? 'Completaste la lección'}
         </Text>
 
         {earnedAchievements.length > 0 ? (
@@ -85,7 +101,10 @@ export function LessonSummary({ result, isPending, nextLevel, onClose, onContinu
         </View>
       </View>
 
-      <View className="h-[22%] min-h-[150px] self-stretch -mx-4 bg-[#67AEF5] items-center justify-end pb-5 relative">
+      <View
+        className="h-[22%] min-h-[150px] self-stretch -mx-4 items-center justify-end pb-5 relative"
+        style={{ backgroundColor: footerBg }}
+      >
         {showUnlock ? (
           <View className="items-center z-10 mb-3">
             <Image
@@ -93,9 +112,13 @@ export function LessonSummary({ result, isPending, nextLevel, onClose, onContinu
               className="w-16 h-16"
               contentFit="contain"
             />
-            <Text className="font-nunito text-base font-bold text-ink text-center leading-4">
-              Nivel {nextLevel}
-              {'\n'}desbloqueado
+            <Text
+              className={cn(
+                'font-nunito text-base font-bold text-center leading-4',
+                isDarkFooter ? 'text-white' : 'text-ink',
+              )}
+            >
+              {unlockLabel}
             </Text>
           </View>
         ) : null}

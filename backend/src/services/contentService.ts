@@ -21,6 +21,21 @@ export const getModuleLessonsService = async (moduleId: string) => {
   return data
 }
 
+/**
+ * Todas las lecciones de todos los módulos. El home las necesita para saber
+ * cuántas tiene cada módulo y así desbloquear el siguiente cuando el anterior
+ * está completo — con el filtro por módulo sólo podía ver el seleccionado.
+ */
+export const getAllLessonsService = async () => {
+  const { data, error } = await supabaseAdmin
+    .from('lessons')
+    .select('*')
+    .order('order', { ascending: true })
+
+  if (error) throw new Error(error.message)
+  return data
+}
+
 export const getVideosService = async () => {
   const { data, error } = await supabaseAdmin
     .from('videos')

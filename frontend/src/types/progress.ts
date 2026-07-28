@@ -14,10 +14,29 @@ export interface LessonMeta {
   description: string | null
   /** 1 a 5: la isla dentro del módulo (no confundir con `order`). */
   lesson_number: number
+  /**
+   * Clave con la que el frontend busca el contenido del ejercicio en
+   * `LESSON_CONTENT` (`m<módulo>-l<lección>`). Nullable: un módulo puede estar
+   * sembrado sin contenido todavía.
+   */
+  content_key: string | null
   xp_reward: number
   points_perfect: number
   points_retry: number
   order: number
+}
+
+/**
+ * Fila de `public.videos`. El abecedario matchea por `title` (una letra,
+ * ej. "A") contra `letter`; las lecciones referencian por `id` desde
+ * `lesson_signs`, no por este tipo.
+ */
+export interface Video {
+  id: string
+  title: string
+  url: string
+  signs_reward: number
+  created_at: string
 }
 
 /** Fila de `public.user_stats`. */

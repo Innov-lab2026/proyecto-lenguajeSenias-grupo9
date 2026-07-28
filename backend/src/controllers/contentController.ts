@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import {
   getAchievementsService,
+  getAllLessonsService,
   getModuleLessonsService,
   getModulesService,
   getStickersService,
@@ -19,6 +20,15 @@ export const getModules = async (req: Request, res: Response) => {
 export const getModuleLessons = async (req: Request, res: Response) => {
   try {
     const data = await getModuleLessonsService(req.params.id as string)
+    res.json({ data })
+  } catch (error: any) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
+export const getAllLessons = async (_req: Request, res: Response) => {
+  try {
+    const data = await getAllLessonsService()
     res.json({ data })
   } catch (error: any) {
     res.status(500).json({ message: error.message })

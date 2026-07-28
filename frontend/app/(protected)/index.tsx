@@ -9,7 +9,7 @@ import { LockedModuleView } from '@/src/components/features/home/LockedModuleVie
 import { ProgressBar } from '@/src/components/common/ProgressBar'
 import { getModuleProgress, getLockedModuleMessage } from '@/src/utils/home'
 import { useModules } from '@/src/hooks/features/lessons/useModules'
-import { useModuleLessons } from '@/src/hooks/features/lessons/useModuleLessons'
+import { useAllLessons } from '@/src/hooks/features/lessons/useAllLessons'
 import { useStats } from '@/src/hooks/features/lessons/useStats'
 import { useCompletedLessons } from '@/src/hooks/features/lessons/useCompletedLessons'
 import type { HomeModule } from '@/src/types/home'
@@ -23,6 +23,7 @@ export default function HomeScreen() {
   const modulesQuery = useModules()
   const statsQuery = useStats()
   const completedLessonsQuery = useCompletedLessons()
+  const lessonsQuery = useAllLessons()
 
   // El home NO se desmonta al entrar a una lección (el Stack raíz la apila
   // encima, no la reemplaza) — vuelve a quedar visible con router.back() sin
@@ -43,13 +44,11 @@ export default function HomeScreen() {
   const sortedModules = [...(modulesQuery.data ?? [])].sort((a, b) => a.order - b.order)
   const effectiveSelectedId = selectedModuleId ?? sortedModules[0]?.id
 
-  const moduleLessonsQuery = useModuleLessons(effectiveSelectedId)
-
   const isLoading =
     modulesQuery.isPending ||
     statsQuery.isPending ||
     completedLessonsQuery.isPending ||
-    (Boolean(effectiveSelectedId) && moduleLessonsQuery.isPending)
+    lessonsQuery.isPending
 
   if (isLoading) {
     return (
@@ -60,24 +59,28 @@ export default function HomeScreen() {
   }
 
   const completedLessonIds = new Set((completedLessonsQuery.data ?? []).map((c) => c.lesson_id))
-  const selectedModuleLessons = [...(moduleLessonsQuery.data ?? [])].sort(
-    (a, b) => a.lesson_number - b.lesson_number,
-  )
-  const completedIslandsForSelected = selectedModuleLessons.filter((l) =>
-    completedLessonIds.has(l.id),
-  ).length
+  const allLessons = lessonsQuery.data ?? []
 
-  // El primer módulo (menor `order`) siempre está desbloqueado. El resto queda
-  // "locked" por ahora: desbloquearlo en cascada necesitaría el progreso de
-  // CADA módulo anterior, pero sólo pedimos lecciones del módulo seleccionado
-  // (un hook por módulo a la vez, no en loop) — y hoy sólo hay un módulo
-  // sembrado, así que no hay con qué ejercitar esa cascada todavía. Ver
-  // PLAN_FRONTEND_CONECTAR_BACKEND.md §5.4/§10 antes de tocar esto.
+  const lessonsOf = (moduleId: string) =>
+    allLessons.filter((l) => l.module_id === moduleId).sort((a, b) => a.lesson_number - b.lesson_number)
+
+  const selectedModuleLessons = effectiveSelectedId ? lessonsOf(effectiveSelectedId) : []
+
+  /** Un módulo está completo cuando tiene lecciones y todas figuran completadas. */
+  const isModuleComplete = (moduleId: string) => {
+    const lessons = lessonsOf(moduleId)
+    return lessons.length > 0 && lessons.every((l) => completedLessonIds.has(l.id))
+  }
+
+  // El primer módulo (menor `order`) siempre está desbloqueado; cada uno de los
+  // siguientes se desbloquea al completar el anterior. Un módulo sembrado pero
+  // todavía sin lecciones (ej. el 3) nunca cuenta como completo, así que corta
+  // la cadena en vez de desbloquear módulos vacíos.
   const modules: HomeModule[] = sortedModules.map((m, index) => ({
     id: m.id,
     title: m.title,
-    state: index === 0 ? 'unlocked' : 'locked',
-    completedIslands: m.id === effectiveSelectedId ? completedIslandsForSelected : 0,
+    state: index === 0 || isModuleComplete(sortedModules[index - 1].id) ? 'unlocked' : 'locked',
+    completedIslands: lessonsOf(m.id).filter((l) => completedLessonIds.has(l.id)).length,
   }))
 
   const selectedModule = modules.find((m) => m.id === effectiveSelectedId) ?? modules[0]
@@ -92,7 +95,9 @@ export default function HomeScreen() {
     // `pr` (points_retry) viaja para que el feedback de error pueda mostrar el
     // número real de puntos que quedan en juego. Es sólo para mostrar: la
     // recompensa la calcula el server al completar la lección.
-    router.push(`/lesson/${lesson.id}?n=${lesson.lesson_number}&pr=${lesson.points_retry}`)
+    // `ck` (content_key) elige qué ejercicio se arma.
+    const query = `n=${lesson.lesson_number}&pr=${lesson.points_retry}&ck=${lesson.content_key ?? ''}`
+    router.push(`/lesson/${lesson.id}?${query}`)
   }
 
   if (!selectedModule) {

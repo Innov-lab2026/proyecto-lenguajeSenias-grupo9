@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { Text, View } from 'react-native'
-import { Image } from 'expo-image'
+import { Image, type ImageSource } from 'expo-image'
 import { Button } from '@/src/components/common/Button'
 import { LessonModalCard } from '@/src/components/features/lessons/LessonModalCard'
 
@@ -9,11 +9,25 @@ interface IntroModalProps {
   levelId: ReactNode
   title: string
   description: string
+  /** 1 a 5: elige la ilustración de la isla. */
+  islandNumber?: number
   onStart: () => void
 }
 
+/**
+ * Ilustración por isla. Los `require()` tienen que ser literales estáticos
+ * (el bundler los resuelve en build), así que van en un mapa fuera del componente.
+ */
+const ISLAND_IMAGES: Record<number, ImageSource> = {
+  1: require('@/assets/images/lessons/isla_nivel1_presentacion.svg'),
+  2: require('@/assets/images/lessons/isla_nivel2_presentacion.svg'),
+  3: require('@/assets/images/lessons/isla_nivel3_presentacion.svg'),
+  4: require('@/assets/images/lessons/isla_nivel4_presentacion.svg'),
+  5: require('@/assets/images/lessons/isla_nivel5_presentacion.svg'),
+}
+
 /** Modal de inicio de la lección: dificultad, isla, título y descripción. */
-export function IntroModal({ visible, levelId, title, description, onStart }: IntroModalProps) {
+export function IntroModal({ visible, levelId, title, description, islandNumber = 1, onStart }: IntroModalProps) {
   return (
     <LessonModalCard visible={visible} className="items-center overflow-hidden rounded-[40px] p-8">
       <View className="bg-accent/20 px-4 py-1 rounded-full mb-4">
@@ -23,7 +37,7 @@ export function IntroModal({ visible, levelId, title, description, onStart }: In
       <View className="items-center mb-6">
         <View className="w-32 h-32 bg-accent/10 rounded-full items-center justify-center mb-2">
           <Image
-            source={require('@/assets/images/lessons/isla_nivel1_presentacion.svg')}
+            source={ISLAND_IMAGES[islandNumber] ?? ISLAND_IMAGES[1]}
             className="w-24 h-24"
             contentFit="contain"
           />

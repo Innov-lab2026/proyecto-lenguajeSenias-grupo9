@@ -1,9 +1,12 @@
 import { useRouter, useLocalSearchParams } from 'expo-router'
-import { View } from 'react-native'
+import { Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { Ionicons } from '@expo/vector-icons'
+import { Button } from '@/src/components/common/Button'
 import { ContentStep } from '@/src/components/features/lessons/steps/ContentStep'
 import { QuizStep } from '@/src/components/features/lessons/steps/QuizStep'
 import { MatchingStep } from '@/src/components/features/lessons/steps/MatchingStep'
+import { CompositionStep } from '@/src/components/features/lessons/steps/CompositionStep'
 import { DialogueExercise } from '@/src/components/features/lessons/DialogueExercise'
 import { LessonVideo } from '@/src/components/features/lessons/LessonVideo'
 import { LessonSummary } from '@/src/components/features/lessons/LessonSummary'
@@ -19,15 +22,20 @@ import { LESSON_SHELL } from '@/src/constants/lessons'
 import { cn } from '@/src/utils/cn'
 
 export default function LessonScreen() {
-  const { id, n, pr } = useLocalSearchParams()
+  const { id, n, pr, ck } = useLocalSearchParams()
   const router = useRouter()
   const insets = useSafeAreaInsets()
 
   // `id` es el UUID real de la lección (para completeLesson); `n` es el
-  // lesson_number (1-5) que llega por query param desde el home y decide qué
-  // contenido mock mostrar. El backend no modela el contenido del ejercicio
-  // todavía (ver PLAN_FRONTEND_CONECTAR_BACKEND.md §4) — sólo la economía.
+  // lesson_number (1-5), sólo para mostrar "Nivel N" y el desbloqueo. El
+  // backend no modela el contenido del ejercicio todavía (ver
+  // PLAN_FRONTEND_CONECTAR_BACKEND.md §4) — sólo la economía.
   const lessonNumber = Number(Array.isArray(n) ? n[0] : n) || 1
+
+  // `ck` = lessons.content_key: con qué entrada de LESSON_CONTENT se arma el
+  // ejercicio. No alcanza con `n` porque el lesson_number es 1-5 dentro de cada
+  // módulo, así que se repite entre módulos.
+  const contentKey = (Array.isArray(ck) ? ck[0] : ck) ?? null
 
   // `pr` = points_retry de la lección (LessonMeta), también por query param:
   // sólo para mostrar en el feedback cuántos puntos se pueden ganar todavía
@@ -40,6 +48,7 @@ export default function LessonScreen() {
 
   const {
     lesson,
+    hasContent,
     currentStep,
     currentStepIndex,
     selectedOption,
@@ -47,10 +56,12 @@ export default function LessonScreen() {
     matchingState,
     dialogueAnswers,
     setDialogueAnswers,
+    compositionAnswers,
     shuffledQuizOptions,
     correctSteps,
     showFeedback,
     showSummary,
+    currentStepErrorCount,
     completionResult,
     isSaving,
     isMuted,
@@ -72,7 +83,28 @@ export default function LessonScreen() {
     markWatched,
     toggleFavorite,
     handleMatchSelection,
-  } = useLessonEngine({ lessonId: id as string, lessonNumber })
+    handleAddWordToComposition,
+    handleRemoveWordFromComposition,
+  } = useLessonEngine({ lessonId: id as string, lessonNumber, contentKey })
+
+  // Lección sembrada en la DB pero sin contenido cargado para su content_key.
+  if (!hasContent) {
+    return (
+      <View
+        className="flex-1 bg-background items-center justify-center px-8"
+        style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
+      >
+        <Ionicons name="construct-outline" size={64} color="#9BA8B1" />
+        <Text className="font-nunito text-xl font-bold text-ink text-center mt-4">
+          Lección en preparación
+        </Text>
+        <Text className="font-nunito text-base text-muted text-center mt-2">
+          Todavía estamos armando el contenido de esta lección. ¡Volvé pronto!
+        </Text>
+        <Button label="Volver" onPress={() => router.back()} className="mt-6 px-10" />
+      </View>
+    )
+  }
 
   if (showSummary) {
     return (
@@ -80,6 +112,7 @@ export default function LessonScreen() {
         result={completionResult}
         isPending={isSaving}
         nextLevel={nextLevel}
+        contentKey={contentKey}
         onClose={() => router.back()}
         onContinue={() => !isSaving && router.back()}
         insets={insets}
@@ -104,6 +137,7 @@ export default function LessonScreen() {
       <IntroModal
         visible={currentStepIndex === -1}
         levelId={lessonNumber}
+        islandNumber={lessonNumber}
         title={lesson.title}
         description={lesson.description}
         onStart={handleStart}
@@ -118,9 +152,24 @@ export default function LessonScreen() {
               selectedOption={selectedOption}
               onSelectOption={setSelectedOption}
               onWatched={markWatched}
+              muted={isMuted}
             />
           ) : currentStep.type === 'matching' ? (
-            <MatchingStep step={currentStep} matchingState={matchingState} onSelect={handleMatchSelection} />
+            <MatchingStep
+              step={currentStep}
+              matchingState={matchingState}
+              onSelect={handleMatchSelection}
+              muted={isMuted}
+            />
+          ) : currentStep.type === 'composition' ? (
+            <CompositionStep
+              step={currentStep}
+              compositionAnswers={compositionAnswers[currentStepIndex] ?? []}
+              onAddWord={handleAddWordToComposition}
+              onRemoveWord={handleRemoveWordFromComposition}
+              isLocked={correctSteps.has(currentStepIndex)}
+              muted={isMuted}
+            />
           ) : currentStep.type === 'dialogue' ? (
             <View className="flex-1 w-full">
               {currentStep.videoUrl ? (
@@ -144,6 +193,7 @@ export default function LessonScreen() {
               selectedOption={selectedOption}
               onSelectOption={setSelectedOption}
               isLocked={correctSteps.has(currentStepIndex)}
+              muted={isMuted}
             />
           )}
         </View>
@@ -153,6 +203,9 @@ export default function LessonScreen() {
         feedback={showFeedback}
         tip={currentStep?.tip}
         retryPoints={retryPoints}
+        errorCount={currentStepErrorCount}
+        stepType={currentStep?.type}
+        contentKey={contentKey}
         onRetry={handleRetry}
         onNext={handleNext}
       />

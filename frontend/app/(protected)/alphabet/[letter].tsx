@@ -1,9 +1,11 @@
 import { useState } from 'react'
-import { Pressable, ScrollView, Text, View, Modal, ActivityIndicator, Platform } from 'react-native'
+import { Pressable, Text, View, Modal, ActivityIndicator, Platform } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { Button } from '@/src/components/common/Button'
+import { LessonVideo } from '@/src/components/features/lessons/LessonVideo'
+import { useVideos } from '@/src/hooks/features/alphabet/useVideos'
 import { WebView } from 'react-native-webview'
 
 export default function LetterScreen() {
@@ -13,14 +15,14 @@ export default function LetterScreen() {
   const [isFavorite, setIsFavorite] = useState(false)
   const [showPractice, setShowPractice] = useState(false)
 
+  const videosQuery = useVideos()
+  // Match por título exacto (mayúsculas): así están cargados en la DB.
+  const video = videosQuery.data?.find((v) => v.title.trim().toUpperCase() === letter?.toUpperCase())
+
   const practiceUrl = 'https://matiascodeds-lsa-fingerspelling.hf.space'
 
   const handleOpenPractice = () => {
-    if (Platform.OS === 'web') {
-      window.open(practiceUrl, '_blank')
-    } else {
-      setShowPractice(true)
-    }
+    setShowPractice(true)
   }
 
   return (
@@ -61,12 +63,25 @@ export default function LetterScreen() {
         {/* Content Area */}
         <View className="flex-1 items-center justify-center py-2">
           <View className="w-full flex-1 max-h-[85%] rounded-[40px] border border-muted/20 bg-surface p-2 shadow-sm relative">
-            <View className="flex-1 items-center justify-center rounded-[32px] border border-dashed border-muted/40 bg-muted/10 overflow-hidden">
-              <Ionicons name="videocam-outline" size={80} color="#9BA8B1" />
-              <Text className="px-4 mt-4 text-center font-nunito text-sm text-muted">
-                {'Aquí aparecerá el video de la seña.'}
-              </Text>
-            </View>
+            {video ? (
+              <LessonVideo
+                uri={video.url}
+                className="flex-1 w-full rounded-[32px]"
+              />
+            ) : (
+              <View className="flex-1 items-center justify-center rounded-[32px] border border-dashed border-muted/40 bg-muted/10 overflow-hidden">
+                <Ionicons
+                  name={videosQuery.isPending ? 'hourglass-outline' : 'videocam-outline'}
+                  size={80}
+                  color="#9BA8B1"
+                />
+                <Text className="px-4 mt-4 text-center font-nunito text-sm text-muted">
+                  {videosQuery.isPending
+                    ? 'Cargando video...'
+                    : 'Todavía no hay un video grabado para esta letra.'}
+                </Text>
+              </View>
+            )}
           </View>
         </View>
 
@@ -80,26 +95,38 @@ export default function LetterScreen() {
         </View>
       </View>
 
-      {/* Practice Modal (Only for Mobile) */}
-      {Platform.OS !== 'web' && (
-        <Modal
-          visible={showPractice}
-          animationType="slide"
-          presentationStyle="pageSheet"
-          onRequestClose={() => setShowPractice(false)}
-        >
-          <SafeAreaView className="flex-1 bg-surface">
-            <View className="h-14 flex-row items-center justify-between px-5 border-b border-black/5">
-              <Text className="font-nunito text-lg font-bold text-ink">Práctica de Señas</Text>
-              <Pressable 
-                onPress={() => setShowPractice(false)}
-                className="p-1"
-              >
-                <Ionicons name="close" size={28} color="#1F2937" />
-              </Pressable>
-            </View>
-            
-            <WebView 
+      {/* Práctica embebida: iframe en web, WebView en nativo. En web no se abre
+          en pestaña nueva a propósito — el Space necesita permiso de cámara y
+          se pierde el contexto de la app al salir. */}
+      <Modal
+        visible={showPractice}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setShowPractice(false)}
+      >
+        <SafeAreaView className="flex-1 bg-surface">
+          <View className="h-14 flex-row items-center justify-between px-5 border-b border-black/5">
+            <Text className="font-nunito text-lg font-bold text-ink">Práctica de Señas</Text>
+            <Pressable
+              onPress={() => setShowPractice(false)}
+              className="p-1"
+              accessibilityRole="button"
+              accessibilityLabel="Cerrar práctica"
+            >
+              <Ionicons name="close" size={28} color="#1F2937" />
+            </Pressable>
+          </View>
+
+          {Platform.OS === 'web' ? (
+            // allow="camera": el Space usa la cámara para reconocer la seña.
+            <iframe
+              src={practiceUrl}
+              allow="camera; microphone"
+              style={{ flex: 1, border: 'none', width: '100%', height: '100%' }}
+              title="Práctica de Señas"
+            />
+          ) : (
+            <WebView
               source={{ uri: practiceUrl }}
               className="flex-1"
               startInLoadingState
@@ -109,9 +136,9 @@ export default function LetterScreen() {
                 </View>
               )}
             />
-          </SafeAreaView>
-        </Modal>
-      )}
+          )}
+        </SafeAreaView>
+      </Modal>
     </SafeAreaView>
   )
 }

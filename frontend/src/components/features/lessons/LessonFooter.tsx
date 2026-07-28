@@ -30,39 +30,55 @@ export function LessonFooter({
   onHint,
 }: LessonFooterProps) {
   return (
-    <View className="px-4 pb-2 pt-2 bg-background border-t border-black/5">
-      <View className="mx-auto w-full max-w-sm">
+    <View className="bg-background">
+      <View className="px-4 pt-2 pb-3 mx-auto w-full max-w-sm">
         <Button label={ctaLabel} onPress={onNext} disabled={ctaDisabled} />
       </View>
 
-      <View className="flex-row items-center mt-2 h-8">
-        <View className="w-10">
-          {showBack && (
-            <Pressable onPress={onBack}>
-              <Ionicons name="arrow-undo-outline" size={24} color="#6F706F" />
+      {/* Barra de accesos como tarjeta: se apoya sobre el borde inferior y
+          separa visualmente el CTA de los controles secundarios. */}
+      <View className="bg-surface border-t-2 border-l-2 border-r-2 border-secondary rounded-t-[32px] px-5 pb-6 pt-5">
+        <View className="mx-auto w-full max-w-sm flex-row items-center h-8">
+          <View className="flex-1 items-center justify-center">
+            {showBack && (
+              <Pressable onPress={onBack} accessibilityRole="button" accessibilityLabel="Paso anterior" hitSlop={8}>
+                <Ionicons name="arrow-undo" size={24} color="#518BC9" />
+              </Pressable>
+            )}
+          </View>
+
+          <View className="flex-1 items-center justify-center">
+            <Pressable onPress={onSettings} accessibilityRole="button" accessibilityLabel="Ajustes" hitSlop={8}>
+              <Ionicons name="settings-sharp" size={24} color="#763D14" />
             </Pressable>
-          )}
+          </View>
+
+          <View className="flex-1 items-center justify-center">
+            <Pressable
+              onPress={onToggleFavorite}
+              accessibilityRole="button"
+              accessibilityLabel={isFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+              hitSlop={8}
+            >
+              <Ionicons
+                name={isFavorite ? 'heart' : 'heart-outline'}
+                size={24}
+                color={isFavorite ? '#EF4444' : '#6F706F'}
+              />
+            </Pressable>
+          </View>
+
+          <View className="flex-1 items-center justify-center">
+            <Pressable onPress={onHint} accessibilityRole="button" accessibilityLabel="Ver pista" hitSlop={8}>
+              {/* Apagado una vez vista: evita que siga llamando la atención. */}
+              <Ionicons
+                name={hintViewed ? 'bulb-outline' : 'bulb'}
+                size={24}
+                color={hintViewed ? '#6F706F' : '#F7BB18'}
+              />
+            </Pressable>
+          </View>
         </View>
-
-        <View className="flex-1 flex-row justify-center items-center gap-12">
-          <Pressable onPress={onSettings}>
-            <Ionicons name="settings-sharp" size={24} color="#6F706F" />
-          </Pressable>
-
-          <Pressable onPress={onToggleFavorite}>
-            <Ionicons
-              name={isFavorite ? 'heart' : 'heart-outline'}
-              size={24}
-              color={isFavorite ? '#EF4444' : '#6F706F'}
-            />
-          </Pressable>
-
-          <Pressable onPress={onHint}>
-            <Ionicons name={hintViewed ? 'bulb-outline' : 'bulb'} size={24} color={hintViewed ? '#6F706F' : '#F7BB18'} />
-          </Pressable>
-        </View>
-
-        <View className="w-10" />
       </View>
     </View>
   )
