@@ -16,11 +16,7 @@ export default function LetterScreen() {
   const practiceUrl = 'https://matiascodeds-lsa-fingerspelling.hf.space'
 
   const handleOpenPractice = () => {
-    if (Platform.OS === 'web') {
-      window.open(practiceUrl, '_blank')
-    } else {
-      setShowPractice(true)
-    }
+    setShowPractice(true)
   }
 
   return (
@@ -80,26 +76,38 @@ export default function LetterScreen() {
         </View>
       </View>
 
-      {/* Practice Modal (Only for Mobile) */}
-      {Platform.OS !== 'web' && (
-        <Modal
-          visible={showPractice}
-          animationType="slide"
-          presentationStyle="pageSheet"
-          onRequestClose={() => setShowPractice(false)}
-        >
-          <SafeAreaView className="flex-1 bg-surface">
-            <View className="h-14 flex-row items-center justify-between px-5 border-b border-black/5">
-              <Text className="font-nunito text-lg font-bold text-ink">Práctica de Señas</Text>
-              <Pressable 
-                onPress={() => setShowPractice(false)}
-                className="p-1"
-              >
-                <Ionicons name="close" size={28} color="#1F2937" />
-              </Pressable>
-            </View>
-            
-            <WebView 
+      {/* Práctica embebida: iframe en web, WebView en nativo. En web no se abre
+          en pestaña nueva a propósito — el Space necesita permiso de cámara y
+          se pierde el contexto de la app al salir. */}
+      <Modal
+        visible={showPractice}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setShowPractice(false)}
+      >
+        <SafeAreaView className="flex-1 bg-surface">
+          <View className="h-14 flex-row items-center justify-between px-5 border-b border-black/5">
+            <Text className="font-nunito text-lg font-bold text-ink">Práctica de Señas</Text>
+            <Pressable
+              onPress={() => setShowPractice(false)}
+              className="p-1"
+              accessibilityRole="button"
+              accessibilityLabel="Cerrar práctica"
+            >
+              <Ionicons name="close" size={28} color="#1F2937" />
+            </Pressable>
+          </View>
+
+          {Platform.OS === 'web' ? (
+            // allow="camera": el Space usa la cámara para reconocer la seña.
+            <iframe
+              src={practiceUrl}
+              allow="camera; microphone"
+              style={{ flex: 1, border: 'none', width: '100%', height: '100%' }}
+              title="Práctica de Señas"
+            />
+          ) : (
+            <WebView
               source={{ uri: practiceUrl }}
               className="flex-1"
               startInLoadingState
@@ -109,9 +117,9 @@ export default function LetterScreen() {
                 </View>
               )}
             />
-          </SafeAreaView>
-        </Modal>
-      )}
+          )}
+        </SafeAreaView>
+      </Modal>
     </SafeAreaView>
   )
 }
