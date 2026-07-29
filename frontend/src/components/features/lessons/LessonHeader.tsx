@@ -1,7 +1,7 @@
 import { Text, View } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
 import { ProgressBar } from '@/src/components/common/ProgressBar'
 import { LESSON_SHELL } from '@/src/constants/lessons'
+import { StatBadge } from '@/src/components/features/home/stats/StatBadge'
 
 interface LessonHeaderProps {
   stats: { xp: number; stars: number; paws: number }
@@ -15,17 +15,15 @@ export function LessonHeader({ stats, progress }: LessonHeaderProps) {
       <View className={LESSON_SHELL}>
         <View className="flex-row justify-around items-center mb-2">
           <View className="flex-row items-center gap-1">
-            <View className="w-6 h-6 bg-secondary/20 rounded-full items-center justify-center">
-              <Text className="text-[10px] text-secondary font-bold">XP</Text>
-            </View>
+            <StatBadge kind="xp" size={24} animated={false} />
             <Text className="font-nunito text-xs font-bold text-ink">{stats.xp}</Text>
           </View>
           <View className="flex-row items-center gap-1">
-            <Ionicons name="star" size={16} color="#F7BB18" />
+            <StatBadge kind="star" size={24} animated={false} />
             <Text className="font-nunito text-xs font-bold text-ink">{stats.stars}</Text>
           </View>
           <View className="flex-row items-center gap-1">
-            <Ionicons name="paw" size={16} color="#A5652E" />
+            <StatBadge kind="paw" size={24} animated={false} />
             <Text className="font-nunito text-xs font-bold text-ink">{stats.paws}</Text>
           </View>
         </View>

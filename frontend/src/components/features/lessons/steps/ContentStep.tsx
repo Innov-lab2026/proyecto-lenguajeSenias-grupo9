@@ -18,20 +18,24 @@ export function ContentStep({ step, selectedOption, onSelectOption, onWatched, m
     <View className="flex-1 w-full">
       <View className="flex-1 w-full items-center justify-center mb-2">
         {!step.options ? (
-          <LessonVideo
-            uri={step.videoUrl!}
-            muted={muted}
-            onWatched={() => onWatched('main')}
-            className="h-full max-h-[560px] aspect-[9/16]"
-          />
+          <View className="w-full flex-1 max-h-[560px] rounded-[40px] border border-muted/20 bg-surface p-2 shadow-sm relative">
+            <LessonVideo
+              uri={step.videoUrl!}
+              muted={muted}
+              onWatched={() => onWatched('main')}
+              className="flex-1 w-full rounded-[32px]"
+            />
+          </View>
         ) : selectedOption && step.videoUrls?.[selectedOption] ? (
-          <LessonVideo
-            key={selectedOption}
-            uri={step.videoUrls[selectedOption]}
-            muted={muted}
-            onWatched={() => onWatched(selectedOption)}
-            className="h-full max-h-[560px] aspect-[9/16]"
-          />
+          <View className="w-full flex-1 max-h-[560px] rounded-[40px] border border-muted/20 bg-surface p-2 shadow-sm relative">
+            <LessonVideo
+              key={selectedOption}
+              uri={step.videoUrls[selectedOption]}
+              muted={muted}
+              onWatched={() => onWatched(selectedOption)}
+              className="flex-1 w-full rounded-[32px]"
+            />
+          </View>
         ) : (
           <View className="h-full max-h-[560px] aspect-[9/16] items-center justify-center rounded-3xl border-2 border-black/5 bg-surface px-4">
             <Ionicons name="videocam-outline" size={60} color="#9BA8B1" />
@@ -42,7 +46,7 @@ export function ContentStep({ step, selectedOption, onSelectOption, onWatched, m
         )}
       </View>
 
-      <Text className="font-nunito text-xl md:text-2xl font-bold text-ink text-center mb-2">
+      <Text className="font-nunito text-xl font-bold text-ink text-center py-4 px-2">
         {selectedOption || step.contentTitle}
       </Text>
 

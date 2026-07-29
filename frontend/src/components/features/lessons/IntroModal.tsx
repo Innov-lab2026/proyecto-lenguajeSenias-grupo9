@@ -1,56 +1,92 @@
-import type { ReactNode } from 'react'
-import { Text, View } from 'react-native'
-import { Image, type ImageSource } from 'expo-image'
+import { Pressable, Text, View, Modal } from 'react-native'
+import { Image } from 'expo-image'
 import { Button } from '@/src/components/common/Button'
-import { LessonModalCard } from '@/src/components/features/lessons/LessonModalCard'
+import { Island } from '@/src/components/features/home/Island'
 
 interface IntroModalProps {
   visible: boolean
-  levelId: ReactNode
+  levelId: number
   title: string
   description: string
-  /** 1 a 5: elige la ilustración de la isla. */
+  /** 1 a 5: elige la ilustración de la isla (mapeado dinámicamente si es mayor a 5). */
   islandNumber?: number
   onStart: () => void
+  onClose?: () => void
 }
 
 /**
- * Ilustración por isla. Los `require()` tienen que ser literales estáticos
- * (el bundler los resuelve en build), así que van en un mapa fuera del componente.
+ * Mapeo de dificultad por número de nivel (1 a 10).
  */
-const ISLAND_IMAGES: Record<number, ImageSource> = {
-  1: require('@/assets/images/lessons/isla_nivel1_presentacion.svg'),
-  2: require('@/assets/images/lessons/isla_nivel2_presentacion.svg'),
-  3: require('@/assets/images/lessons/isla_nivel3_presentacion.svg'),
-  4: require('@/assets/images/lessons/isla_nivel4_presentacion.svg'),
-  5: require('@/assets/images/lessons/isla_nivel5_presentacion.svg'),
+const DIFFICULTY_BY_LEVEL: Record<number, string> = {
+  1: 'Fácil',
+  2: 'Medio',
+  3: 'Difícil',
+  4: 'Medio',
+  5: 'Difícil',
+  6: 'Fácil',
+  7: 'Medio',
+  8: 'Difícil',
+  9: 'Difícil',
+  10: 'Medio',
 }
 
-/** Modal de inicio de la lección: dificultad, isla, título y descripción. */
-export function IntroModal({ visible, levelId, title, description, islandNumber = 1, onStart }: IntroModalProps) {
+/** Modal de inicio de la lección: dificultad, isla animada, título y descripción. */
+export function IntroModal({ visible, levelId, title, description, islandNumber = 1, onStart, onClose }: IntroModalProps) {
+  const computedIslandNumber = typeof islandNumber === 'number' ? ((islandNumber - 1) % 5) + 1 : 1
+  const difficulty = DIFFICULTY_BY_LEVEL[levelId] ?? 'Fácil'
+
   return (
-    <LessonModalCard visible={visible} className="items-center overflow-hidden rounded-[40px] p-8">
-      <View className="bg-accent/20 px-4 py-1 rounded-full mb-4">
-        <Text className="font-nunito text-sm font-bold text-ink">Fácil</Text>
-      </View>
-
-      <View className="items-center mb-6">
-        <View className="w-32 h-32 bg-accent/10 rounded-full items-center justify-center mb-2">
+    <Modal visible={visible} transparent animationType="fade">
+      <View className="flex-1 bg-black/50 items-center justify-center px-6">
+        <View className="w-full max-w-[340px] aspect-[13/16] relative items-center justify-between p-6">
+          {/* Imagen de fondo del modal */}
           <Image
-            source={ISLAND_IMAGES[islandNumber] ?? ISLAND_IMAGES[1]}
-            className="w-24 h-24"
-            contentFit="contain"
+            source={require('@/assets/images/lessons/intro_modal.png')}
+            className="absolute inset-0 w-full h-full"
+            contentFit="fill"
           />
-        </View>
-        <View className="bg-primary px-3 py-1 rounded-md rotate-[-5deg]">
-          <Text className="text-white font-bold text-xs">Nivel {levelId}</Text>
+
+          {/* Botón salir posicionado sobre el X de la imagen de fondo */}
+          {onClose && (
+            <Pressable
+              onPress={onClose}
+              accessibilityRole="button"
+              accessibilityLabel="Cerrar modal"
+              hitSlop={8}
+              className="absolute -top-3 -right-3 w-12 h-12 items-center justify-center rounded-full active:opacity-60 z-20"
+            />
+          )}
+
+          {/* Texto de dificultad en el tab superior */}
+          <View className="absolute top-5.5 left-0 right-0 items-center">
+            <Text className="font-nunito text-base font-bold text-ink">{difficulty}</Text>
+          </View>
+
+          {/* Contenido principal */}
+          <View className="flex-1 items-center justify-center mt-6 w-full">
+            {/* Indicador de nivel */}
+            <View className="bg-secondary px-6 py-1.5 rounded-full mb-3 shadow-sm">
+              <Text className="text-white font-nunito font-bold text-sm">Nivel {levelId}</Text>
+            </View>
+
+            {/* Isla animada de la home */}
+            <View className="items-center justify-center h-28 my-1">
+              <Island number={computedIslandNumber} state="available" width={110} />
+            </View>
+
+            {/* Título y descripción */}
+            <Text className="font-nunito text-2xl font-bold text-ink text-center px-4 mt-2">
+              {title}
+            </Text>
+            <Text className="font-nunito text-sm text-muted text-center px-6 mt-1 mb-4">
+              {description}
+            </Text>
+          </View>
+
+          {/* Botón de acción */}
+          <Button label="¡A Jugar!" onPress={onStart} className="mb-2" />
         </View>
       </View>
-
-      <Text className="font-nunito text-3xl font-bold text-ink mb-4">{title}</Text>
-      <Text className="font-nunito text-base text-muted text-center mb-8 px-4">{description}</Text>
-
-      <Button label="¡A Jugar!" onPress={onStart} className="px-10" />
-    </LessonModalCard>
+    </Modal>
   )
 }

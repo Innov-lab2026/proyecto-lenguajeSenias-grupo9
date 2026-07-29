@@ -12,7 +12,7 @@ const MOCK_MODULES: Module[] = [
   { id: MOCK_MODULE_2_ID, title: 'Módulo 2: Presentaciones', description: 'Formá tus primeras frases, reconocé nombres y mantené una conversación.', order: 2 },
   // Sembrado pero sin lecciones, igual que en la DB: queda bloqueado y corta
   // la cadena de desbloqueo (un módulo vacío nunca cuenta como completo).
-  { id: MOCK_MODULE_3_ID, title: 'Módulo 3', description: 'Próximamente.', order: 3 },
+  { id: MOCK_MODULE_3_ID, title: 'Módulo 3: Familia', description: 'Aprendé las señas para presentar a tu familia.', order: 3 },
 ]
 
 const MOCK_LESSONS: LessonMeta[] = [

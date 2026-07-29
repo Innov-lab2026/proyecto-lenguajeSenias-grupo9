@@ -17,8 +17,8 @@ export function BottomBar() {
         {NAVIGATION_ITEMS.map((item) => {
           const hrefStr = item.href as string
           const isActive =
-            hrefStr === '/'
-              ? pathname === '/'
+            hrefStr === '/home' || hrefStr === '/'
+              ? pathname === '/' || pathname === '/home'
               : pathname === hrefStr || pathname.startsWith(hrefStr + '/')
 
           return (

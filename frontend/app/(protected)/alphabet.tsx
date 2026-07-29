@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { FlatList, Pressable, Text, View, useWindowDimensions } from 'react-native'
+import { Pressable, Text, View, useWindowDimensions } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
 import { useAlphabetProgress } from '@/src/hooks/features/alphabet/useAlphabetProgress'
@@ -19,25 +19,31 @@ function getNumColumns(width: number): number {
   return 4
 }
 
+const GAP = 8
+const HORIZONTAL_PADDING = 32 // 16px por lado
+
 export default function AlphabetScreen() {
   const router = useRouter()
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null)
   const [contentWidth, setContentWidth] = useState<number | null>(null)
+  const [gridHeight, setGridHeight] = useState<number | null>(null)
   const { width } = useWindowDimensions()
 
-  // Las letras vistas vienen del server (user_alphabet_progress): así el color
-  // sobrevive a recargar la app y a cambiar de dispositivo. La marca la hace la
-  // pantalla de la letra, no esta — acá sólo se lee.
   const progressQuery = useAlphabetProgress()
   const visitedLetters = new Set(progressQuery.data?.map((p) => p.letter))
 
-  const hasMeasuredWidth = contentWidth !== null
+  const hasMeasured = contentWidth !== null && gridHeight !== null
   const availableWidth = contentWidth ?? width
   const numColumns = getNumColumns(availableWidth)
-  // Padding total horizontal: 20px a cada lado + gaps entre columnas
-  const HORIZONTAL_PADDING = 40
-  const GAP = 12
-  const cardSize = Math.floor((availableWidth - HORIZONTAL_PADDING - GAP * (numColumns - 1)) / numColumns)
+  const numRows = Math.ceil(LSA_ALPHABET.length / numColumns)
+
+  // Tamaño de tarjeta: el menor entre lo que cabe horizontalmente y
+  // verticalmente, para que todas las letras sean visibles sin scroll.
+  const cardByWidth = Math.floor((availableWidth - HORIZONTAL_PADDING - GAP * (numColumns - 1)) / numColumns)
+  const cardByHeight = gridHeight != null
+    ? Math.floor((gridHeight - GAP * (numRows - 1)) / numRows)
+    : cardByWidth
+  const cardSize = Math.min(cardByWidth, cardByHeight)
 
   const handleLetterPress = (letter: string) => {
     setSelectedLetter(letter)
@@ -45,67 +51,67 @@ export default function AlphabetScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={['top']}>
+    <SafeAreaView className="flex-1 bg-secondary" edges={['top']}>
       <View className="flex-1 max-w-4xl mx-auto w-full" onLayout={(event) => setContentWidth(event.nativeEvent.layout.width)}>
-        {/* Encabezado */}
-        <View className="px-5 pt-8 pb-6">
-          <Text className="font-nunito text-4xl font-bold text-ink">Abecedario</Text>
-          <Text className="font-nunito text-base text-muted mt-2">
+        {/* Encabezado azul */}
+        <View className="bg-secondary px-5 pt-6 pb-10 items-center">
+          <Text className="font-nunito text-3xl font-bold text-white">Abecedario</Text>
+          <Text className="font-nunito text-sm text-white/70 mt-1">
             Seleccioná una letra para ver su seña
           </Text>
         </View>
 
-        {/* Grilla de letras */}
-        {hasMeasuredWidth && (
-          <FlatList
-            data={LSA_ALPHABET}
-            keyExtractor={(item) => item}
-            numColumns={numColumns}
-            key={numColumns} // fuerza re-render al cambiar columnas
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 40 }}
-            columnWrapperStyle={{ gap: GAP, marginBottom: GAP }}
-            style={{ flex: 1 }}
-            renderItem={({ item: letter }) => {
-              const isSelected = selectedLetter === letter
-              const isVisited = visitedLetters.has(letter)
+        {/* Grilla con fondo blanco y esquinas superiores redondeadas */}
+        <View
+          className="flex-1 bg-background rounded-t-3xl -mt-4"
+          onLayout={(event) => setGridHeight(event.nativeEvent.layout.height)}
+        >
+          {hasMeasured && (
+            <View
+              className="flex-1 flex-row flex-wrap items-start justify-center content-center"
+              style={{ paddingHorizontal: 16, gap: GAP }}
+            >
+              {LSA_ALPHABET.map((letter) => {
+                const isSelected = selectedLetter === letter
+                const isVisited = visitedLetters.has(letter)
 
-              return (
-                <Pressable
-                  onPress={() => handleLetterPress(letter)}
-                  accessibilityRole="button"
-                  accessibilityLabel={`Letra ${letter}`}
-                  accessibilityState={{ selected: isSelected }}
-                  style={{ width: cardSize, height: cardSize }}
-                  className={cn(
-                    'items-center justify-center rounded-[24px] border-b-4 active:mt-1 active:border-b-0',
-                    isSelected
-                      ? 'bg-accent border-secondary'
-                      : isVisited
-                        ? 'bg-surface border-secondary/30'
-                        : 'bg-surface border-black/5'
-                  )}
-                >
-                  <Text
+                return (
+                  <Pressable
+                    key={letter}
+                    onPress={() => handleLetterPress(letter)}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Letra ${letter}`}
+                    accessibilityState={{ selected: isSelected }}
+                    style={{ width: cardSize, height: cardSize }}
                     className={cn(
-                      'font-nunito font-bold',
+                      'items-center justify-center rounded-[20px] border-b-4 active:mt-1 active:border-b-0',
                       isSelected
-                        ? 'text-secondary'
+                        ? 'bg-accent border-secondary'
                         : isVisited
-                          ? 'text-secondary/70'
-                          : 'text-ink/40',
+                          ? 'bg-surface border-secondary/30'
+                          : 'bg-surface border-black/5'
                     )}
-                    style={{ fontSize: cardSize * 0.38 }}
                   >
-                    {letter}
-                  </Text>
-                </Pressable>
-              )
-            }}
-          />
-        )}
+                    <Text
+                      className={cn(
+                        'font-nunito font-bold',
+                        isSelected
+                          ? 'text-secondary'
+                          : isVisited
+                            ? 'text-secondary/70'
+                            : 'text-ink/40',
+                      )}
+                      style={{ fontSize: cardSize * 0.36 }}
+                    >
+                      {letter}
+                    </Text>
+                  </Pressable>
+                )
+              })}
+            </View>
+          )}
+        </View>
       </View>
     </SafeAreaView>
   )
 }
-

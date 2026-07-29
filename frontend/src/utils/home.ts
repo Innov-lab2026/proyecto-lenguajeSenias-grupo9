@@ -25,7 +25,7 @@ export function getLockedModuleMessage(modules: HomeModule[], locked: HomeModule
   const pending = modules
     .slice(0, index)
     .filter((m) => m.completedIslands < ISLANDS_PER_MODULE)
-    .map((m) => `el ${m.title.toLowerCase()}`)
+    .map((m) => `el ${m.title}`)
 
   if (pending.length === 0) return 'Este módulo todavía no está disponible.'
 
@@ -34,5 +34,5 @@ export function getLockedModuleMessage(modules: HomeModule[], locked: HomeModule
       ? `${pending.slice(0, -1).join(', ')} y ${pending[pending.length - 1]}`
       : pending[0]
 
-  return `Completa ${list} para desbloquear más lecciones.`
+  return `Completá ${list} para desbloquear más lecciones.`
 }

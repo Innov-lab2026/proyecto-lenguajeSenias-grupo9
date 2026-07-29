@@ -11,11 +11,11 @@ interface LockedModuleViewProps {
  */
 export function LockedModuleView({ message }: LockedModuleViewProps) {
   return (
-    <View className="flex-1 items-center bg-panel px-8 pt-10">
+    <View className="flex-1 items-center justify-center bg-panel px-8">
       <Text className="text-center font-nunito text-lg font-bold text-ink">{message}</Text>
       <Image
         source={require('@/assets/images/home/carpi-2.png')}
-        style={{ width: 200, height: 200, marginTop: 36 }}
+        style={{ width: 280, height: 280, marginTop: 24 }}
         contentFit="contain"
         accessibilityLabel="Carpincho leyendo el libro de Lengua de Señas Argentina"
       />

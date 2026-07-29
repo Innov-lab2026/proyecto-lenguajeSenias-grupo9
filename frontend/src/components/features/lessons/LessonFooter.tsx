@@ -1,6 +1,12 @@
 import { Pressable, View } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
+import { Image } from 'expo-image'
 import { Button } from '@/src/components/common/Button'
+
+// Iconos personalizados en formato SVG
+const configIcon = require('@/assets/images/lessons/icons/config.svg')
+const favBlcIcon = require('@/assets/images/lessons/icons/fav_blc.svg')
+const favRedIcon = require('@/assets/images/lessons/icons/fav_red.svg')
 
 interface LessonFooterProps {
   ctaLabel: string
@@ -11,7 +17,7 @@ interface LessonFooterProps {
   onSettings: () => void
   isFavorite: boolean
   onToggleFavorite: () => void
-  /** true = ya se vio la pista de este step (ícono outline en vez de relleno). */
+  /** true = ya se vio la pista de este step. */
   hintViewed: boolean
   onHint: () => void
 }
@@ -36,9 +42,9 @@ export function LessonFooter({
       </View>
 
       {/* Barra de accesos como tarjeta: se apoya sobre el borde inferior y
-          separa visualmente el CTA de los controles secundarios. */}
-      <View className="bg-surface border-t-2 border-l-2 border-r-2 border-secondary rounded-t-[32px] px-5 pb-6 pt-5">
-        <View className="mx-auto w-full max-w-sm flex-row items-center h-8">
+          separa visualmente el CTA de los controles secundarios. Altura reducida. */}
+      <View className="bg-surface border-t-2 border-l-2 border-r-2 border-secondary rounded-t-[32px] px-5 pb-4 pt-3">
+        <View className="mx-auto w-full max-w-sm flex-row items-center h-7">
           <View className="flex-1 items-center justify-center">
             {showBack && (
               <Pressable onPress={onBack} accessibilityRole="button" accessibilityLabel="Paso anterior" hitSlop={8}>
@@ -49,7 +55,11 @@ export function LessonFooter({
 
           <View className="flex-1 items-center justify-center">
             <Pressable onPress={onSettings} accessibilityRole="button" accessibilityLabel="Ajustes" hitSlop={8}>
-              <Ionicons name="settings-sharp" size={24} color="#763D14" />
+              <Image
+                source={configIcon}
+                style={{ width: 24, height: 24 }}
+                contentFit="contain"
+              />
             </Pressable>
           </View>
 
@@ -60,21 +70,21 @@ export function LessonFooter({
               accessibilityLabel={isFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
               hitSlop={8}
             >
-              <Ionicons
-                name={isFavorite ? 'heart' : 'heart-outline'}
-                size={24}
-                color={isFavorite ? '#EF4444' : '#6F706F'}
+              <Image
+                source={isFavorite ? favRedIcon : favBlcIcon}
+                style={{ width: 24, height: 24 }}
+                contentFit="contain"
               />
             </Pressable>
           </View>
 
           <View className="flex-1 items-center justify-center">
             <Pressable onPress={onHint} accessibilityRole="button" accessibilityLabel="Ver pista" hitSlop={8}>
-              {/* Apagado una vez vista: evita que siga llamando la atención. */}
+              {/* El foco/bombilla permanece encendido siempre incluso tras hacer click */}
               <Ionicons
-                name={hintViewed ? 'bulb-outline' : 'bulb'}
+                name="bulb"
                 size={24}
-                color={hintViewed ? '#6F706F' : '#F7BB18'}
+                color="#F7BB18"
               />
             </Pressable>
           </View>

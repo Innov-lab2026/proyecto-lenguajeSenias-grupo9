@@ -17,7 +17,7 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
     key: 'home',
     label: 'Inicio',
     icon: 'home',
-    href: '/',
+    href: '/home',
   },
   {
     key: 'rewards',

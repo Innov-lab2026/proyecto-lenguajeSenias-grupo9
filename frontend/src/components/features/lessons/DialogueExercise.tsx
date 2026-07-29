@@ -80,7 +80,7 @@ export function DialogueExercise({
 
   return (
     <View className="flex-1">
-      <Text className="font-nunito text-base md:text-lg font-bold text-ink text-center mb-2">{question}</Text>
+      <Text className="font-nunito text-xl font-bold text-ink text-center py-4 px-2">{question}</Text>
 
       {/* Dialogue Area */}
       <View className="flex-1 bg-surface rounded-2xl border-2 border-black/5 p-3 mb-3">

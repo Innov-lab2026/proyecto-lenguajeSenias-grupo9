@@ -141,6 +141,7 @@ export default function LessonScreen() {
         title={lesson.title}
         description={lesson.description}
         onStart={handleStart}
+        onClose={() => router.back()}
       />
 
       {/* Contenido del step actual */}
@@ -174,7 +175,9 @@ export default function LessonScreen() {
             <View className="flex-1 w-full">
               {currentStep.videoUrl ? (
                 <View className="w-full items-center justify-center mb-2">
-                  <LessonVideo uri={currentStep.videoUrl} muted={isMuted} className="h-[200px] aspect-[9/16]" />
+                  <View className="w-full h-[200px] rounded-[40px] border border-muted/20 bg-surface p-2 shadow-sm relative">
+                    <LessonVideo uri={currentStep.videoUrl} muted={isMuted} className="flex-1 w-full rounded-[32px]" />
+                  </View>
                 </View>
               ) : null}
 

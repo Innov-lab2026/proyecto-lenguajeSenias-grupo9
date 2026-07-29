@@ -1,7 +1,6 @@
-import { Text, View } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import { Pressable, Text, View, Modal } from 'react-native'
+import { Image } from 'expo-image'
 import { Button } from '@/src/components/common/Button'
-import { LessonModalCard } from '@/src/components/features/lessons/LessonModalCard'
 
 interface HintModalProps {
   visible: boolean
@@ -9,18 +8,54 @@ interface HintModalProps {
   onClose: () => void
 }
 
-/** Modal de pista del step actual. */
+/** Modal de pista del step actual: muestra una lámpara animada y la explicación. */
 export function HintModal({ visible, tip, onClose }: HintModalProps) {
   return (
-    <LessonModalCard visible={visible} className="items-center shadow-xl">
-      <View className="w-16 h-16 bg-accent/20 rounded-full items-center justify-center mb-4">
-        <Ionicons name="bulb" size={32} color="#F7BB18" />
+    <Modal visible={visible} transparent animationType="fade">
+      <View className="flex-1 bg-black/50 items-center justify-center px-6">
+        <View className="w-full max-w-[340px] aspect-[13/16] relative items-center justify-between p-6">
+          {/* Imagen de fondo del modal (idéntica a la de IntroModal) */}
+          <Image
+            source={require('@/assets/images/lessons/intro_modal.png')}
+            className="absolute inset-0 w-full h-full"
+            contentFit="fill"
+          />
+
+          {/* Botón salir posicionado sobre el X de la imagen de fondo */}
+          <Pressable
+            onPress={onClose}
+            accessibilityRole="button"
+            accessibilityLabel="Cerrar modal"
+            hitSlop={8}
+            className="absolute -top-3 -right-3 w-12 h-12 items-center justify-center rounded-full active:opacity-60 z-20"
+          />
+
+          {/* Texto "Pista" en el tab superior */}
+          <View className="absolute top-5.5 left-0 right-0 items-center">
+            <Text className="font-nunito text-base font-bold text-ink">Pista</Text>
+          </View>
+
+          {/* Contenido principal */}
+          <View className="flex-1 items-center justify-center mt-6 w-full">
+            {/* Lámpara ilustrativa */}
+            <View className="items-center justify-center h-28 my-2">
+              <Image
+                source={require('@/assets/images/lessons/tip_lampara.svg')}
+                className="w-24 h-24"
+                contentFit="contain"
+              />
+            </View>
+
+            {/* Explicación de la pista */}
+            <Text className="font-nunito text-base text-muted text-center px-6 mt-4 mb-4">
+              {tip || 'Observa bien los gestos y la posición de las manos.'}
+            </Text>
+          </View>
+
+          {/* Botón de acción */}
+          <Button label="Entendido" onPress={onClose} className="mb-2" />
+        </View>
       </View>
-      <Text className="font-nunito text-xl font-bold text-ink mb-2">Pista</Text>
-      <Text className="font-nunito text-base text-muted text-center mb-8 px-2">
-        {tip || 'Observa bien los gestos y la posición de las manos.'}
-      </Text>
-      <Button label="Entendido" onPress={onClose} />
-    </LessonModalCard>
+    </Modal>
   )
 }

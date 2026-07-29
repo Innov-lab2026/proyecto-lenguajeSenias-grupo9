@@ -97,7 +97,7 @@ export function LessonVideo({
     <VideoView
       player={player}
       style={{ width: '100%', height: '100%' }}
-      contentFit="contain"
+      contentFit="cover"
       nativeControls={false}
       fullscreenOptions={{ enable: false }}
       allowsPictureInPicture={false}

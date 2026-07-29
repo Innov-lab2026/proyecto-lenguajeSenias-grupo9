@@ -68,22 +68,9 @@ export default function LetterScreen() {
           <View className="flex-1">
             <Text className="font-nunito text-2xl font-bold text-ink">Letra {letter ?? '?'}</Text>
             <Text className="font-nunito text-xs text-muted">
-              {'Seña y video correspondiente.'}
+              {'Mirá el video para aprender la seña. Después, ¡practicá vos!'}
             </Text>
           </View>
-          <Pressable
-            onPress={() => setIsFavorite(!isFavorite)}
-            accessibilityRole="button"
-            accessibilityLabel={isFavorite ? "Quitar de favoritos" : "Añadir a favoritos"}
-            hitSlop={8}
-            className="h-10 w-10 items-center justify-center rounded-full bg-surface shadow-sm shadow-black/10 web:hover:bg-muted/10"
-          >
-            <Ionicons 
-              name={isFavorite ? "heart" : "heart-outline"} 
-              size={22} 
-              color={isFavorite ? "#EF4444" : "#1F2937"} 
-            />
-          </Pressable>
         </View>
 
         {/* No bloquea la pantalla: el video se puede seguir viendo igual,
@@ -119,6 +106,20 @@ export default function LetterScreen() {
                 </Text>
               </View>
             )}
+            {/* Favorite button – Instagram-style overlay */}
+            <Pressable
+              onPress={() => setIsFavorite(!isFavorite)}
+              accessibilityRole="button"
+              accessibilityLabel={isFavorite ? "Quitar de favoritos" : "Añadir a favoritos"}
+              hitSlop={8}
+              className="absolute bottom-4 right-4 h-11 w-11 items-center justify-center rounded-full bg-black/30"
+            >
+              <Ionicons
+                name={isFavorite ? "heart" : "heart-outline"}
+                size={24}
+                color={isFavorite ? "#EF4444" : "#FFFFFF"}
+              />
+            </Pressable>
           </View>
         </View>
 

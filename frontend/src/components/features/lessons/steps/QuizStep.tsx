@@ -20,10 +20,12 @@ export function QuizStep({ step, options, selectedOption, onSelectOption, isLock
     return (
       <View className="flex-1 w-full">
         <View className="flex-1 w-full items-center justify-center mb-2">
-          <LessonVideo uri={step.videoUrl} muted={muted} className="h-full max-h-[560px] aspect-[9/16]" />
+          <View className="w-full flex-1 max-h-[560px] rounded-[40px] border border-muted/20 bg-surface p-2 shadow-sm relative">
+            <LessonVideo uri={step.videoUrl} muted={muted} className="flex-1 w-full rounded-[32px]" />
+          </View>
         </View>
 
-        <Text className="font-nunito text-lg md:text-xl font-bold text-ink text-center mb-2">{step.question}</Text>
+        <Text className="font-nunito text-xl font-bold text-ink text-center py-4 px-2">{step.question}</Text>
 
         <View className="flex-col md:flex-row gap-2 mb-2">
           {step.options?.map((option) => (
@@ -76,7 +78,7 @@ export function QuizStep({ step, options, selectedOption, onSelectOption, isLock
         ))}
       </View>
 
-      <Text className="font-nunito text-lg md:text-xl font-bold text-ink text-center mb-2">{step.question}</Text>
+      <Text className="font-nunito text-xl font-bold text-ink text-center py-4 px-2">{step.question}</Text>
     </View>
   )
 }

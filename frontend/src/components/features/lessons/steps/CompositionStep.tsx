@@ -30,12 +30,14 @@ export function CompositionStep({
       {step.videoUrl && (
         <View className="w-full flex-1 items-center justify-center mb-4" style={{ maxHeight: '50%' }}>
           {/* El video principal del step */}
-          <LessonVideo uri={step.videoUrl} muted={muted} className="flex-1 w-full aspect-[9/16]" />
+          <View className="w-full flex-1 rounded-[40px] border border-muted/20 bg-surface p-2 shadow-sm relative">
+            <LessonVideo uri={step.videoUrl} muted={muted} className="flex-1 w-full rounded-[32px]" />
+          </View>
         </View>
       )}
 
       {/* Enunciado/Pregunta */}
-      <Text className="font-nunito text-base md:text-lg font-bold text-ink text-center mb-4 px-2">
+      <Text className="font-nunito text-xl font-bold text-ink text-center py-4 px-2">
         {step.question}
       </Text>
 

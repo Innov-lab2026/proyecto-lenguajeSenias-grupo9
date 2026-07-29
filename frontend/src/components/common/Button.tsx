@@ -14,10 +14,11 @@ interface ButtonProps {
   className?: string
 }
 
+// Estilos de contenedor por variante.
 const containerByVariant: Record<Variant, string> = {
-  primary: 'bg-primary hover:bg-primary-hover active:bg-primary-hover',
-  white: 'bg-surface shadow-sm shadow-black/5 hover:bg-gray-100 active:bg-gray-200',
-  secondary: 'bg-secondary hover:bg-secondary/90 active:bg-secondary/80',
+  primary: 'w-1/2 self-center bg-primary border-b-4 border-[#C8910A] active:mt-1 active:border-b-0 hover:bg-primary-hover',
+  white: 'w-full bg-surface shadow-sm shadow-black/5 hover:bg-gray-100 active:bg-gray-200',
+  secondary: 'w-full bg-secondary hover:bg-secondary/90 active:bg-secondary/80',
 }
 
 const textByVariant: Record<Variant, string> = {
@@ -51,7 +52,7 @@ export function Button({
       accessibilityRole="button"
       accessibilityState={{ disabled: isDisabled, busy: loading }}
       className={cn(
-        'h-14 w-full flex-row items-center justify-center gap-2 rounded-full px-4 web:transition-colors',
+        'h-14 flex-row items-center justify-center gap-2 rounded-full px-4 web:transition-colors',
         containerByVariant[variant],
         isDisabled && 'opacity-50',
         className,

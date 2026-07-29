@@ -30,12 +30,13 @@ export function ModuleTabs({ modules, selectedId, onSelect }: ModuleTabsProps) {
             accessibilityState={{ selected: isSelected }}
             accessibilityLabel={isLocked ? `${module.title} (bloqueado)` : module.title}
             className={cn(
-              'items-center justify-center gap-0.5 rounded-t-xl active:opacity-90',
+              'items-center justify-center gap-0.5 rounded-t-xl active:opacity-90 px-2 overflow-hidden',
               isSelected ? 'h-14 flex-[1.4] bg-secondary' : 'h-12 flex-1 bg-tab-locked',
             )}
           >
             <Text
-              className={cn('font-nunito font-bold text-white', isSelected ? 'text-lg' : 'text-sm')}
+              numberOfLines={2}
+              className={cn('font-nunito font-bold text-white text-center', isSelected ? 'text-sm' : 'text-xs')}
             >
               {module.title}
             </Text>
