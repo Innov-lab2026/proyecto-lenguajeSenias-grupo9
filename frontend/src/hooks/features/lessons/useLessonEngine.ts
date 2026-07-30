@@ -109,7 +109,6 @@ export function useLessonEngine({ lessonId, lessonNumber, contentKey }: UseLesso
         'm1-l4-content-interactive',
         'm2-l2-content-interactive',
         'm2-l4-content-interactive',
-        'm2-l3-quiz'
       ]
       if (currentStep && targetStepIds.includes(currentStep.id) && currentStep.options && currentStep.options.length > 0) {
         setSelectedOption(stepAnswers[currentStepIndex] || currentStep.options[0])
