@@ -3,5 +3,9 @@
   "outputDirectory": "dist",
   "installCommand": "npm install",
   "framework": null,
-  "cleanUrls": true
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/lesson/:id", "destination": "/lesson/[id].html" },
+    { "source": "/alphabet/:letter", "destination": "/alphabet/[letter].html" }
+  ]
 }
