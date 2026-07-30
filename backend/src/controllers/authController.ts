@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import { loginService, registerService } from '../services/authService'
+import { deleteAccountService, loginService, registerService } from '../services/authService'
 import { supabase, supabaseAdmin } from '../config/supabaseClient'
 
 export const login = async (req: Request, res: Response) => {
@@ -80,4 +80,14 @@ export const updateCredentials = async (req: Request, res: Response) => {
   if (error) return res.status(400).json({ error: error.message })
 
   return res.status(200).json({ message: 'Datos de seguridad actualizados.', user: { email: data.user.email } })
+}
+
+export const deleteAccount = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user.id
+    await deleteAccountService(userId)
+    return res.status(200).json({ message: 'Cuenta eliminada correctamente.' })
+  } catch (error: any) {
+    return res.status(500).json({ error: error.message })
+  }
 }
