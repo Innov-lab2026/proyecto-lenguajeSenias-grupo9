@@ -107,7 +107,7 @@ export default function HelpScreen() {
         </View>
       </ScrollView>
 
-      {/* Botón flotante de volver en el canto inferior direito (solo el icono, sin circulo blanco de fondo) */}
+      {/* Botón flotante de volver en la esquina inferior derecha (sólo el ícono, sin círculo blanco de fondo) */}
       <Pressable
         onPress={() => router.back()}
         accessibilityRole="button"

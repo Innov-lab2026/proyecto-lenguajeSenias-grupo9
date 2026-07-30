@@ -38,13 +38,13 @@ export default function AboutScreen() {
       >
         <View className="mt-4 gap-5">
           <Text className="font-nunito text-lg leading-8 text-ink/80 text-justify">
-            Carpiseñas es una App pensada para acercar el Lenguaje de Señas Argentina a personas oyentes de maneira accesible, divertida e inclusiva.
+            Carpiseñas es una App pensada para acercar el Lenguaje de Señas Argentina a personas oyentes de manera accesible, divertida e inclusiva.
           </Text>
           <Text className="font-nunito text-lg leading-8 text-ink/80 text-justify">
-            Creemos en un mundo donde la comunicacion no tenga barreras y el aprendizaje sea una experiencia significativa para todos.
+            Creemos en un mundo donde la comunicación no tenga barreras y el aprendizaje sea una experiencia significativa para todos.
           </Text>
           <Text className="font-nunito text-lg leading-8 text-ink/80 text-justify">
-            Aprende el Lenguaje de Señas Argentina jugando, sumando pontos y siguiendo tu progreso para hacer tu aprendizaje más entretenido. Carpi te acompanha en cada etapa del aprendizaje.
+            Aprende el Lenguaje de Señas Argentina jugando, sumando puntos y siguiendo tu progreso para hacer tu aprendizaje más entretenido. Carpi te acompaña en cada etapa del aprendizaje.
           </Text>
         </View>
 
@@ -58,7 +58,7 @@ export default function AboutScreen() {
         </View>
       </ScrollView>
 
-      {/* Botón flotante de volver en el canto inferior direito (solo el icono, sin circulo blanco de fondo) */}
+      {/* Botón flotante de volver en la esquina inferior derecha (sólo el ícono, sin círculo blanco de fondo) */}
       <Pressable
         onPress={() => router.back()}
         accessibilityRole="button"
