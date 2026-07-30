@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react"
-import { Alert, Image, Modal, Platform, Pressable, ScrollView, Switch, Text, View } from "react-native"
+import { useCallback, useEffect, useState } from "react"
+import { Image, Modal, Pressable, ScrollView, Switch, Text, View } from "react-native"
 import * as ImagePicker from "expo-image-picker"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { Ionicons } from "@expo/vector-icons"
@@ -17,6 +17,7 @@ import { deleteAccount, deleteAvatar, updateCredentials, uploadAvatar } from "@/
 import { getApiErrorMessage } from "@/src/services/http"
 import { saveUser } from "@/src/lib/storage"
 import { usePreferencesStore } from "@/src/store/preferencesStore"
+import { useAppAlert } from "@/src/components/common/AppAlertProvider"
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -39,6 +40,7 @@ function Row({ label, value }: { label: string; value: string }) {
 export default function ProfileScreen() {
   const router = useRouter()
   const logout = useLogout()
+  const { notify } = useAppAlert()
   const { data: profile, refetch } = useProfile()
   const updateProfile = useUpdateProfile()
   const user = useSessionStore((state) => state.user)
@@ -68,20 +70,41 @@ export default function ProfileScreen() {
   const audio = !isMuted
   const setAudio = (enabled: boolean) => setIsMuted(!enabled)
 
-  useEffect(() => {
+  // Recalcula los campos editables a partir de los datos ya guardados (perfil
+  // + sesión). Se usa tanto para hidratar al cargar como para descartar
+  // ediciones sin guardar al tocar "Cancelar" — sin esto, "Cancelar" sólo
+  // apagaba el modo edición pero dejaba lo tipeado en el estado local, que la
+  // vista de sólo-lectura sigue mostrando hasta el próximo refetch/reload.
+  // useCallback acá no es por performance: es para que el useEffect de abajo
+  // pueda declarar la dependencia sin recrearla en cada render.
+  const resetPersonalFields = useCallback(() => {
     const parts = (profile?.full_name || [user?.firstName, user?.lastName].filter(Boolean).join(" ") || "Usuario").split(" ")
     setFirstName(parts[0] || "")
     setLastName(parts.slice(1).join(" "))
     setGender(profile?.gender || undefined)
     setBirthDate(profile?.birth_date ? profile.birth_date.split("-").reverse().join("/") : "")
+  }, [profile?.birth_date, profile?.full_name, profile?.gender, user?.firstName, user?.lastName])
+
+  const resetSecurityFields = useCallback(() => {
     setEmail(user?.email || "")
-  }, [profile?.birth_date, profile?.full_name, profile?.gender, user?.email, user?.firstName, user?.lastName])
+    setCurrentPassword("")
+    setNewPassword("")
+    setConfirmPassword("")
+  }, [user?.email])
+
+  useEffect(() => {
+    resetPersonalFields()
+    resetSecurityFields()
+  }, [resetPersonalFields, resetSecurityFields])
 
   const fullName = [firstName, lastName].filter(Boolean).join(" ") || "Usuario"
 
   const savePersonal = async () => {
-    if (!firstName.trim()) return Alert.alert("Error", "El nombre es obligatorio")
-    
+    if (!firstName.trim()) {
+      await notify({ title: "Error", message: "El nombre es obligatorio" })
+      return
+    }
+
     try {
       const birthDateIso = birthDate ? birthDate.split("/").reverse().join("-") : undefined
       await updateProfile.mutateAsync({
@@ -90,16 +113,25 @@ export default function ProfileScreen() {
         birth_date: birthDateIso
       })
       setEditingPersonal(false)
-      Alert.alert("Listo", "Perfil actualizado correctamente")
-    } catch (error) { 
-      Alert.alert("Error", getApiErrorMessage(error))
+      await notify({ title: "Listo", message: "Perfil actualizado correctamente" })
+    } catch (error) {
+      await notify({ title: "Error", message: getApiErrorMessage(error) })
     }
   }
 
   const saveSecurity = async () => {
-    if (newPassword && newPassword !== confirmPassword) return Alert.alert("Error", "As senhas não coincidem.")
-    if (newPassword && newPassword.length < 8) return Alert.alert("Contraseña", "La nueva contraseña debe tener al menos 8 caracteres.")
-    if (!newPassword && email === user?.email) return Alert.alert("Sin cambios", "Modificá el correo o la contraseña.")
+    if (newPassword && newPassword !== confirmPassword) {
+      await notify({ title: "Error", message: "Las contraseñas no coinciden." })
+      return
+    }
+    if (newPassword && newPassword.length < 8) {
+      await notify({ title: "Contraseña", message: "La nueva contraseña debe tener al menos 8 caracteres." })
+      return
+    }
+    if (!newPassword && email === user?.email) {
+      await notify({ title: "Sin cambios", message: "Modificá el correo o la contraseña." })
+      return
+    }
 
     setSavingSecurity(true)
     try {
@@ -113,9 +145,9 @@ export default function ProfileScreen() {
       setNewPassword("")
       setConfirmPassword("")
       setEditingSecurity(false)
-      Alert.alert("Listo", "Tus datos de seguridad foram atualizados.")
+      await notify({ title: "Listo", message: "Tus datos de seguridad fueron actualizados." })
     } catch (error) {
-      Alert.alert("Error", getApiErrorMessage(error))
+      await notify({ title: "Error", message: getApiErrorMessage(error) })
     } finally {
       setSavingSecurity(false)
     }
@@ -123,7 +155,10 @@ export default function ProfileScreen() {
 
   const pickAvatar = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync()
-    if (!permission.granted) return Alert.alert("Permiso requerido", "Permití el acceso a tus fotos para cambiar la imagen.")
+    if (!permission.granted) {
+      await notify({ title: "Permiso requerido", message: "Permití el acceso a tus fotos para cambiar la imagen." })
+      return
+    }
     const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ["images"], allowsEditing: true, aspect: [1, 1], quality: 0.7, base64: true })
     if (result.canceled || !result.assets[0]?.base64) return
     setSavingAvatar(true)
@@ -131,9 +166,9 @@ export default function ProfileScreen() {
       const mime = result.assets[0].mimeType || "image/jpeg"
       await uploadAvatar(`data:${mime};base64,${result.assets[0].base64}`)
       await refetch()
-      Alert.alert("Listo", "Tu foto fue actualizada.")
+      await notify({ title: "Listo", message: "Tu foto fue actualizada." })
     } catch (error) {
-      Alert.alert("Error", getApiErrorMessage(error))
+      await notify({ title: "Error", message: getApiErrorMessage(error) })
     } finally {
       setSavingAvatar(false)
     }
@@ -144,9 +179,9 @@ export default function ProfileScreen() {
     try {
       await deleteAvatar()
       await refetch()
-      Alert.alert("Listo", "Tu foto fue eliminada.")
+      await notify({ title: "Listo", message: "Tu foto fue eliminada." })
     } catch (error) {
-      Alert.alert("Error", getApiErrorMessage(error))
+      await notify({ title: "Error", message: getApiErrorMessage(error) })
     } finally {
       setSavingAvatar(false)
     }
@@ -222,12 +257,15 @@ export default function ProfileScreen() {
                     <Button
                       label="Cancelar"
                       variant="white"
-                      onPress={() => setEditingPersonal(false)}
+                      onPress={() => {
+                        resetPersonalFields()
+                        setEditingPersonal(false)
+                      }}
                       className="flex-1"
                     />
-                    <Button 
-                      label="Guardar" 
-                      onPress={savePersonal} 
+                    <Button
+                      label="Guardar"
+                      onPress={savePersonal}
                       className="flex-1"
                       loading={updateProfile.isPending}
                     />
@@ -259,7 +297,10 @@ export default function ProfileScreen() {
                     <Button
                       label="Cancelar"
                       variant="white"
-                      onPress={() => setEditingSecurity(false)}
+                      onPress={() => {
+                        resetSecurityFields()
+                        setEditingSecurity(false)
+                      }}
                       className="flex-1"
                     />
                     <Button 
@@ -428,7 +469,7 @@ export default function ProfileScreen() {
                         setShowDeleteModal(false)
                         void logout()
                       } catch (error) {
-                        Alert.alert("Error", getApiErrorMessage(error))
+                        await notify({ title: "Error", message: getApiErrorMessage(error) })
                       } finally {
                         setDeletingAccount(false)
                       }
