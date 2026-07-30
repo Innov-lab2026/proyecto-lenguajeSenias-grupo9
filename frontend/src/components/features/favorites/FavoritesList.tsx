@@ -1,26 +1,27 @@
-import { View, Text, Pressable, ScrollView, Alert } from 'react-native'
-import { useState } from 'react'
+import { View, Text, Pressable, ScrollView, Alert, Modal, ActivityIndicator } from 'react-native'
+import { useState, useEffect } from 'react'
 import { Image } from 'expo-image'
 import { Ionicons } from '@expo/vector-icons'
 import { cn } from '@/src/utils/cn'
+import { useFavoritesStore, type FavoriteItem } from '@/src/store/favoritesStore'
+import { useModules } from '@/src/hooks/features/lessons/useModules'
+import { useCompletedLessons } from '@/src/hooks/features/lessons/useCompletedLessons'
+import { useAllLessons } from '@/src/hooks/features/lessons/useAllLessons'
+import { LessonVideo } from '@/src/components/features/lessons/LessonVideo'
 
-type FavoriteType = 'lesson' | 'letter'
-
-interface FavoriteItem {
-  id: string
-  type: FavoriteType
-  title: string
-  subtitle?: string
-  image?: any
-}
-
-const MOCK_FAVORITES: FavoriteItem[] = [
-  { id: '1', type: 'lesson', title: 'Nivel 1, saludos', subtitle: 'Ver lección' },
-  { id: '2', type: 'lesson', title: 'Nivel 2, hospital', subtitle: 'Ver lección' },
-]
-
+/** Componente de lista de favoritos: agrupa favoritos por módulos (y su estado de bloqueo) y abecedario. */
 export function FavoritesList() {
-  const [favorites, setFavorites] = useState<FavoriteItem[]>(MOCK_FAVORITES)
+  const favoritesStore = useFavoritesStore()
+  const [playingItem, setPlayingItem] = useState<FavoriteItem | null>(null)
+
+  const modulesQuery = useModules()
+  const completedLessonsQuery = useCompletedLessons()
+  const lessonsQuery = useAllLessons()
+
+  // Hidratar favoritos al montar
+  useEffect(() => {
+    favoritesStore.loadFavorites()
+  }, [])
 
   const handleToggleFavorite = (id: string, title: string) => {
     Alert.alert(
@@ -28,61 +29,230 @@ export function FavoritesList() {
       `Se eliminará "${title}" de tu lista.`,
       [
         { text: 'Cancelar', style: 'cancel' },
-        { 
-          text: 'Quitar', 
+        {
+          text: 'Quitar',
           style: 'destructive',
-          onPress: () => setFavorites(prev => prev.filter(item => item.id !== id))
+          onPress: () => favoritesStore.removeFavorite(id)
         }
       ]
     )
   }
 
-  if (favorites.length === 0) {
+  const isLoading =
+    modulesQuery.isPending ||
+    completedLessonsQuery.isPending ||
+    lessonsQuery.isPending
+
+  // Vista vacía general
+  if (favoritesStore.items.length === 0) {
     return (
-      <View className="flex-1 items-center justify-center px-10 pb-20">
-        <Image 
-          source={require('@/assets/images/home/carpi-2.png')} 
-          className="w-48 h-48 mb-6"
+      <View className="flex-1 items-center justify-start px-10 pt-16">
+        <Text className="font-nunito text-lg font-bold text-center text-ink mb-20 px-4">
+          Agrega tus ejercicios o lecciones favoritas.
+        </Text>
+        <Image
+          source={require('@/assets/images/home/carpi-2.png')}
+          className="w-48 h-48"
           contentFit="contain"
         />
-        <Text className="font-nunito text-2xl font-bold text-center text-ink mb-2">
-          Nada por aquí...
-        </Text>
-        <Text className="font-nunito text-base text-center text-muted">
-          Agregá ejercicios ou letras presionando el corazón para verlas acá.
-        </Text>
       </View>
     )
   }
 
-  return (
-    <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false}>
-      <View className="flex-row flex-wrap gap-4 pb-10">
-        {favorites.map((item) => (
-          <View key={item.id} className="w-[47%] mb-2">
-            <Pressable 
-              className="aspect-square bg-surface rounded-[32px] items-center justify-center border-b-4 border-black/5 active:mt-1 active:border-b-0 relative overflow-hidden"
-              onPress={() => Alert.alert('Próximamente', `Abriendo ${item.title}`)}
-            >
-              <View className="items-center bg-accent/20 w-full h-full justify-center">
-                <View className="w-16 h-16 bg-white rounded-full items-center justify-center shadow-sm">
-                  <Ionicons name="play" size={32} color="#4A90E2" className="ml-1" />
-                </View>
-              </View>
-              
-              <Pressable 
-                className="absolute top-4 right-4 bg-white/80 p-2 rounded-full shadow-sm"
-                onPress={() => handleToggleFavorite(item.id, item.title)}
-              >
-                <Ionicons name="heart" size={20} color="#EF4444" />
-              </Pressable>
-            </Pressable>
-            <Text className="font-nunito text-sm font-bold text-ink mt-3 text-center px-1" numberOfLines={2}>
-              {item.title}
-            </Text>
-          </View>
-        ))}
+  if (isLoading) {
+    return (
+      <View className="flex-1 justify-center items-center py-20">
+        <ActivityIndicator size="large" color="#4A90E2" />
       </View>
-    </ScrollView>
+    )
+  }
+
+  const completedLessonIds = new Set((completedLessonsQuery.data ?? []).map((c) => c.lesson_id))
+  const allLessons = lessonsQuery.data ?? []
+  const sortedModules = [...(modulesQuery.data ?? [])].sort((a, b) => a.order - b.order)
+
+  // Un módulo está completo si tiene lecciones y todas están completadas
+  const isModuleComplete = (moduleId: string) => {
+    const lessons = allLessons.filter((l) => l.module_id === moduleId)
+    return lessons.length > 0 && lessons.every((l) => completedLessonIds.has(l.id))
+  }
+
+  // Obtener ID del módulo según su orden, con fallback de mock
+  const getModuleIdByOrder = (order: number) => {
+    return sortedModules.find(m => m.order === order)?.id ?? `mock-module-${order}`
+  }
+
+  const getModuleTitle = (order: number, defaultTitle: string) => {
+    return sortedModules.find(m => m.order === order)?.title ?? defaultTitle
+  }
+
+  const modulesList = [
+    { id: getModuleIdByOrder(1), number: 1, name: getModuleTitle(1, 'Módulo 1: Introducción') },
+    { id: getModuleIdByOrder(2), number: 2, name: getModuleTitle(2, 'Módulo 2: Presentaciones') },
+    { id: getModuleIdByOrder(3), number: 3, name: getModuleTitle(3, 'Módulo 3: Familia') }
+  ]
+
+  // Un módulo está bloqueado si el anterior no está completo
+  const isModuleLocked = (moduleId: string) => {
+    const m1Id = getModuleIdByOrder(1)
+    if (moduleId === m1Id) return false
+
+    const m2Id = getModuleIdByOrder(2)
+    if (moduleId === m2Id) {
+      return !isModuleComplete(m1Id)
+    }
+
+    return !isModuleComplete(m1Id) || !isModuleComplete(m2Id)
+  }
+
+  // Renderizar cada tarjeta de favoritos (isCarousel controla el ancho fijo y margen derecho)
+  const renderFavoriteCard = (item: FavoriteItem, isCarousel: boolean = false) => {
+    const isLetter = item.type === 'letter'
+    const displayLetter = item.letter ?? item.title.replace('Letra ', '')
+
+    // Dividir título en "Nivel X" y "Título de lección"
+    const match = item.title.match(/Nivel\s+(\d+),\s+(.*)/i)
+    const levelNumber = match ? match[1] : null
+    const lessonTitle = match ? match[2].charAt(0).toUpperCase() + match[2].slice(1) : item.title
+
+    return (
+      <View key={item.id} className={cn(isCarousel ? 'w-28 mr-3' : 'w-[48%] mb-4')}>
+        <Pressable
+          className="aspect-square bg-[#BEE3F8]/30 rounded-[24px] items-center justify-center border-b-[3px] border-black/5 active:mt-0.5 active:border-b-0 relative overflow-hidden px-2.5"
+          onPress={() => setPlayingItem(item)}
+        >
+          {isLetter ? (
+            <Text className="font-nunito text-5xl font-black text-[#4A90E2]">
+              {displayLetter}
+            </Text>
+          ) : (
+            <View className="items-center justify-center">
+              {levelNumber && (
+                <Text className="font-nunito text-[11px] font-bold text-muted/70 text-center mb-0.5">
+                  Nivel {levelNumber}
+                </Text>
+              )}
+              <Text className="font-nunito text-xs font-black text-center text-ink leading-tight" numberOfLines={2}>
+                {lessonTitle}
+              </Text>
+            </View>
+          )}
+        </Pressable>
+      </View>
+    )
+  }
+
+  const alphabetFavorites = favoritesStore.items.filter((item) => item.type === 'letter')
+  const hasLessonFavorites = favoritesStore.items.some((item) => item.type === 'lesson')
+
+  return (
+    <View className="flex-1 w-full">
+      <ScrollView className="flex-1 pt-6" showsVerticalScrollIndicator={false}>
+        {modulesList.map((m) => {
+          const moduleFavorites = favoritesStore.items.filter(
+            (item) => item.type === 'lesson' && item.moduleNumber === m.number
+          )
+
+          // Ocultar el grupo si no posee videos favoritos seleccionados
+          if (moduleFavorites.length === 0) return null
+
+          const isLocked = isModuleLocked(m.id)
+
+          return (
+            <View key={m.id} className="mb-8">
+              <View className="px-5 mb-3">
+                <Text className="font-nunito text-2xl font-bold text-ink">{m.name}</Text>
+              </View>
+
+              {isLocked ? (
+                <View className="px-5">
+                  <Text className="font-nunito text-sm text-muted mb-2 pr-6">
+                    {m.number === 2
+                      ? 'Bloqueado, completá el módulo 1 para empezar a agregar tus lecciones favoritas.'
+                      : 'Bloqueado, completá los módulos anteriores para empezar a agregar tus lecciones favoritas.'}
+                  </Text>
+                </View>
+              ) : (
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{ paddingHorizontal: 20 }}
+                >
+                  {moduleFavorites.map((item) => renderFavoriteCard(item, true))}
+                </ScrollView>
+              )}
+            </View>
+          )
+        })}
+
+        {/* Divisor bonito entre módulos y Abecedario */}
+        {hasLessonFavorites && alphabetFavorites.length > 0 && (
+          <View className="flex-row items-center my-6 px-5">
+            <View className="flex-1 h-[1px] bg-muted/20" />
+          </View>
+        )}
+
+        {/* Sección Abecedario - se oculta si está vacía */}
+        {alphabetFavorites.length > 0 && (
+          <View className="mb-12">
+            <View className="px-5 mb-3">
+              <Text className="font-nunito text-2xl font-bold text-ink">Abecedario</Text>
+            </View>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ paddingHorizontal: 20 }}
+            >
+              {alphabetFavorites.map((item) => renderFavoriteCard(item, true))}
+            </ScrollView>
+          </View>
+        )}
+      </ScrollView>
+
+      {/* Modal para reproducir el video favorito */}
+      <Modal
+        visible={playingItem !== null}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setPlayingItem(null)}
+      >
+        <View className="flex-1 bg-black justify-center items-center relative">
+          <Pressable
+            className="absolute top-10 right-5 z-50 p-2 bg-black/50 rounded-full"
+            onPress={() => setPlayingItem(null)}
+          >
+            <Ionicons name="close" size={32} color="white" />
+          </Pressable>
+          {playingItem && playingItem.videoUrl ? (
+            <View className="w-full h-full max-h-[85%] relative justify-center items-center">
+              <LessonVideo
+                uri={playingItem.videoUrl}
+                className="w-full h-full"
+                muted={false}
+                autoPlay={true}
+              />
+              {/* Botón de corazón en la esquina inferior derecha para desfavoritar (estilo Instagram) */}
+              <Pressable
+                onPress={() => favoritesStore.toggleFavorite(playingItem)}
+                accessibilityRole="button"
+                accessibilityLabel={
+                  favoritesStore.isFavorite(playingItem.id)
+                    ? 'Quitar de favoritos'
+                    : 'Añadir a favoritos'
+                }
+                hitSlop={8}
+                className="absolute bottom-6 right-6 h-14 w-14 items-center justify-center rounded-full bg-black/40 z-50 border border-white/20 active:scale-95"
+              >
+                <Ionicons
+                  name={favoritesStore.isFavorite(playingItem.id) ? 'heart' : 'heart-outline'}
+                  size={30}
+                  color={favoritesStore.isFavorite(playingItem.id) ? '#EF4444' : '#FFFFFF'}
+                />
+              </Pressable>
+            </View>
+          ) : null}
+        </View>
+      </Modal>
+    </View>
   )
 }

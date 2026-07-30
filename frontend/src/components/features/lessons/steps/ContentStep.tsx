@@ -51,7 +51,7 @@ export function ContentStep({ step, selectedOption, onSelectOption, onWatched, m
       </Text>
 
       {step.options && (
-        <View className="flex-col md:flex-row gap-2 mb-2">
+        <View className={cn(step.id === 'm1-l2-content-interactive' || step.id === 'm1-l4-content-interactive' ? 'flex-row' : 'flex-col md:flex-row', 'gap-2 mb-2')}>
           {step.options.map((option) => (
             <Pressable
               key={option}

@@ -20,21 +20,23 @@ export function MatchingStep({ step, matchingState, onSelect, muted = false }: M
           por eso el video se veía chico y las opciones ocupaban de más). */}
       <View className="flex-[2] w-full items-center justify-center mb-2">
         {matchingState.selectedVideo ? (
-          <LessonVideo
-            key={matchingState.selectedVideo}
-            uri={matchingState.selectedVideo}
-            muted={muted}
-            className="h-full max-h-[440px] aspect-[9/16]"
-          />
+          <View className="h-full max-h-[440px] aspect-[9/16] rounded-[40px] border border-muted/20 bg-surface p-2 shadow-sm relative">
+            <LessonVideo
+              key={matchingState.selectedVideo}
+              uri={matchingState.selectedVideo}
+              muted={muted}
+              className="flex-1 w-full rounded-[32px]"
+            />
+          </View>
         ) : (
-          <View className="h-full max-h-[440px] aspect-[9/16] items-center justify-center rounded-2xl border-2 border-black/5 bg-surface px-4">
+          <View className="h-full max-h-[440px] aspect-[9/16] items-center justify-center rounded-[40px] border border-muted/20 bg-surface px-4 shadow-sm">
             <Ionicons name="videocam-outline" size={48} color="#9BA8B1" />
             <Text className="font-nunito text-sm text-muted mt-1 text-center">Selecciona un video</Text>
           </View>
         )}
       </View>
 
-      <Text className="font-nunito text-base md:text-lg font-bold text-ink text-center mb-2">{step.question}</Text>
+      <Text className="font-nunito text-xl font-bold text-ink text-center py-4 px-2">{step.question}</Text>
 
       <View className="flex-row justify-between gap-4 mb-2 w-full max-w-2xl self-center flex-1">
         {/* Columna de Videos — antes cada opción era flex-1 (se estiraba a

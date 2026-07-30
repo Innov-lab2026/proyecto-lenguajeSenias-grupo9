@@ -18,6 +18,7 @@ import { SettingsModal } from '@/src/components/features/lessons/SettingsModal'
 import { HintModal } from '@/src/components/features/lessons/HintModal'
 import { useLessonEngine } from '@/src/hooks/features/lessons/useLessonEngine'
 import { useStats } from '@/src/hooks/features/lessons/useStats'
+import { useFavoritesStore } from '@/src/store/favoritesStore'
 import { LESSON_SHELL } from '@/src/constants/lessons'
 import { cn } from '@/src/utils/cn'
 
@@ -173,14 +174,6 @@ export default function LessonScreen() {
             />
           ) : currentStep.type === 'dialogue' ? (
             <View className="flex-1 w-full">
-              {currentStep.videoUrl ? (
-                <View className="w-full items-center justify-center mb-2">
-                  <View className="w-full h-[200px] rounded-[40px] border border-muted/20 bg-surface p-2 shadow-sm relative">
-                    <LessonVideo uri={currentStep.videoUrl} muted={isMuted} className="flex-1 w-full rounded-[32px]" />
-                  </View>
-                </View>
-              ) : null}
-
               <DialogueExercise
                 question={currentStep.question}
                 dialogue={currentStep.dialogue ?? []}
@@ -219,7 +212,10 @@ export default function LessonScreen() {
         onToggleMute={() => setIsMuted(!isMuted)}
         onExit={() => {
           setShowSettings(false)
-          router.back()
+          // Se usa setTimeout para evitar problemas de navegación concurrentes con el cierre del Modal
+          setTimeout(() => {
+            router.back()
+          }, 100)
         }}
         onClose={() => setShowSettings(false)}
       />

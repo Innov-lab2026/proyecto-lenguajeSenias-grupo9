@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Pressable, Text, View, useWindowDimensions } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
 import { useAlphabetProgress } from '@/src/hooks/features/alphabet/useAlphabetProgress'
 import { cn } from '@/src/utils/cn'
@@ -24,6 +25,7 @@ const HORIZONTAL_PADDING = 32 // 16px por lado
 
 export default function AlphabetScreen() {
   const router = useRouter()
+  const insets = useSafeAreaInsets()
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null)
   const [contentWidth, setContentWidth] = useState<number | null>(null)
   const [gridHeight, setGridHeight] = useState<number | null>(null)
@@ -41,7 +43,7 @@ export default function AlphabetScreen() {
   // verticalmente, para que todas las letras sean visibles sin scroll.
   const cardByWidth = Math.floor((availableWidth - HORIZONTAL_PADDING - GAP * (numColumns - 1)) / numColumns)
   const cardByHeight = gridHeight != null
-    ? Math.floor((gridHeight - GAP * (numRows - 1)) / numRows)
+    ? Math.floor((gridHeight - 48 - GAP * (numRows - 1)) / numRows)
     : cardByWidth
   const cardSize = Math.min(cardByWidth, cardByHeight)
 
@@ -51,19 +53,33 @@ export default function AlphabetScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-secondary" edges={['top']}>
+    <View className="flex-1 bg-background">
       <View className="flex-1 max-w-4xl mx-auto w-full" onLayout={(event) => setContentWidth(event.nativeEvent.layout.width)}>
-        {/* Encabezado azul */}
-        <View className="bg-secondary px-5 pt-6 pb-10 items-center">
-          <Text className="font-nunito text-3xl font-bold text-white">Abecedario</Text>
-          <Text className="font-nunito text-sm text-white/70 mt-1">
-            Seleccioná una letra para ver su seña
+        {/* Encabezado azul con imagen nubeblanca_abc.svg */}
+        <View
+          className="w-full bg-[#4A90E2] items-center justify-end pb-5 relative"
+          style={{ paddingTop: insets.top + 14 }}
+        >
+          <Image
+            source={require('@/assets/images/abecedario/nubeblanca_abc.svg')}
+            className="absolute top-0 bottom-0"
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              height: 120,
+            }}
+            contentFit="fill"
+          />
+          <Text className="font-nunito text-3xl font-bold text-white text-center z-10 relative mt-10">
+            Abecedario
           </Text>
         </View>
 
-        {/* Grilla con fondo blanco y esquinas superiores redondeadas */}
+        {/* Grilla con fondo blanco y esquinas superiores redondeadas con padding superior e inferior */}
         <View
-          className="flex-1 bg-background rounded-t-3xl -mt-4"
+          className="flex-1 bg-background rounded-t-4xl -mt-0 pt-8 pb-4"
           onLayout={(event) => setGridHeight(event.nativeEvent.layout.height)}
         >
           {hasMeasured && (
@@ -72,6 +88,7 @@ export default function AlphabetScreen() {
               style={{ paddingHorizontal: 16, gap: GAP }}
             >
               {LSA_ALPHABET.map((letter) => {
+                // Estado de la letra actual: seleccionada, visitada o no visitada
                 const isSelected = selectedLetter === letter
                 const isVisited = visitedLetters.has(letter)
 
@@ -88,7 +105,9 @@ export default function AlphabetScreen() {
                       isSelected
                         ? 'bg-accent border-secondary'
                         : isVisited
-                          ? 'bg-surface border-secondary/30'
+                          // Letras visitadas: fondo azul y sombra oscura en el borde inferior
+                          ? 'bg-secondary border-black/15'
+                          // Letras no visitadas: fondo blanco estándar y borde gris tenue
                           : 'bg-surface border-black/5'
                     )}
                   >
@@ -98,7 +117,9 @@ export default function AlphabetScreen() {
                         isSelected
                           ? 'text-secondary'
                           : isVisited
-                            ? 'text-secondary/70'
+                            // Letras visitadas: texto blanco para contraste con fondo azul
+                            ? 'text-white'
+                            // Letras no visitadas: texto gris tenue
                             : 'text-ink/40',
                       )}
                       style={{ fontSize: cardSize * 0.36 }}
@@ -112,6 +133,6 @@ export default function AlphabetScreen() {
           )}
         </View>
       </View>
-    </SafeAreaView>
+    </View>
   )
 }

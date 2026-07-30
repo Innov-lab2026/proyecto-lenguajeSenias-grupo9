@@ -84,7 +84,7 @@ export function DialogueExercise({
 
       {/* Dialogue Area */}
       <View className="flex-1 bg-surface rounded-2xl border-2 border-black/5 p-3 mb-3">
-        <ScrollView showsVerticalScrollIndicator={false}>
+        <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
           {dialogue.map((line, lineIdx) => {
             const parts = line.text.split('[blank]')
             let blankCounter = 0
@@ -92,13 +92,30 @@ export function DialogueExercise({
               .slice(0, lineIdx)
               .reduce((acc, l) => acc + (l.text.match(/\[blank\]/g)?.length || 0), 0)
 
+            const isAna = line.speaker.toLowerCase() === 'ana'
+
             return (
-              <View key={lineIdx} className="mb-2">
-                <Text className="font-nunito text-xs md:text-sm font-bold text-secondary mb-0.5">{line.speaker}:</Text>
-                <View className="flex-row flex-wrap items-center">
+              <View
+                key={lineIdx}
+                className={cn(
+                  "mb-3 p-2.5 rounded-2xl max-w-[85%]",
+                  isAna
+                    ? "bg-[#EAF8FF] border border-[#BEE3F8] self-start items-start"
+                    : "bg-orange-50 border border-orange-100 self-end items-start"
+                )}
+              >
+                <View className="flex-row items-center flex-wrap gap-x-1.5">
+                  <Text
+                    className={cn(
+                      "font-nunito text-sm font-bold",
+                      isAna ? "text-secondary" : "text-[#D97706]"
+                    )}
+                  >
+                    {line.speaker}:
+                  </Text>
                   {parts.map((part, partIdx) => (
                     <View key={partIdx} className="flex-row items-center flex-wrap">
-                      <Text className="font-nunito text-sm md:text-base text-ink">{part}</Text>
+                      {part ? <Text className="font-nunito text-sm md:text-base text-ink">{part}</Text> : null}
                       {partIdx < parts.length - 1 &&
                         (() => {
                           const globalIdx = previousLinesBlanks + blankCounter

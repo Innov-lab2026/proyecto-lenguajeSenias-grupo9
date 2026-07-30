@@ -3,7 +3,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Image } from 'expo-image'
 import { Button } from '@/src/components/common/Button'
 import { useResponsive } from '@/src/hooks/common/useResponsive'
-import { LESSON_POSITIVE_FEEDBACK } from '@/src/constants/lessons'
+import { LESSON_POSITIVE_FEEDBACK, LESSON_NEGATIVE_FEEDBACK } from '@/src/constants/lessons'
 import type { StepType } from '@/src/types/lessons'
 import { cn } from '@/src/utils/cn'
 
@@ -23,10 +23,10 @@ interface FeedbackModalProps {
 
 /** Texto del error según qué se estaba resolviendo. */
 const ERROR_POR_STEP: Partial<Record<StepType, string>> = {
-  quiz: 'La opción elegida no es la correcta.',
-  matching: 'La relación seleccionada no es correcta.',
-  dialogue: 'Algunas palabras no están en la posición correcta.',
-  composition: 'Algunas palabras no están en la posición correcta.',
+  quiz: '¡Casi! Probemos otra vez.',
+  matching: '¡Casi! Probemos otra vez.',
+  dialogue: '¡Casi! Probemos otra vez.',
+  composition: '¡Casi! Probemos otra vez.',
 }
 
 /** Feedback de correcto/incorrecto tras responder un step: full-screen en mobile, card centrado en desktop. */
@@ -53,26 +53,40 @@ export function FeedbackModal({
       : require('@/assets/images/lessons/feedback_incorrecto.svg')
 
   const positive = contentKey ? LESSON_POSITIVE_FEEDBACK[contentKey] : undefined
+  const negative = contentKey ? LESSON_NEGATIVE_FEEDBACK[contentKey] : undefined
   const errorText = (stepType && ERROR_POR_STEP[stepType]) ?? 'Esa no es la respuesta correcta.'
+  const negativeText = tip || negative?.text || errorText
+
+  // Seleccionar el ícono correspondiente según el tipo de feedback
+  const iconSource = isCorrect
+    ? require('@/assets/images/lessons/feedback_icon_correcto.svg')
+    : require('@/assets/images/lessons/feedback_icon_incorrecto.svg')
 
   const body = (
     <>
-      <Text className={cn('font-nunito text-2xl font-bold mb-4', isCorrect ? 'text-green-600' : 'text-red-600')}>
+      {/* Ícono de feedback que se superpone al fondo divisorio curvo */}
+      <Image
+        source={iconSource}
+        className="w-16 h-16 z-20 mb-1 mt-[-42px]"
+        contentFit="contain"
+      />
+
+      <Text className={cn('font-nunito text-2xl font-bold mb-2 text-ink')}>
         {isCorrect ? '¡Correcto!' : 'Incorrecto'}
       </Text>
 
       {isCorrect ? (
-        <View className="bg-accent/5 p-5 rounded-2xl w-full flex-1 justify-center gap-3">
+        <View className="w-full flex-1 justify-center items-center gap-2">
           {positive ? (
             <>
-              <Text className="font-nunito text-base font-bold text-ink text-center leading-relaxed">
+              <Text className="font-nunito text-lg font-bold text-ink text-center leading-relaxed">
                 {positive.title}
               </Text>
 
               <View className="border-t border-secondary/20 my-1 w-3/4 mx-auto" />
 
-              <View className="gap-1.5">
-                <Text className="font-nunito text-sm font-bold text-secondary text-center">
+              <View className="gap-1 items-center">
+                <Text className="font-nunito text-base font-bold text-ink text-center">
                   {positive.hintTitle}
                 </Text>
                 <Text className="font-nunito text-sm text-ink leading-relaxed text-center">
@@ -81,24 +95,35 @@ export function FeedbackModal({
               </View>
             </>
           ) : (
-            <Text className="font-nunito text-sm text-ink leading-relaxed">{tip}</Text>
+            <Text className="font-nunito text-base text-ink leading-relaxed text-center">{tip}</Text>
           )}
         </View>
       ) : (
-        <View className="w-full flex-1">
-          <Text className="font-nunito text-base text-ink mb-1">{errorText}</Text>
-          {/* El puntaje se define por lección, no por step: fallar de nuevo no
-              baja más la recompensa, así que el monto se muestra siempre igual. */}
-          {retryPoints > 0 ? (
-            <Text className="font-nunito text-sm text-muted mb-4 opacity-70">
-              Al completar la lección todavía podés ganar {retryPoints} puntos.
-            </Text>
-          ) : null}
-          <Text className="font-nunito text-sm font-bold text-ink italic">
-            {isRepeatedError
-              ? 'Seguí intentando: mirá el video con atención antes de responder.'
-              : 'Consejo: observá atentamente el video antes de seleccionar la respuesta correcta.'}
-          </Text>
+        <View className="w-full flex-1 justify-center items-center gap-2">
+          {!isRepeatedError ? (
+            <>
+              <Text className="font-nunito text-base font-bold text-ink text-center leading-relaxed">
+                {errorText}
+              </Text>
+              {retryPoints > 0 ? (
+                <Text className="font-nunito text-sm font-bold text-ink text-center">
+                  Todavía podés obtener {retryPoints} puntos.
+                </Text>
+              ) : null}
+            </>
+          ) : (
+            <>
+              {negative?.title ? (
+                <Text className="font-nunito text-lg font-bold text-ink text-center leading-relaxed">
+                  {negative.title}
+                </Text>
+              ) : null}
+              <Text className="font-nunito text-base text-ink text-center leading-relaxed">{negativeText}</Text>
+              <Text className="font-nunito text-sm font-bold text-ink text-center mt-1">
+                Ya no obtenés puntos en este ejercicio, pero cada intento te ayuda a mejorar.
+              </Text>
+            </>
+          )}
         </View>
       )}
 
@@ -117,7 +142,24 @@ export function FeedbackModal({
         <View className="flex-1 bg-surface" style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}>
           <View className="flex-1 w-full items-center">
             <Image source={image} className="w-full h-1/2" contentFit="cover" contentPosition="top" />
-            <View className="flex-1 w-full px-6 pt-3 pb-4 items-center">{body}</View>
+            <View className="flex-1 w-full items-center relative bg-surface">
+              {/* Fondo divisorio curvo de ancho completo para mostrar bordes redondeados */}
+              <Image
+                source={require('@/assets/images/lessons/lesson_feedback_blanco.svg')}
+                style={{
+                  position: 'absolute',
+                  top: -50,
+                  left: 0,
+                  right: 0,
+                  height: 120,
+                }}
+                contentFit="fill"
+              />
+              {/* Contenedor interno para aplicar padding horizontal al body */}
+              <View className="flex-1 w-full px-6 pt-3 pb-4 items-center">
+                {body}
+              </View>
+            </View>
           </View>
         </View>
       </Modal>
@@ -129,7 +171,24 @@ export function FeedbackModal({
       <View className="flex-1 bg-black/50 items-center justify-center px-6">
         <View className="w-full max-w-md items-center overflow-hidden rounded-[32px] bg-surface">
           <Image source={image} className="w-full h-64" contentFit="cover" contentPosition="top" />
-          <View className="w-full items-center px-6 pb-6 pt-3">{body}</View>
+          <View className="w-full items-center relative bg-surface">
+            {/* Fondo divisorio curvo de ancho completo para mostrar bordes redondeados */}
+            <Image
+              source={require('@/assets/images/lessons/lesson_feedback_blanco.svg')}
+              style={{
+                position: 'absolute',
+                top: -50,
+                left: 0,
+                right: 0,
+                height: 120,
+              }}
+              contentFit="fill"
+            />
+            {/* Contenedor interno para aplicar padding horizontal al body */}
+            <View className="w-full items-center px-6 pb-6 pt-3">
+              {body}
+            </View>
+          </View>
         </View>
       </View>
     </Modal>

@@ -7,14 +7,24 @@ import { Button } from '@/src/components/common/Button'
 import { LessonVideo } from '@/src/components/features/lessons/LessonVideo'
 import { useVideos } from '@/src/hooks/features/alphabet/useVideos'
 import { useCompleteLetter } from '@/src/hooks/features/alphabet/useCompleteLetter'
+import { useFavoritesStore } from '@/src/store/favoritesStore'
 import { WebView } from 'react-native-webview'
+import { Image } from 'expo-image'
 
 export default function LetterScreen() {
   const router = useRouter()
   const params = useLocalSearchParams<{ letter?: string }>()
   const letter = Array.isArray(params.letter) ? params.letter[0] : params.letter
-  const [isFavorite, setIsFavorite] = useState(false)
   const [showPractice, setShowPractice] = useState(false)
+
+  const favoritesStore = useFavoritesStore()
+
+  // Hidratar favoritos al montar
+  useEffect(() => {
+    favoritesStore.loadFavorites()
+  }, [])
+
+  const isFavorite = letter ? favoritesStore.isFavorite('letter-' + letter) : false
 
   const videosQuery = useVideos()
   // Match por título exacto (mayúsculas): así están cargados en la DB.
@@ -55,22 +65,22 @@ export default function LetterScreen() {
     <SafeAreaView className="flex-1 bg-background" edges={['top', 'bottom']}>
       <View className="flex-1 px-5 pb-6 pt-4">
         {/* Header */}
-        <View className="flex-row items-center gap-3">
-          <Pressable
-            onPress={() => router.replace('/alphabet')}
-            accessibilityRole="button"
-            accessibilityLabel="Volver al Abecedario"
-            hitSlop={8}
-            className="h-10 w-10 items-center justify-center rounded-full bg-surface shadow-sm shadow-black/10 web:hover:bg-muted/10"
-          >
-            <Ionicons name="arrow-back" size={22} color="#1F2937" />
-          </Pressable>
-          <View className="flex-1">
+        <View className="flex-row items-center justify-between w-full relative">
+          <View className="flex-1 pr-12">
             <Text className="font-nunito text-2xl font-bold text-ink">Letra {letter ?? '?'}</Text>
             <Text className="font-nunito text-xs text-muted">
               {'Mirá el video para aprender la seña. Después, ¡practicá vos!'}
             </Text>
           </View>
+          <Pressable
+            onPress={() => router.replace('/alphabet')}
+            accessibilityRole="button"
+            accessibilityLabel="Volver al Abecedario"
+            hitSlop={12}
+            className="absolute top-0 right-0 h-10 w-10 items-center justify-center active:scale-95 z-20"
+          >
+            <Ionicons name="arrow-undo" size={32} color="#518BC9" />
+          </Pressable>
         </View>
 
         {/* No bloquea la pantalla: el video se puede seguir viendo igual,
@@ -108,7 +118,16 @@ export default function LetterScreen() {
             )}
             {/* Favorite button – Instagram-style overlay */}
             <Pressable
-              onPress={() => setIsFavorite(!isFavorite)}
+              onPress={() => {
+                if (!letter || !video) return
+                favoritesStore.toggleFavorite({
+                  id: 'letter-' + letter,
+                  type: 'letter',
+                  title: `Letra ${letter}`,
+                  videoUrl: video.url,
+                  letter: letter
+                })
+              }}
               accessibilityRole="button"
               accessibilityLabel={isFavorite ? "Quitar de favoritos" : "Añadir a favoritos"}
               hitSlop={8}
@@ -143,15 +162,14 @@ export default function LetterScreen() {
         onRequestClose={() => setShowPractice(false)}
       >
         <SafeAreaView className="flex-1 bg-surface">
-          <View className="h-14 flex-row items-center justify-between px-5 border-b border-black/5">
-            <Text className="font-nunito text-lg font-bold text-ink">Práctica de Señas</Text>
+          <View className="h-14 flex-row items-center justify-end px-5 border-b border-black/5 bg-[#F0F7FF]">
             <Pressable
               onPress={() => setShowPractice(false)}
-              className="p-1"
+              className="p-1 active:scale-95"
               accessibilityRole="button"
               accessibilityLabel="Cerrar práctica"
             >
-              <Ionicons name="close" size={28} color="#1F2937" />
+              <Ionicons name="arrow-undo" size={32} color="#518BC9" />
             </Pressable>
           </View>
 

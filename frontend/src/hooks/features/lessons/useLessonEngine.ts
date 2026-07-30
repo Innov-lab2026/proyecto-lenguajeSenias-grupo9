@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { LESSON_CONTENT, type Lesson, type MatchingState } from '@/src/types/lessons'
 import { LESSONS_POR_MODULO } from '@/src/constants/lessons'
 import { useCompleteLesson } from './useCompleteLesson'
+import { useFavoritesStore } from '@/src/store/favoritesStore'
 
 interface UseLessonEngineArgs {
   /** UUID real de la lección (el que consume completeLesson). */
@@ -55,7 +56,13 @@ export function useLessonEngine({ lessonId, lessonNumber, contentKey }: UseLesso
   const [showSettings, setShowSettings] = useState(false)
   const [showHint, setShowHint] = useState(false)
   const [hintViewed, setHintViewed] = useState<Record<number, boolean>>({})
-  const [favorites, setFavorites] = useState<Set<string>>(new Set())
+  
+  const favoritesStore = useFavoritesStore()
+  useEffect(() => {
+    favoritesStore.loadFavorites()
+  }, [])
+  const favorites = new Set(favoritesStore.items.map((i) => i.id))
+
   const [watchedOptions, setWatchedOptions] = useState<Record<number, Set<string>>>({})
   const [dialogueAnswers, setDialogueAnswers] = useState<Record<number, string>>({})
   // Por step: qué índice de `options` ocupa cada hueco de la frase (null = vacío).
@@ -249,7 +256,23 @@ export function useLessonEngine({ lessonId, lessonNumber, contentKey }: UseLesso
   const handleRetry = () => {
     setShowFeedback(null)
     setSelectedOption(null)
-    setDialogueAnswers({})
+
+    // En dialogue conservamos las respuestas correctas
+    if (currentStep?.type === 'dialogue') {
+      const correctParts = currentStep.correctAnswer?.split('|') ?? []
+      setDialogueAnswers(prev => {
+        const next: Record<number, string> = {}
+        Object.entries(prev).forEach(([key, val]) => {
+          const idx = Number(key)
+          if (val === correctParts[idx]) {
+            next[idx] = val
+          }
+        })
+        return next
+      })
+    } else {
+      setDialogueAnswers({})
+    }
 
     // En composition no se borra todo: se conservan las palabras que ya estaban
     // en su lugar y sólo se vacían las mal ubicadas, para no obligar a rehacer
@@ -273,13 +296,35 @@ export function useLessonEngine({ lessonId, lessonNumber, contentKey }: UseLesso
       }))
     }
 
-    setMatchingState({
-      selectedVideo: null,
-      selectedWord: null,
-      completedPairs: new Set(),
-      attempts: {},
-      shuffledWords: currentStep?.pairs ? [...currentStep.pairs.map(p => p.word)].sort(() => Math.random() - 0.5) : []
-    })
+    // En matching conservamos los pares que ya se unieron correctamente
+    if (currentStep?.type === 'matching') {
+      setMatchingState(prev => {
+        const nextAttempts: Record<string, 'correct' | 'incorrect' | null> = {}
+        const nextCompletedPairs = new Set<string>()
+        Object.entries(prev.attempts).forEach(([word, status]) => {
+          if (status === 'correct') {
+            nextAttempts[word] = 'correct'
+            nextCompletedPairs.add(word)
+          }
+        })
+        return {
+          ...prev,
+          selectedVideo: null,
+          selectedWord: null,
+          completedPairs: nextCompletedPairs,
+          attempts: nextAttempts
+        }
+      })
+    } else {
+      setMatchingState({
+        selectedVideo: null,
+        selectedWord: null,
+        completedPairs: new Set(),
+        attempts: {},
+        shuffledWords: currentStep?.pairs ? [...currentStep.pairs.map(p => p.word)].sort(() => Math.random() - 0.5) : []
+      })
+    }
+
     setStepAnswers(prev => ({ ...prev, [currentStepIndex]: null }))
     // Al reintentar, permitimos que el usuario vuelva a interactuar
     setCorrectSteps(prev => {
@@ -306,11 +351,32 @@ export function useLessonEngine({ lessonId, lessonNumber, contentKey }: UseLesso
 
   const toggleFavorite = () => {
     if (!currentStep?.id) return
-    setFavorites(prev => {
-      const newSet = new Set(prev)
-      if (newSet.has(currentStep.id)) newSet.delete(currentStep.id)
-      else newSet.add(currentStep.id)
-      return newSet
+    
+    let title = 'Ejercicio'
+    let moduleNumber = 1
+    const match = contentKey?.match(/m(\d+)-l(\d+)/)
+    if (match) {
+      moduleNumber = parseInt(match[1])
+      const lessonNumber = parseInt(match[2])
+      const level = (moduleNumber - 1) * 5 + lessonNumber
+      title = `Nivel ${level}, ${lesson.title.toLowerCase()}`
+    }
+
+    let videoUrl = currentStep.videoUrl
+    if (!videoUrl && currentStep.correctAnswer && currentStep.videoUrls?.[currentStep.correctAnswer]) {
+      videoUrl = currentStep.videoUrls[currentStep.correctAnswer]
+    } else if (!videoUrl && currentStep.videoUrls) {
+      const keys = Object.keys(currentStep.videoUrls)
+      if (keys.length > 0) videoUrl = currentStep.videoUrls[keys[0]]
+    }
+
+    favoritesStore.toggleFavorite({
+      id: currentStep.id,
+      type: 'lesson',
+      title,
+      videoUrl,
+      moduleNumber,
+      contentKey: contentKey ?? undefined
     })
   }
 

@@ -1,5 +1,5 @@
-import { View, Text } from 'react-native'
-import { StatBadge } from '../home/stats/StatBadge'
+import { View } from 'react-native'
+import { StatItem } from '../home/stats'
 import type { HomeStats } from '@/src/types/home'
 
 interface RewardStatsProps {
@@ -8,35 +8,18 @@ interface RewardStatsProps {
 
 export function RewardStats({ stats }: RewardStatsProps) {
   return (
-    <View className="flex-row justify-between w-full px-4 py-6 gap-3">
-      <StatCard
-        kind="xp"
-        label="EXPERIENCIA"
-        value={stats.xp}
-      />
-      <StatCard
-        kind="star"
-        label="PUNTOS"
-        value={stats.stars}
-      />
-      <StatCard
-        kind="paw"
-        label="SEÑAS"
-        value={stats.paws}
-      />
+    <View className="flex-row justify-between w-full px-1 py-4 gap-2">
+      <View className="flex-1 min-h-[110px] bg-surface rounded-2xl border-2 border-[#4A90E2] items-center justify-center px-1 py-2 shadow-sm">
+        <StatItem kind="xp" label="Experiencia" value={stats.xp} layout="column" showLabel badgeSize={34} valueClassName="text-2xl" />
+      </View>
+      <View className="flex-1 min-h-[110px] bg-surface rounded-2xl border-2 border-[#4A90E2] items-center justify-center px-1 py-2 shadow-sm">
+        <StatItem kind="star" label="Puntos" value={stats.stars} layout="column" showLabel badgeSize={34} valueClassName="text-2xl" />
+      </View>
+      <View className="flex-1 min-h-[110px] bg-surface rounded-2xl border-2 border-[#4A90E2] items-center justify-center px-1 py-2 shadow-sm">
+        <StatItem kind="paw" label="Señas" value={stats.paws} layout="column" showLabel badgeSize={34} valueClassName="text-2xl" />
+      </View>
     </View>
   )
 }
 
-function StatCard({ kind, label, value }: { kind: 'xp' | 'star' | 'paw'; label: string; value: number }) {
-  return (
-    <View className="flex-1 bg-surface rounded-2xl p-3 items-center shadow-md border border-black/5">
-      <View className="flex-row items-baseline gap-2 mb-1">
-        <StatBadge kind={kind} size={24} />
-        <Text className="font-nunito text-2xl font-bold text-ink">{value}</Text>
-      </View>
-      <Text className="font-nunito text-[10px] font-bold text-muted/80 tracking-widest">{label}</Text>
-    </View>
-  )
-}
 

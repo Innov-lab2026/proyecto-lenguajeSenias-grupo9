@@ -320,9 +320,10 @@ export default function ProfileScreen() {
                 className="mt-2"
               />
 
+              {/* Botón para borrar la cuenta, configurado al 50% de ancho y centrado */}
               <Pressable
                 onPress={() => Alert.alert("Borrar Cuenta", "Esta acción no se puede deshacer. ¿Querés continuar?", [{ text: "Cancelar", style: "cancel" }, { text: "Borrar Cuenta", style: "destructive", onPress: () => Alert.alert("Próximamente", "La eliminación de cuenta estará disponible próximamente.") }])}
-                className="mt-2 h-14 w-full items-center justify-center rounded-full border border-red-200 bg-red-50 px-4"
+                className="mt-2 h-14 w-1/2 self-center items-center justify-center rounded-full border border-red-200 bg-red-50 px-4"
               >
                 <Text className="font-nunito text-base font-bold text-red-600">Borrar Cuenta</Text>
               </Pressable>

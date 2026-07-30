@@ -49,7 +49,7 @@ export default function ProtectedLayout() {
         </Text>
         <Button label="Reintentar" onPress={() => void refetch()} className="mt-1 max-w-xs" />
         <Pressable onPress={logout} accessibilityRole="link" hitSlop={8}>
-          <Text className="font-nunito text-sm font-bold text-secondary">Cerrar sesión</Text>
+          <Text className="font-nunito text-sm font-bold text-secondary">Cerrar Sesión</Text>
         </Pressable>
       </View>
     )

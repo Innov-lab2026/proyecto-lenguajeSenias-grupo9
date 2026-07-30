@@ -41,24 +41,30 @@ export function IntroModal({ visible, levelId, title, description, islandNumber 
         <View className="w-full max-w-[340px] aspect-[13/16] relative items-center justify-between p-6">
           {/* Imagen de fondo del modal */}
           <Image
-            source={require('@/assets/images/lessons/intro_modal.png')}
+            source={require('@/assets/images/lessons/intro_modal.svg')}
             className="absolute inset-0 w-full h-full"
             contentFit="fill"
           />
 
-          {/* Botón salir posicionado sobre el X de la imagen de fondo */}
+          {/* Botón salir */}
           {onClose && (
             <Pressable
               onPress={onClose}
               accessibilityRole="button"
               accessibilityLabel="Cerrar modal"
               hitSlop={8}
-              className="absolute -top-3 -right-3 w-12 h-12 items-center justify-center rounded-full active:opacity-60 z-20"
-            />
+              className="absolute top-2 -right-1 w-10 h-10 items-center justify-center active:opacity-60 z-20"
+            >
+              <Image
+                source={require('@/assets/images/lessons/intro_modal_salir.svg')}
+                className="w-full h-full"
+                contentFit="contain"
+              />
+            </Pressable>
           )}
 
           {/* Texto de dificultad en el tab superior */}
-          <View className="absolute top-5.5 left-0 right-0 items-center">
+          <View className="absolute top-4 left-0 right-0 items-center">
             <Text className="font-nunito text-base font-bold text-ink">{difficulty}</Text>
           </View>
 
@@ -66,7 +72,7 @@ export function IntroModal({ visible, levelId, title, description, islandNumber 
           <View className="flex-1 items-center justify-center mt-6 w-full">
             {/* Indicador de nivel */}
             <View className="bg-secondary px-6 py-1.5 rounded-full mb-3 shadow-sm">
-              <Text className="text-white font-nunito font-bold text-sm">Nivel {levelId}</Text>
+              <Text className="text-white font-nunito font-bold text-lg">Nivel {levelId}</Text>
             </View>
 
             {/* Isla animada de la home */}
