@@ -8,10 +8,12 @@ import { useModules } from '@/src/hooks/features/lessons/useModules'
 import { useCompletedLessons } from '@/src/hooks/features/lessons/useCompletedLessons'
 import { useAllLessons } from '@/src/hooks/features/lessons/useAllLessons'
 import { LessonVideo } from '@/src/components/features/lessons/LessonVideo'
+import { usePreferencesStore } from '@/src/store/preferencesStore'
 
 /** Componente de lista de favoritos: agrupa favoritos por módulos (y su estado de bloqueo) y abecedario. */
 export function FavoritesList() {
   const favoritesStore = useFavoritesStore()
+  const isMuted = usePreferencesStore((s) => s.isMuted)
   const [playingItem, setPlayingItem] = useState<FavoriteItem | null>(null)
 
   const modulesQuery = useModules()
@@ -228,7 +230,7 @@ export function FavoritesList() {
               <LessonVideo
                 uri={playingItem.videoUrl}
                 className="w-full h-full"
-                muted={false}
+                muted={isMuted}
                 autoPlay={true}
               />
               {/* Botón de corazón en la esquina inferior derecha para desfavoritar (estilo Instagram) */}

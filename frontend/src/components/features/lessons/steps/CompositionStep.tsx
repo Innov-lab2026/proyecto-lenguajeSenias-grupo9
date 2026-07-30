@@ -23,12 +23,13 @@ export function CompositionStep({
   muted = false,
 }: CompositionStepProps) {
   const parts = step.sentence?.split('[blank]') || []
+  const isSingleLetter = step.options?.every(opt => opt.length <= 2) || step.id === 'm2-l4-composition'
   let blankCounter = 0
 
   return (
     <View className="flex-1 w-full">
       {step.videoUrl && (
-        <View className="w-full flex-1 items-center justify-center mb-4" style={{ maxHeight: '50%' }}>
+        <View className="w-full flex-[2.5] items-center justify-center mb-1" style={{ maxHeight: '68%' }}>
           {/* El video principal del step */}
           <View className="w-full flex-1 rounded-[40px] border border-muted/20 bg-surface p-2 shadow-sm relative">
             <LessonVideo uri={step.videoUrl} muted={muted} className="flex-1 w-full rounded-[32px]" />
@@ -37,12 +38,15 @@ export function CompositionStep({
       )}
 
       {/* Enunciado/Pregunta */}
-      <Text className="font-nunito text-xl font-bold text-ink text-center py-4 px-2">
+      <Text className="font-nunito text-base font-bold text-ink text-center py-1 px-2">
         {step.question}
       </Text>
 
       {/* Slots de la oración */}
-      <View className="flex-row items-center justify-center gap-x-1 bg-surface rounded-2xl border-2 border-black/5 px-3 py-3 mb-4 min-h-[56px]">
+      <View className={cn(
+        "flex-row items-center justify-center bg-surface rounded-2xl border-2 border-black/5 mb-2 min-h-[46px]",
+        isSingleLetter ? "gap-x-0.5 px-2 py-1" : "gap-x-1 px-3 py-1.5"
+      )}>
         {parts.map((part, index) => {
           const showBlank = index < parts.length - 1
           const currentBlankIdx = blankCounter
@@ -67,15 +71,19 @@ export function CompositionStep({
                     onPress={() => hasValue && !isLocked && onRemoveWord(currentBlankIdx)}
                     disabled={!hasValue || isLocked}
                     className={cn(
-                      'h-9 px-3 rounded-xl justify-center items-center',
+                      isSingleLetter ? 'h-8 px-1 rounded-lg' : 'h-9 px-3 rounded-xl',
+                      'justify-center items-center',
                       hasValue
                         ? 'bg-surface border-2 border-[#518BC9] shadow-sm active:opacity-85'
-                        : 'bg-black/5 border-2 border-dashed border-black/10 min-w-[60px]'
+                        : isSingleLetter 
+                          ? 'bg-black/5 border-2 border-dashed border-black/10 min-w-[28px]'
+                          : 'bg-black/5 border-2 border-dashed border-black/10 min-w-[60px]'
                     )}
                   >
                     <Text
                       className={cn(
-                        'font-nunito text-sm md:text-base font-bold',
+                        'font-nunito font-bold',
+                        isSingleLetter ? 'text-xs md:text-sm' : 'text-sm md:text-base',
                         hasValue ? 'text-ink' : 'text-transparent'
                       )}
                     >
@@ -90,7 +98,7 @@ export function CompositionStep({
       </View>
 
       {/* Banco de Palabras */}
-      <View className="flex-row flex-wrap gap-2.5 justify-center mt-auto mb-6 w-full max-w-md self-center px-2">
+      <View className="flex-row flex-wrap gap-2 justify-center mt-auto mb-3 w-full max-w-md self-center px-2">
         {step.options?.map((option, index) => {
           const isUsed = compositionAnswers.includes(index)
 
@@ -100,7 +108,10 @@ export function CompositionStep({
               onPress={() => !isUsed && !isLocked && onAddWord(index)}
               disabled={isUsed || isLocked}
               className={cn(
-                'rounded-xl border-2 px-4 py-2.5 justify-center items-center min-w-[80px]',
+                'rounded-xl border-2 justify-center items-center',
+                isSingleLetter 
+                  ? 'px-2 py-1 min-w-[36px] h-9' 
+                  : 'px-3 py-2 min-w-[64px]',
                 isUsed
                   ? 'bg-black/5 border-black/5 opacity-20'
                   : 'bg-surface border-black/10 shadow-sm active:bg-accent/10 active:border-secondary'
@@ -108,7 +119,8 @@ export function CompositionStep({
             >
               <Text
                 className={cn(
-                  'font-nunito text-sm md:text-base font-bold text-center',
+                  'font-nunito font-bold text-center',
+                  isSingleLetter ? 'text-xs md:text-sm' : 'text-sm md:text-base',
                   isUsed ? 'text-transparent' : 'text-ink'
                 )}
               >

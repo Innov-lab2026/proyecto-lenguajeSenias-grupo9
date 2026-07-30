@@ -3,6 +3,7 @@ import { LESSON_CONTENT, type Lesson, type MatchingState } from '@/src/types/les
 import { LESSONS_POR_MODULO } from '@/src/constants/lessons'
 import { useCompleteLesson } from './useCompleteLesson'
 import { useFavoritesStore } from '@/src/store/favoritesStore'
+import { usePreferencesStore } from '@/src/store/preferencesStore'
 
 interface UseLessonEngineArgs {
   /** UUID real de la lección (el que consume completeLesson). */
@@ -11,6 +12,18 @@ interface UseLessonEngineArgs {
   lessonNumber: number
   /** `lessons.content_key` de la DB: con qué contenido se arma el ejercicio. */
   contentKey: string | null
+}
+
+let lastCompletedLessonId: string | null = null
+
+export function setLastCompletedLessonId(id: string | null) {
+  lastCompletedLessonId = id
+}
+
+export function getLastCompletedLessonId() {
+  const val = lastCompletedLessonId
+  lastCompletedLessonId = null
+  return val
 }
 
 /** Placeholder para que el hook no tenga que lidiar con `lesson` nulo. La pantalla corta antes (ver `hasContent`). */
@@ -52,7 +65,8 @@ export function useLessonEngine({ lessonId, lessonNumber, contentKey }: UseLesso
   const [showSummary, setShowSummary] = useState(false)
   const [retryCount, setRetryCount] = useState<Record<number, number>>({})
   const [correctSteps, setCorrectSteps] = useState<Set<number>>(new Set())
-  const [isMuted, setIsMuted] = useState(false)
+  const isMuted = usePreferencesStore((s) => s.isMuted)
+  const setIsMuted = usePreferencesStore((s) => s.setIsMuted)
   const [showSettings, setShowSettings] = useState(false)
   const [showHint, setShowHint] = useState(false)
   const [hintViewed, setHintViewed] = useState<Record<number, boolean>>({})
@@ -83,19 +97,35 @@ export function useLessonEngine({ lessonId, lessonNumber, contentKey }: UseLesso
     // sólo se informa qué pasó.
     const isPerfect = Object.keys(retryCount).length === 0
     completeLessonMutation.mutate({ lessonId, isPerfect })
+    setLastCompletedLessonId(lessonId)
   }, [showSummary])
 
   const currentStep = lesson.steps[currentStepIndex]
 
   useEffect(() => {
     if (currentStepIndex !== -1) {
-      setSelectedOption(stepAnswers[currentStepIndex] || null)
+      const targetStepIds = [
+        'm1-l2-content-interactive',
+        'm1-l4-content-interactive',
+        'm2-l2-content-interactive',
+        'm2-l4-content-interactive',
+        'm2-l3-quiz'
+      ]
+      if (currentStep && targetStepIds.includes(currentStep.id) && currentStep.options && currentStep.options.length > 0) {
+        setSelectedOption(stepAnswers[currentStepIndex] || currentStep.options[0])
+      } else {
+        setSelectedOption(stepAnswers[currentStepIndex] || null)
+      }
 
       // Mezcla las palabras del ejercicio de matching
       if (currentStep?.type === 'matching' && currentStep.pairs) {
         const words = currentStep.pairs.map(p => p.word)
+        const defaultVideo = currentStep.id === 'm1-l4-matching' && currentStep.pairs.length > 0
+          ? currentStep.pairs[0].videoUrl
+          : null
         setMatchingState(prev => ({
           ...prev,
+          selectedVideo: defaultVideo,
           shuffledWords: [...words].sort(() => Math.random() - 0.5)
         }))
       }
@@ -167,6 +197,7 @@ export function useLessonEngine({ lessonId, lessonNumber, contentKey }: UseLesso
     }
 
     if (currentStep.type === 'content' || correctSteps.has(currentStepIndex)) {
+      setStepAnswers(prev => ({ ...prev, [currentStepIndex]: selectedOption }))
       if (isLastStep) {
         setShowSummary(true)
       } else {
@@ -451,8 +482,18 @@ export function useLessonEngine({ lessonId, lessonNumber, contentKey }: UseLesso
       !isCompositionFilled &&
       !correctSteps.has(currentStepIndex))
 
+  let absoluteLevel = lessonNumber
+  if (contentKey) {
+    const match = contentKey.match(/m(\d+)-l(\d+)/)
+    if (match) {
+      const moduleNum = parseInt(match[1])
+      const lessonNum = parseInt(match[2])
+      absoluteLevel = (moduleNum - 1) * 5 + lessonNum
+    }
+  }
+
   /** Próximo nivel a desbloquear, o `null` si es la última lección del módulo. */
-  const nextLevel = lessonNumber < LESSONS_POR_MODULO ? lessonNumber + 1 : null
+  const nextLevel = lessonNumber < LESSONS_POR_MODULO ? absoluteLevel + 1 : null
 
   return {
     lesson,

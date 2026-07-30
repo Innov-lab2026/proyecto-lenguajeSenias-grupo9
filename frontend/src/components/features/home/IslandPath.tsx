@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { ScrollView, View } from 'react-native'
+import { ScrollView, Text, View } from 'react-native'
 import { Image } from 'expo-image'
 import Svg, { Path } from 'react-native-svg'
 import Animated, {
@@ -22,6 +22,7 @@ import { CarpiAvatar } from '../../common/CarpiAvatar'
 
 interface IslandPathProps {
   module: HomeModule
+  moduleNumber: number
   onIslandPress?: (islandNumber: number) => void
 }
 
@@ -42,6 +43,12 @@ const ISLAND_POSTERS = [
   require('@/assets/images/home/carteles/cartel3.svg'),
   require('@/assets/images/home/carteles/cartel4.svg'),
   require('@/assets/images/home/carteles/cartel5.svg'),
+  require('@/assets/images/home/carteles/cartel6.svg'),
+  require('@/assets/images/home/carteles/cartel7.svg'),
+  require('@/assets/images/home/carteles/cartel8.svg'),
+  require('@/assets/images/home/carteles/cartel9.svg'),
+  require('@/assets/images/home/carteles/cartel10.svg'),
+  require('@/assets/images/home/carteles/cartel11.svg'),
 ]
 const POSTER_WIDTH = 36
 const POSTER_HEIGHT = 48
@@ -83,7 +90,7 @@ function buildRiverPath(points: { x: number; y: number }[]): string {
  * arriba, unidas por el río, con carpi-1 en la esquina inferior derecha.
  * En pantallas bajas el camino scrollea; arranca mostrando la isla 1 (abajo).
  */
-export function IslandPath({ module, onIslandPress }: IslandPathProps) {
+export function IslandPath({ module, moduleNumber, onIslandPress }: IslandPathProps) {
   const scrollRef = useRef<ScrollView>(null)
   const [width, setWidth] = useState<number | null>(null)
   const [isAnimating, setIsAnimating] = useState(false)
@@ -329,7 +336,7 @@ export function IslandPath({ module, onIslandPress }: IslandPathProps) {
                       }}
                     >
                       <Image
-                        source={ISLAND_POSTERS[n - 1]}
+                        source={ISLAND_POSTERS[(moduleNumber - 1) * 5 + n - 1]}
                         style={{
                           width: '100%',
                           height: '100%',

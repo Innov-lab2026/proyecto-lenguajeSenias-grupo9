@@ -8,6 +8,7 @@ import { LessonVideo } from '@/src/components/features/lessons/LessonVideo'
 import { useVideos } from '@/src/hooks/features/alphabet/useVideos'
 import { useCompleteLetter } from '@/src/hooks/features/alphabet/useCompleteLetter'
 import { useFavoritesStore } from '@/src/store/favoritesStore'
+import { usePreferencesStore } from '@/src/store/preferencesStore'
 import { WebView } from 'react-native-webview'
 import { Image } from 'expo-image'
 
@@ -16,6 +17,7 @@ export default function LetterScreen() {
   const params = useLocalSearchParams<{ letter?: string }>()
   const letter = Array.isArray(params.letter) ? params.letter[0] : params.letter
   const [showPractice, setShowPractice] = useState(false)
+  const isMuted = usePreferencesStore((s) => s.isMuted)
 
   const favoritesStore = useFavoritesStore()
 
@@ -101,6 +103,7 @@ export default function LetterScreen() {
               <LessonVideo
                 uri={video.url}
                 className="flex-1 w-full rounded-[32px]"
+                muted={isMuted}
               />
             ) : (
               <View className="flex-1 items-center justify-center rounded-[32px] border border-dashed border-muted/40 bg-muted/10 overflow-hidden">

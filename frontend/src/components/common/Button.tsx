@@ -12,6 +12,7 @@ interface ButtonProps {
   disabled?: boolean
   leftIcon?: ReactNode
   className?: string
+  textClassName?: string
 }
 
 // Estilos de contenedor por variante. Todos los botones ocupan el 50% de la línea de forma predeterminada.
@@ -42,6 +43,7 @@ export function Button({
   disabled = false,
   leftIcon,
   className,
+  textClassName,
 }: ButtonProps) {
   const isDisabled = disabled || loading
 
@@ -63,7 +65,7 @@ export function Button({
       ) : (
         <>
           {leftIcon}
-          <Text className={cn('font-nunito text-base font-bold', textByVariant[variant])}>{label}</Text>
+          <Text className={cn('font-nunito font-bold', textClassName || 'text-base', textByVariant[variant])}>{label}</Text>
         </>
       )}
     </Pressable>

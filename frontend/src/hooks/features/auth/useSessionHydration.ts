@@ -4,6 +4,8 @@ import { refreshSession, signOut } from '@/src/services/session'
 import { useSessionStore } from '@/src/store/sessionStore'
 import { getTokenExpiry, isExpired } from '@/src/utils/jwt'
 
+import { usePreferencesStore } from '@/src/store/preferencesStore'
+
 /**
  * Restaura la sesión al iniciar la app.
  *
@@ -21,6 +23,9 @@ export function useSessionHydration() {
     let active = true
 
     void (async () => {
+      // Cargar preferencias del usuario (silenciar audio, etc.)
+      await usePreferencesStore.getState().loadPreferences()
+
       const [token, refreshToken, user] = await Promise.all([getToken(), getRefreshToken(), getUser()])
       if (!active) return
 

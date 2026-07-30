@@ -25,7 +25,7 @@ export function QuizStep({ step, options, selectedOption, onSelectOption, isLock
   const mainVideoUrl = step.videoUrl || 
     ((step.id === 'm1-l1-quiz' || step.id === 'm1-l3-quiz') && step.videoUrls && step.correctAnswer ? step.videoUrls[step.correctAnswer] : undefined)
 
-  const isHorizontalQuiz = step.id === 'm1-l2-quiz'
+  const isHorizontalQuiz = step.id === 'm1-l2-quiz' || step.id === 'm2-l2-quiz'
 
   // Si el paso tiene un video principal, se muestra con sus opciones normales abajo
   if (mainVideoUrl) {

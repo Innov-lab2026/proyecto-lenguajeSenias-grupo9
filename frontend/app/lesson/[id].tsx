@@ -33,10 +33,19 @@ export default function LessonScreen() {
   // PLAN_FRONTEND_CONECTAR_BACKEND.md §4) — sólo la economía.
   const lessonNumber = Number(Array.isArray(n) ? n[0] : n) || 1
 
-  // `ck` = lessons.content_key: con qué entrada de LESSON_CONTENT se arma el
-  // ejercicio. No alcanza con `n` porque el lesson_number es 1-5 dentro de cada
-  // módulo, así que se repite entre módulos.
   const contentKey = (Array.isArray(ck) ? ck[0] : ck) ?? null
+
+  const absoluteLevel = (() => {
+    if (contentKey) {
+      const match = contentKey.match(/m(\d+)-l(\d+)/)
+      if (match) {
+        const moduleNum = parseInt(match[1])
+        const lessonNum = parseInt(match[2])
+        return (moduleNum - 1) * 5 + lessonNum
+      }
+    }
+    return lessonNumber
+  })()
 
   // `pr` = points_retry de la lección (LessonMeta), también por query param:
   // sólo para mostrar en el feedback cuántos puntos se pueden ganar todavía
@@ -137,7 +146,7 @@ export default function LessonScreen() {
 
       <IntroModal
         visible={currentStepIndex === -1}
-        levelId={lessonNumber}
+        levelId={absoluteLevel}
         islandNumber={lessonNumber}
         title={lesson.title}
         description={lesson.description}

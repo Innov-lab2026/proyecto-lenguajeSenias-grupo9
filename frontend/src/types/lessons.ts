@@ -115,7 +115,7 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
       {
         id: 'm1-l2-content-interactive',
         type: 'content',
-        contentTitle: '¿Cómo te sentís?',
+        contentTitle: 'Observá las siguientes 3 palabras para continuar.',
         options: ['Bien', 'Más o menos', 'Mal'],
         videoUrls: {
           'Bien': VIDEO_BIEN,
@@ -163,7 +163,7 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
       {
         id: 'm1-l4-content-interactive',
         type: 'content',
-        contentTitle: 'Cortesía',
+        contentTitle: 'Observá las siguientes 3 palabras para continuar.',
         options: ['Por favor', 'Gracias', 'Perdón'],
         videoUrls: {
           'Por favor': VIDEO_POR_FAVOR,
@@ -305,7 +305,7 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
         type: 'composition',
         question: '¿Qué palabra representa esta seña?\nOrdená las letras para formar la palabra correcta.',
         videoUrl: VIDEO_1,
-        options: ['d', 'o', 'é', 't', 'l', 'a', 'n', 'e', 'c', 'o', 'f'],
+        options: ['o', 'é', 't', 'l', 'a', 'n', 'e', 'c', 'o', 'f'],
         sentence: '[blank] [blank] [blank] [blank] [blank] [blank] [blank] [blank]',
         correctAnswer: 'teléfono',
       },

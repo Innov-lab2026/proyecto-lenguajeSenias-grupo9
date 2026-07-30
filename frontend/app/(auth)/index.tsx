@@ -20,6 +20,8 @@ export default function WelcomeScreen() {
         variant="white"
         onPress={() => router.push('/register')}
         leftIcon={<Ionicons name="mail-outline" size={20} color="#1F2937" />}
+        className="w-[70%] self-center"
+        textClassName="text-xs"
       />
 
       {/* Google usa Supabase real (no se mockea) → se oculta en modo mock/QA. */}
@@ -31,7 +33,10 @@ export default function WelcomeScreen() {
             <View className="h-px flex-1 bg-ink/10" />
           </View>
 
-          <GoogleButton />
+          <GoogleButton
+            className="w-[70%] self-center"
+            textClassName="text-xs"
+          />
         </>
       )}
 

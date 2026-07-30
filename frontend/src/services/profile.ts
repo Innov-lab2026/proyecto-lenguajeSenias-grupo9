@@ -65,3 +65,8 @@ export async function updateCredentials(payload: UpdateCredentialsPayload): Prom
   if (USE_MOCK_AUTH) return
   await http.patch('/auth/credentials', payload)
 }
+
+export async function deleteAccount(): Promise<void> {
+  if (USE_MOCK_AUTH) return
+  await http.delete('/auth/account')
+}

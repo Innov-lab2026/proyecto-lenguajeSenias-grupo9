@@ -47,11 +47,11 @@ export function ContentStep({ step, selectedOption, onSelectOption, onWatched, m
       </View>
 
       <Text className="font-nunito text-xl font-bold text-ink text-center py-4 px-2">
-        {selectedOption || step.contentTitle}
+        {step.contentTitle}
       </Text>
 
       {step.options && (
-        <View className={cn(step.id === 'm1-l2-content-interactive' || step.id === 'm1-l4-content-interactive' ? 'flex-row' : 'flex-col md:flex-row', 'gap-2 mb-2')}>
+        <View className={cn(step.id === 'm1-l2-content-interactive' || step.id === 'm1-l4-content-interactive' || step.id === 'm2-l2-content-interactive' || step.id === 'm2-l4-content-interactive' ? 'flex-row' : 'flex-col md:flex-row', 'gap-2 mb-2')}>
           {step.options.map((option) => (
             <Pressable
               key={option}

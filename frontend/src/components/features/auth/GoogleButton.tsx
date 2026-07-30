@@ -3,12 +3,17 @@ import { Button } from '@/src/components/common/Button'
 import { GoogleIcon } from './GoogleIcon'
 import { useGoogleAuth } from '@/src/hooks/features/auth/useGoogleAuth'
 
+interface GoogleButtonProps {
+  className?: string
+  textClassName?: string
+}
+
 /**
  * Botón "Continuar con Google". Sirve tanto para login como para registro
  * (Supabase crea la cuenta en el primer ingreso). La navegación la resuelve
  * el guard de rutas al pasar a "authenticated".
  */
-export function GoogleButton() {
+export function GoogleButton({ className, textClassName }: GoogleButtonProps) {
   const { signInWithGoogle, isLoading, error } = useGoogleAuth()
 
   return (
@@ -19,6 +24,8 @@ export function GoogleButton() {
         onPress={signInWithGoogle}
         loading={isLoading}
         leftIcon={<GoogleIcon size={20} />}
+        className={className}
+        textClassName={textClassName}
       />
       {error ? (
         <Text className="text-center font-nunito text-sm font-bold text-red-500">{error}</Text>

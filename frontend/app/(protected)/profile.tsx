@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
-import { Alert, Image, Platform, Pressable, ScrollView, Switch, Text, View } from "react-native"
+import { Alert, Image, Modal, Platform, Pressable, ScrollView, Switch, Text, View } from "react-native"
 import * as ImagePicker from "expo-image-picker"
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
+import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { Ionicons } from "@expo/vector-icons"
 import { Button } from "@/src/components/common/Button"
 import { TextField } from "@/src/components/common/TextField"
@@ -13,10 +13,10 @@ import { useProfile } from "@/src/hooks/features/profile/useProfile"
 import { useUpdateProfile } from "@/src/hooks/features/profile/useUpdateProfile"
 import { useSessionStore } from "@/src/store/sessionStore"
 import { useRouter } from "expo-router"
-import { deleteAvatar, updateCredentials, uploadAvatar } from "@/src/services/profile"
+import { deleteAccount, deleteAvatar, updateCredentials, uploadAvatar } from "@/src/services/profile"
 import { getApiErrorMessage } from "@/src/services/http"
 import { saveUser } from "@/src/lib/storage"
-import { ddMmYyyyToIso, parseDdMmYyyy } from "@/src/utils/date"
+import { usePreferencesStore } from "@/src/store/preferencesStore"
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -59,8 +59,14 @@ export default function ProfileScreen() {
   const [confirmPassword, setConfirmPassword] = useState("")
   const [savingSecurity, setSavingSecurity] = useState(false)
   const [savingAvatar, setSavingAvatar] = useState(false)
-  const [notifications, setNotifications] = useState(true)
-  const [audio, setAudio] = useState(true)
+  const [showLogoutModal, setShowLogoutModal] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [deleteStep, setDeleteStep] = useState(1)
+  const [deletingAccount, setDeletingAccount] = useState(false)
+  const isMuted = usePreferencesStore((s) => s.isMuted)
+  const setIsMuted = usePreferencesStore((s) => s.setIsMuted)
+  const audio = !isMuted
+  const setAudio = (enabled: boolean) => setIsMuted(!enabled)
 
   useEffect(() => {
     const parts = (profile?.full_name || [user?.firstName, user?.lastName].filter(Boolean).join(" ") || "Usuario").split(" ")
@@ -107,7 +113,7 @@ export default function ProfileScreen() {
       setNewPassword("")
       setConfirmPassword("")
       setEditingSecurity(false)
-      Alert.alert("Listo", "Tus datos de seguridad fueron actualizados.")
+      Alert.alert("Listo", "Tus datos de seguridad foram atualizados.")
     } catch (error) {
       Alert.alert("Error", getApiErrorMessage(error))
     } finally {
@@ -147,189 +153,299 @@ export default function ProfileScreen() {
   }
 
   const confirmLogout = () => {
-    if (Platform.OS === "web") {
-      if (window.confirm("¿Querés cerrar sesión?")) void logout()
-      return
-    }
-
-    Alert.alert("Cerrar sesión", "¿Querés cerrar sesión?", [
-      { text: "Cancelar", style: "cancel" },
-      { text: "Cerrar sesión", style: "destructive", onPress: () => void logout() },
-    ])
+    setShowLogoutModal(true)
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={["top"]}>
-      <ScrollView contentContainerClassName="mx-auto w-full max-w-4xl gap-5 px-5 pb-8 pt-5 sm:px-8" showsVerticalScrollIndicator={false}>
-          <View className="items-center rounded-3xl border border-muted/20 bg-surface p-6 sm:flex-row sm:items-center">
-            <View className="relative">
-              <View className="w-28 h-28 rounded-full bg-surface border-4 border-accent items-center justify-center overflow-hidden shadow-sm">
-                {profile?.avatar_url ? (
-                  <Image source={{ uri: profile.avatar_url }} className="w-full h-full" />
-                ) : (
-                  <Ionicons name="person" size={60} color="#D1D5DB" />
-                )}
-              </View>
-              <Pressable 
-                className="absolute bottom-0 right-0 bg-primary w-10 h-10 rounded-full items-center justify-center border-4 border-background"
-                onPress={() => void pickAvatar()}
-                disabled={savingAvatar}
-              >
-                <Ionicons name="camera" size={20} color="white" />
-              </Pressable>
+    <View className="flex-1 bg-background">
+      {/* Cabecera Estática (Congelada) */}
+      <View className="w-full items-center bg-background z-20">
+        {/* Banner azul de perfil */}
+        <View
+          className="w-full bg-[#4A90E2] rounded-b-[40px] items-center pb-20 relative"
+          style={{ paddingTop: insets.top + 14, zIndex: 1 }}
+        >
+          <Text className="font-nunito text-3xl font-bold text-white text-center mt-4">
+            Perfil
+          </Text>
+        </View>
+
+        {/* Contenedor del Avatar y Nombre (Superpuesto en la extremidad inferior del banner) */}
+        <View className="items-center -mt-14 z-10 w-full px-5">
+          <View className="relative">
+            <View className="w-28 h-28 rounded-full bg-surface border-4 border-accent items-center justify-center overflow-hidden shadow-md">
+              {profile?.avatar_url ? (
+                <Image source={{ uri: profile.avatar_url }} className="w-full h-full" />
+              ) : (
+                <Ionicons name="person" size={60} color="#D1D5DB" />
+              )}
             </View>
-            <View className="mt-3 items-center sm:ml-5 sm:mt-0 sm:items-start">
-              <Text className="font-nunito text-3xl font-bold text-ink">{fullName}</Text>
-              <View className="bg-secondary/10 px-4 py-1 rounded-full mt-2">
-                <Text className="font-nunito text-sm font-bold text-secondary">Nivel 1 • Principiante</Text>
+            <Pressable
+              className="absolute bottom-0 right-0 bg-[#A3D0FC] w-10 h-10 rounded-full items-center justify-center border-4 border-white shadow-sm"
+              onPress={() => void pickAvatar()}
+              disabled={savingAvatar}
+            >
+              <Ionicons name="pencil" size={16} color="#1F2937" />
+            </Pressable>
+          </View>
+
+          <Text className="font-nunito text-3xl font-bold text-ink mt-4 mb-2 text-center">
+            {fullName}
+          </Text>
+          {profile?.avatar_url && (
+            <Pressable onPress={() => void removeAvatar()} className="mt-1">
+              <Text className="font-nunito text-sm font-bold text-red-600">Eliminar foto</Text>
+            </Pressable>
+          )}
+        </View>
+      </View>
+
+      <ScrollView
+        contentContainerClassName="mx-auto w-full max-w-4xl gap-6 px-5 pb-8 pt-4 sm:px-8"
+        showsVerticalScrollIndicator={false}
+      >
+        <View className="gap-6 mt-2 lg:flex-row">
+          <View className="gap-6 lg:flex-1">
+            <Section title="Información Personal">
+              {editingPersonal ? (
+                <View className="gap-4">
+                  <TextField label="Nombre" value={firstName} onChangeText={setFirstName} placeholder="Ingresá tu nombre" />
+                  <TextField label="Apellido" value={lastName} onChangeText={setLastName} placeholder="Ingresá tu apellido" />
+                  <Select
+                    label="Género"
+                    options={GENDER_OPTIONS}
+                    value={gender}
+                    onChange={setGender}
+                  />
+                  <BirthDateField value={birthDate} onChange={setBirthDate} />
+                  <View className="flex-row gap-3 mt-2">
+                    <Button
+                      label="Cancelar"
+                      variant="white"
+                      onPress={() => setEditingPersonal(false)}
+                      className="flex-1"
+                    />
+                    <Button 
+                      label="Guardar" 
+                      onPress={savePersonal} 
+                      className="flex-1"
+                      loading={updateProfile.isPending}
+                    />
+                  </View>
+                </View>
+              ) : (
+                <View>
+                  <Row label="NOMBRE Y APELLIDO" value={fullName} />
+                  <Row label="GÉNERO" value={gender || "No especificado"} />
+                  <Row label="FECHA DE NACIMIENTO" value={birthDate || "No especificada"} />
+                  <Button
+                    label="Editar información"
+                    onPress={() => setEditingPersonal(true)}
+                    className="mt-4"
+                    textClassName="text-sm"
+                  />
+                </View>
+              )}
+            </Section>
+
+            <Section title="Datos de Seguridad">
+              {editingSecurity ? (
+                <View className="gap-4">
+                  <TextField label="Correo electrónico" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" placeholder="Ingresá tu correo electrónico" />
+                  <TextField label="Contraseña actual" value={currentPassword} onChangeText={setCurrentPassword} secureTextEntry placeholder="Ingresá tu contraseña actual" />
+                  <TextField label="Nueva contraseña" value={newPassword} onChangeText={setNewPassword} secureTextEntry placeholder="Ingresá tu nueva contraseña" />
+                  <TextField label="Confirmar contraseña" value={confirmPassword} onChangeText={setConfirmPassword} secureTextEntry placeholder="Confirmá tu nueva contraseña" />
+                  <View className="flex-row gap-3 mt-2">
+                    <Button
+                      label="Cancelar"
+                      variant="white"
+                      onPress={() => setEditingSecurity(false)}
+                      className="flex-1"
+                    />
+                    <Button 
+                      label="Guardar" 
+                      onPress={saveSecurity} 
+                      className="flex-1"
+                      loading={savingSecurity}
+                    />
+                  </View>
+                </View>
+              ) : (
+                <View>
+                  <Row label="CORREO ELECTRÓNICO" value={email} />
+                  <Row label="CONTRASEÑA" value="••••••••" />
+                  <Button
+                    label="Editar seguridad"
+                    onPress={() => setEditingSecurity(true)}
+                    className="mt-4"
+                    textClassName="text-sm"
+                  />
+                </View>
+              )}
+            </Section>
+          </View>
+
+          <View className="gap-6 lg:flex-1">
+            <Section title="Preferencias">
+              <View className="flex-row items-center justify-between py-1">
+                <View className="flex-row items-center gap-3">
+                  <View className="w-8 h-8 rounded-full bg-accent/20 items-center justify-center">
+                    <Ionicons name="volume-high" size={18} color="#4A90E2" />
+                  </View>
+                  <Text className="font-nunito text-base font-bold text-ink">Efectos de sonido</Text>
+                </View>
+                <Switch
+                  value={audio}
+                  onValueChange={setAudio}
+                  trackColor={{ false: "#D1D5DB", true: "#5F9BA4" }}
+                />
               </View>
-            </View>
-            {profile?.avatar_url && (
-              <Pressable onPress={() => void removeAvatar()} className="mt-3 sm:ml-auto sm:mt-0">
-                <Text className="font-nunito text-sm font-bold text-red-600">Eliminar foto</Text>
+            </Section>
+
+            <Section title="Más Información">
+              <Pressable onPress={() => router.push("/about")} className="flex-row items-center justify-between py-3 border-b border-muted/15">
+                <Text className="font-nunito text-base font-bold text-ink">Acerca de CarpiSeñas</Text>
+                <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
               </Pressable>
+              <Pressable onPress={() => router.push("/help")} className="flex-row items-center justify-between py-3">
+                <Text className="font-nunito text-base font-bold text-ink">Ayuda y Soporte</Text>
+                <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
+              </Pressable>
+            </Section>
+
+            <Button
+              label="Cerrar sesión"
+              onPress={confirmLogout}
+              className="mt-2"
+            />
+
+            {/* Botón para borrar la cuenta */}
+            <Pressable
+              onPress={() => { setDeleteStep(1); setShowDeleteModal(true) }}
+              className="mt-2 h-14 w-1/2 self-center items-center justify-center rounded-full border border-red-200 bg-red-50 px-4"
+            >
+              <Text className="font-nunito text-base font-bold text-red-600">Borrar Cuenta</Text>
+            </Pressable>
+          </View>
+        </View>
+      </ScrollView>
+
+      {/* Modal de Confirmación de Cierre de Sesión */}
+      <Modal
+        visible={showLogoutModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowLogoutModal(false)}
+      >
+        <View className="flex-1 bg-black/50 items-center justify-center px-6">
+          <View className="w-full max-w-[340px] bg-white rounded-3xl p-6 items-center shadow-lg border border-black/5">
+            <Text className="font-nunito text-xl font-bold text-ink text-center mb-6 mt-2 leading-relaxed">
+              ¿Seguro que desea cerrar sesión?
+            </Text>
+
+            <View className="flex-row gap-3 w-full">
+              <Button
+                label="Volver"
+                variant="white"
+                onPress={() => setShowLogoutModal(false)}
+                className="flex-1"
+                textClassName="text-sm"
+              />
+              <Button
+                label="Confirmar"
+                variant="primary"
+                onPress={() => {
+                  setShowLogoutModal(false)
+                  void logout()
+                }}
+                className="flex-1"
+                textClassName="text-sm"
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Modal de Confirmación de Borrar Cuenta (2 pasos) */}
+      <Modal
+        visible={showDeleteModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowDeleteModal(false)}
+      >
+        <View className="flex-1 bg-black/50 items-center justify-center px-6">
+          <View className="w-full max-w-[340px] bg-white rounded-3xl p-6 items-center shadow-lg border border-black/5">
+            {deleteStep === 1 ? (
+              <>
+                <Ionicons name="warning" size={40} color="#EF4444" style={{ marginBottom: 8 }} />
+                <Text className="font-nunito text-xl font-bold text-ink text-center mb-2 leading-relaxed">
+                  ¿Querés borrar tu cuenta?
+                </Text>
+                <Text className="font-nunito text-sm text-muted text-center mb-6">
+                  Esta acción es irreversible. Se eliminarán todos tus datos, progreso y logros.
+                </Text>
+
+                <View className="flex-row gap-3 w-full">
+                  <Button
+                    label="Cancelar"
+                    variant="white"
+                    onPress={() => setShowDeleteModal(false)}
+                    className="flex-1"
+                    textClassName="text-sm"
+                  />
+                  <Button
+                    label="Continuar"
+                    variant="primary"
+                    onPress={() => setDeleteStep(2)}
+                    className="flex-1"
+                    textClassName="text-sm"
+                  />
+                </View>
+              </>
+            ) : (
+              <>
+                <Ionicons name="alert-circle" size={40} color="#EF4444" style={{ marginBottom: 8 }} />
+                <Text className="font-nunito text-xl font-bold text-red-600 text-center mb-2 leading-relaxed">
+                  ¿Estás completamente seguro?
+                </Text>
+                <Text className="font-nunito text-sm text-muted text-center mb-6">
+                  No podrás recuperar tu cuenta ni tus datos después de confirmar.
+                </Text>
+
+                <View className="flex-row gap-3 w-full">
+                  <Button
+                    label="Volver"
+                    variant="white"
+                    onPress={() => setDeleteStep(1)}
+                    className="flex-1"
+                    textClassName="text-sm"
+                  />
+                  <Pressable
+                    onPress={async () => {
+                      setDeletingAccount(true)
+                      try {
+                        await deleteAccount()
+                        setShowDeleteModal(false)
+                        void logout()
+                      } catch (error) {
+                        Alert.alert("Error", getApiErrorMessage(error))
+                      } finally {
+                        setDeletingAccount(false)
+                      }
+                    }}
+                    disabled={deletingAccount}
+                    className="flex-1 h-14 items-center justify-center rounded-full bg-red-600 active:bg-red-700 px-4"
+                  >
+                    <Text className="font-nunito text-sm font-bold text-white">
+                      {deletingAccount ? "Borrando..." : "Borrar Cuenta"}
+                    </Text>
+                  </Pressable>
+                </View>
+              </>
             )}
           </View>
-
-          <View className="gap-6 mt-5 lg:flex-row">
-            <View className="gap-6 lg:flex-1">
-              <Section title="Información Personal">
-                {editingPersonal ? (
-                  <View className="gap-4">
-                    <TextField label="Nombre" value={firstName} onChangeText={setFirstName} />
-                    <TextField label="Apellido" value={lastName} onChangeText={setLastName} />
-                    <Select
-                      label="Género"
-                      options={GENDER_OPTIONS}
-                      value={gender}
-                      onChange={setGender}
-                    />
-                    <BirthDateField value={birthDate} onChange={setBirthDate} />
-                    <View className="flex-row gap-3 mt-2">
-                      <Button
-                        label="Cancelar"
-                        variant="white"
-                        onPress={() => setEditingPersonal(false)}
-                        className="flex-1"
-                      />
-                      <Button 
-                        label="Guardar" 
-                        onPress={savePersonal} 
-                        className="flex-1"
-                        loading={updateProfile.isPending}
-                      />
-                    </View>
-                  </View>
-                ) : (
-                  <View>
-                    <Row label="NOMBRE Y APELLIDO" value={fullName} />
-                    <Row label="GÉNERO" value={gender || "No especificado"} />
-                    <Row label="FECHA DE NACIMIENTO" value={birthDate || "No especificada"} />
-                    <Button
-                      label="Editar información"
-                      variant="white"
-                      onPress={() => setEditingPersonal(true)}
-                      className="mt-4"
-                    />
-                  </View>
-                )}
-              </Section>
-
-              <Section title="Datos de Seguridad">
-                {editingSecurity ? (
-                  <View className="gap-4">
-                    <TextField label="Correo electrónico" value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" />
-                    <TextField label="Contraseña actual" value={currentPassword} onChangeText={setCurrentPassword} secureTextEntry />
-                    <TextField label="Nueva contraseña" value={newPassword} onChangeText={setNewPassword} secureTextEntry />
-                    <TextField label="Confirmar contraseña" value={confirmPassword} onChangeText={setConfirmPassword} secureTextEntry />
-                    <View className="flex-row gap-3 mt-2">
-                      <Button
-                        label="Cancelar"
-                        variant="white"
-                        onPress={() => setEditingSecurity(false)}
-                        className="flex-1"
-                      />
-                      <Button 
-                        label="Guardar" 
-                        onPress={saveSecurity} 
-                        className="flex-1"
-                        loading={savingSecurity}
-                      />
-                    </View>
-                  </View>
-                ) : (
-                  <View>
-                    <Row label="CORREO ELECTRÓNICO" value={email} />
-                    <Row label="CONTRASEÑA" value="••••••••" />
-                    <Button
-                      label="Editar seguridad"
-                      variant="white"
-                      onPress={() => setEditingSecurity(true)}
-                      className="mt-4"
-                    />
-                  </View>
-                )}
-              </Section>
-            </View>
-
-            <View className="gap-6 lg:flex-1">
-              <Section title="Preferencias">
-                <View className="flex-row items-center justify-between py-3 border-b border-muted/15">
-                  <View className="flex-row items-center gap-3">
-                    <View className="w-8 h-8 rounded-full bg-primary/10 items-center justify-center">
-                      <Ionicons name="notifications" size={18} color="#5F9BA4" />
-                    </View>
-                    <Text className="font-nunito text-base font-bold text-ink">Notificaciones</Text>
-                  </View>
-                  <Switch 
-                    value={notifications} 
-                    onValueChange={setNotifications}
-                    trackColor={{ false: "#D1D5DB", true: "#5F9BA4" }}
-                  />
-                </View>
-                <View className="flex-row items-center justify-between py-3">
-                  <View className="flex-row items-center gap-3">
-                    <View className="w-8 h-8 rounded-full bg-accent/20 items-center justify-center">
-                      <Ionicons name="volume-high" size={18} color="#4A90E2" />
-                    </View>
-                    <Text className="font-nunito text-base font-bold text-ink">Efectos de sonido</Text>
-                  </View>
-                  <Switch 
-                    value={audio} 
-                    onValueChange={setAudio}
-                    trackColor={{ false: "#D1D5DB", true: "#5F9BA4" }}
-                  />
-                </View>
-              </Section>
-
-              <Section title="Más Información">
-                <Pressable onPress={() => router.push("/about")} className="flex-row items-center justify-between py-3 border-b border-muted/15">
-                  <Text className="font-nunito text-base font-bold text-ink">Acerca de CarpiSeñas</Text>
-                  <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
-                </Pressable>
-                <Pressable onPress={() => router.push("/help")} className="flex-row items-center justify-between py-3">
-                  <Text className="font-nunito text-base font-bold text-ink">Ayuda y Soporte</Text>
-                  <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
-                </Pressable>
-              </Section>
-              
-              <Button
-                label="Cerrar sesión"
-                variant="white"
-                onPress={confirmLogout}
-                className="mt-2"
-              />
-
-              {/* Botón para borrar la cuenta, configurado al 50% de ancho y centrado */}
-              <Pressable
-                onPress={() => Alert.alert("Borrar Cuenta", "Esta acción no se puede deshacer. ¿Querés continuar?", [{ text: "Cancelar", style: "cancel" }, { text: "Borrar Cuenta", style: "destructive", onPress: () => Alert.alert("Próximamente", "La eliminación de cuenta estará disponible próximamente.") }])}
-                className="mt-2 h-14 w-1/2 self-center items-center justify-center rounded-full border border-red-200 bg-red-50 px-4"
-              >
-                <Text className="font-nunito text-base font-bold text-red-600">Borrar Cuenta</Text>
-              </Pressable>
-            </View>
-          </View>
-      </ScrollView>
-    </SafeAreaView>
+        </View>
+      </Modal>
+    </View>
   )
 }
