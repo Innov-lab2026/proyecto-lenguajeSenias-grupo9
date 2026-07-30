@@ -4,28 +4,17 @@ import { RewardStats } from '@/src/components/features/rewards/RewardStats'
 import { AchievementsList } from '@/src/components/features/rewards/AchievementsList'
 import { StickersList } from '@/src/components/features/rewards/StickersList'
 import { Image } from 'expo-image'
-import { useProfile } from '@/src/hooks/features/profile/useProfile'
 import { useStats } from '@/src/hooks/features/lessons/useStats'
-import { useRewardsStore } from '@/src/store/rewardsStore'
 
 export default function RewardsScreen() {
   const insets = useSafeAreaInsets()
-  const { data: profile } = useProfile()
   const statsQuery = useStats()
-  const { unlockedStickerIds } = useRewardsStore()
 
-  // Calcular puntos gastados en stickers comprados (básico = 300, estándar = 600, premium = 1200)
-  const spentPoints = unlockedStickerIds.reduce((sum, id) => {
-    if (id === 'sticker-1' || id === 'sticker-2') return sum + 300
-    if (id === 'sticker-3' || id === 'sticker-4') return sum + 600
-    if (id === 'sticker-5' || id === 'sticker-6' || id === 'sticker-7') return sum + 1200
-    return sum
-  }, 0)
-
+  // total_points ya viene neto: purchase_sticker descuenta en el server.
   const stats = statsQuery.data
     ? {
         xp: statsQuery.data.total_xp,
-        stars: Math.max(0, statsQuery.data.total_points - spentPoints),
+        stars: statsQuery.data.total_points,
         paws: statsQuery.data.total_signs
       }
     : { xp: 0, stars: 0, paws: 0 }

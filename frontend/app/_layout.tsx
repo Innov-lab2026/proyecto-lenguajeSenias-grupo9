@@ -7,6 +7,7 @@ import { useFonts } from 'expo-font'
 import * as SplashScreen from 'expo-splash-screen'
 import { useSessionStore } from '@/src/store/sessionStore'
 import { useSessionHydration } from '@/src/hooks/features/auth/useSessionHydration'
+import { AppAlertProvider } from '@/src/components/common/AppAlertProvider'
 import '../global.css'
 
 // Mantener el splash visible hasta cargar fuentes y resolver el estado de sesión.
@@ -48,21 +49,23 @@ export default function RootLayout() {
             su posición) — sin esto, react-native-safe-area-context arranca sin
             insets y los actualiza recién tras la primera medición nativa. */}
         <SafeAreaProvider initialMetrics={initialWindowMetrics}>
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Protected guard={isAuthenticated}>
-              <Stack.Screen name="(protected)" />
-              {/* Fuera de (protected) a propósito: pantalla inmersiva, sin
-                  SideBar/BottomBar. Declarada acá para que quede protegida
-                  igual — antes no estaba en ningún Stack.Protected y el
-                  routing por archivos la registraba accesible sin sesión.
-                  Nota: al no colgar de (protected) tampoco pasa por el gate
-                  de perfil completo; sólo se llega desde el home, que sí. */}
-              <Stack.Screen name="lesson/[id]" />
-            </Stack.Protected>
-            <Stack.Protected guard={!isAuthenticated}>
-              <Stack.Screen name="(auth)" />
-            </Stack.Protected>
-          </Stack>
+          <AppAlertProvider>
+            <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Protected guard={isAuthenticated}>
+                <Stack.Screen name="(protected)" />
+                {/* Fuera de (protected) a propósito: pantalla inmersiva, sin
+                    SideBar/BottomBar. Declarada acá para que quede protegida
+                    igual — antes no estaba en ningún Stack.Protected y el
+                    routing por archivos la registraba accesible sin sesión.
+                    Nota: al no colgar de (protected) tampoco pasa por el gate
+                    de perfil completo; sólo se llega desde el home, que sí. */}
+                <Stack.Screen name="lesson/[id]" />
+              </Stack.Protected>
+              <Stack.Protected guard={!isAuthenticated}>
+                <Stack.Screen name="(auth)" />
+              </Stack.Protected>
+            </Stack>
+          </AppAlertProvider>
         </SafeAreaProvider>
       </QueryClientProvider>
     </GestureHandlerRootView>
