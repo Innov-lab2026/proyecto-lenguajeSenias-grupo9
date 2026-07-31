@@ -5,7 +5,6 @@
   "framework": null,
   "cleanUrls": true,
   "rewrites": [
-    { "source": "/lesson/:id", "destination": "/lesson/[id].html" },
-    { "source": "/alphabet/:letter", "destination": "/alphabet/[letter].html" }
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

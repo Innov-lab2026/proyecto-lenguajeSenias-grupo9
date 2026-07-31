@@ -54,6 +54,16 @@ export default function LessonScreen() {
   // metadata desde acá en vez de arrastrarla por la URL.
   const retryPoints = Number(Array.isArray(pr) ? pr[0] : pr) || 0
 
+  // Si se entró a la lección por URL directa (recarga, link compartido) no hay
+  // una entrada previa en el historial para volver: router.back() no hace nada.
+  const exitLesson = () => {
+    if (router.canGoBack()) {
+      router.back()
+    } else {
+      router.replace('/home')
+    }
+  }
+
   const statsQuery = useStats()
 
   const {
@@ -112,7 +122,7 @@ export default function LessonScreen() {
         <Text className="font-nunito text-base text-muted text-center mt-2">
           Todavía estamos armando el contenido de esta lección. ¡Volvé pronto!
         </Text>
-        <Button label="Volver" onPress={() => router.back()} className="mt-6 px-10" />
+        <Button label="Volver" onPress={exitLesson} className="mt-6 px-10" />
       </View>
     )
   }
@@ -138,8 +148,8 @@ export default function LessonScreen() {
         isPending={isSaving}
         nextLevel={nextLevel}
         contentKey={contentKey}
-        onClose={() => router.back()}
-        onContinue={() => !isSaving && router.back()}
+        onClose={exitLesson}
+        onContinue={() => !isSaving && exitLesson()}
         insets={insets}
       />
     )
@@ -166,7 +176,7 @@ export default function LessonScreen() {
         title={lesson.title}
         description={lesson.description}
         onStart={handleStart}
-        onClose={() => router.back()}
+        onClose={exitLesson}
       />
 
       {/* Contenido del step actual */}
@@ -238,7 +248,7 @@ export default function LessonScreen() {
           setShowSettings(false)
           // Se usa setTimeout para evitar problemas de navegación concurrentes con el cierre del Modal
           setTimeout(() => {
-            router.back()
+            exitLesson()
           }, 100)
         }}
         onClose={() => setShowSettings(false)}
