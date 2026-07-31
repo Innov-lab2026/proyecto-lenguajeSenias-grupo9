@@ -363,7 +363,7 @@ export default function ProfileScreen() {
             {/* Botón para borrar la cuenta */}
             <Pressable
               onPress={() => { setDeleteStep(1); setShowDeleteModal(true) }}
-              className="mt-2 h-14 w-1/2 self-center items-center justify-center rounded-full border border-red-200 bg-red-50 px-4"
+              className="mt-2 h-14 w-full self-center items-center justify-center rounded-full border border-red-200 bg-red-50 px-4"
             >
               <Text className="font-nunito text-base font-bold text-red-600">Borrar Cuenta</Text>
             </Pressable>

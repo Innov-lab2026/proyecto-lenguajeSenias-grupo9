@@ -146,7 +146,7 @@ export default function LetterScreen() {
         </View>
 
         {/* Footer Action */}
-        <View className="mt-auto">
+        <View className="mt-auto w-56 self-center">
           <Button
             label="Practicar"
             onPress={handleOpenPractice}

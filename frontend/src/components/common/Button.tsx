@@ -15,11 +15,10 @@ interface ButtonProps {
   textClassName?: string
 }
 
-// Estilos de contenedor por variante. Todos los botones ocupan el 50% de la línea de forma predeterminada.
 const containerByVariant: Record<Variant, string> = {
-  primary: 'w-1/2 self-center bg-primary border-b-4 border-[#C8910A] active:mt-1 active:border-b-0 hover:bg-primary-hover',
-  white: 'w-1/2 self-center bg-surface shadow-sm shadow-black/5 hover:bg-gray-100 active:bg-gray-200',
-  secondary: 'w-1/2 self-center bg-secondary hover:bg-secondary/90 active:bg-secondary/80',
+  primary: 'w-full self-center bg-primary border-b-4 border-[#C8910A] active:mt-1 active:border-b-0 hover:bg-primary-hover',
+  white: 'w-full self-center bg-surface shadow-sm shadow-black/5 hover:bg-gray-100 active:bg-gray-200',
+  secondary: 'w-full self-center bg-secondary hover:bg-secondary/90 active:bg-secondary/80',
 }
 
 const textByVariant: Record<Variant, string> = {
