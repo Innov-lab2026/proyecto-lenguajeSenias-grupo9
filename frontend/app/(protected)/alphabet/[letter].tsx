@@ -97,8 +97,8 @@ export default function LetterScreen() {
         ) : null}
 
         {/* Content Area */}
-        <View className="flex-1 items-center justify-center py-2">
-          <View className="w-full flex-1 max-h-[85%] rounded-[40px] border border-muted/20 bg-surface p-2 shadow-sm relative">
+        <View className="flex-1 items-center justify-top py-4">
+          <View className="w-full flex-1 max-w-lg max-h-[900px] items-center rounded-[40px] border border-muted/20 bg-surface p-2 mb-2 shadow-sm relative">
             {video ? (
               <LessonVideo
                 uri={video.url}
