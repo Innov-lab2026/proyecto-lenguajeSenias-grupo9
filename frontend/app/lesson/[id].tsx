@@ -1,5 +1,5 @@
 import { useRouter, useLocalSearchParams } from 'expo-router'
-import { Text, View } from 'react-native'
+import { ActivityIndicator, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
 import { Button } from '@/src/components/common/Button'
@@ -59,6 +59,7 @@ export default function LessonScreen() {
   const {
     lesson,
     hasContent,
+    isLoadingVideos,
     currentStep,
     currentStepIndex,
     selectedOption,
@@ -112,6 +113,20 @@ export default function LessonScreen() {
           Todavía estamos armando el contenido de esta lección. ¡Volvé pronto!
         </Text>
         <Button label="Volver" onPress={() => router.back()} className="mt-6 px-10" />
+      </View>
+    )
+  }
+
+  // Los videos de los steps se resuelven por id contra el catálogo: hasta que
+  // llega, las URLs están vacías. Montar igual dejaría los players sin fuente
+  // (y el gate de "ya lo viste" nunca se destrabaría).
+  if (isLoadingVideos) {
+    return (
+      <View
+        className="flex-1 bg-background items-center justify-center"
+        style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
+      >
+        <ActivityIndicator size="large" color="#5F9BA4" />
       </View>
     )
   }

@@ -8,10 +8,17 @@ export interface DialogueLine {
 export interface LessonStep {
   id: string
   type: StepType
+  /**
+   * URL ya resuelta. `LESSON_CONTENT` no la declara nunca: todos los steps
+   * referencian su video por `videoId` y el resolver completa este campo
+   * (ver `utils/lessonVideos.ts`). Queda en el tipo porque es lo que consumen
+   * los componentes de step, y como escotilla por si algún día hace falta un
+   * video que no esté en `public.videos`.
+   */
   videoUrl?: string
   options?: string[]
   videoUrls?: Record<string, string>
-  pairs?: { videoUrl: string, word: string }[]
+  pairs?: { videoUrl?: string, videoId?: string, word: string }[]
   dialogue?: DialogueLine[]
   question?: string
   correctAnswer?: string
@@ -19,6 +26,29 @@ export interface LessonStep {
   contentTitle?: string
   /** Plantilla del step `composition`: la frase a armar, con `[blank]` por hueco. */
   sentence?: string
+
+  /**
+   * `public.videos.id` del video de este step. Se resuelve contra el catálogo
+   * (`GET /api/videos`) en vez de hardcodear la URL: los ids son estables entre
+   * resubidas de Cloudinary, las URLs no — una resubida en julio dejó 12 de 15
+   * URLs hardcodeadas apuntando a archivos borrados (ver local/VIDEOS_DB.md §4).
+   */
+  videoId?: string
+  /** Ídem `videoId`, por opción (el equivalente por-id de `videoUrls`). */
+  videoIds?: Record<string, string>
+
+  /**
+   * `false` para que las opciones se muestren en el orden declarado en vez de
+   * mezclarse. Por default los quiz de varios videos se mezclan, para que la
+   * respuesta correcta no caiga siempre en la misma posición.
+   *
+   * Se desactiva cuando las opciones son ETIQUETAS DE POSICIÓN ("Opción A" /
+   * "Opción B") en vez de palabras con significado propio: ahí mezclarlas no
+   * esconde nada (la respuesta correcta sigue siendo la misma etiqueta, esté
+   * donde esté) y encima las muestra fuera de orden — B a la izquierda, A a la
+   * derecha.
+   */
+  shuffleOptions?: boolean
 }
 
 /** Estado del ejercicio "matching" (relacionar video con palabra). */
@@ -45,29 +75,41 @@ export interface Lesson {
   steps: LessonStep[]
 }
 
-const VIDEO_1 = 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/01_pfseqz.mp4'
-const VIDEO_2 = 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/02_ztp8b3.mp4'
-const VIDEO_3 = 'https://res.cloudinary.com/dhrtwfd13/video/upload/v1785010484/03_jqt9r7.mp4'
+/**
+ * Ids de `public.videos` (ver local/VIDEOS_DB.md). Se referencian por id y no
+ * por URL a propósito: los ids son estables entre resubidas de Cloudinary — la
+ * resubida del 30/07 cambió las 50 URLs del catálogo y no tocó un solo id.
+ */
+const V = {
+  COMO_ESTAS: '9b72d4ff-1a7e-4646-87de-a03dc72bf2df',
+  /** Versión "plana" de la seña: la que se enseña en m1-l1. */
+  COMO_TE_LLAMAS: '4035fa27-40d0-484d-847e-aad6b03c6621',
+  /** Variante editada para el ejercicio de comparación de m2-l3 (hace juego con la incorrecta). */
+  COMO_TE_LLAMAS_CORRECTO_EJ: 'ad415ec9-c78f-4704-8396-be1497ed357d',
+  /** Misma seña hecha mal a propósito: m2-l3 pregunta cuál de las dos está bien. */
+  COMO_TE_LLAMAS_INCORRECTO: '44f6d9e2-aace-4343-b405-5d684d0a0956',
+  BIEN: '5d9a8a93-2748-47b4-a85e-3d1b53392143',
+  MAS_O_MENOS: '507226b9-e46f-48a3-b990-0e6ddc8262df',
+  MAL: '02284bfc-88a6-421c-9e2f-407412570ea2',
+  KAI: '12801b9a-0dda-45dc-a41c-ce1cf88d0234',
+  SOL: 'cbbe8104-cb03-4965-8b19-3bd1ed9c1f1e',
+  ANA: '5aec4513-41e7-4eaa-98ed-1bf57afea740',
+  POR_FAVOR: '44436173-1589-4754-9825-cdbd4f42c9e2',
+  GRACIAS: '2f6b0774-5fd5-4d37-add2-d90a92fd619a',
+  /** No hay video de "De nada" grabado — m1-l4 usa "Perdón" en su lugar. */
+  PERDON: 'fc1abd05-093b-4a70-9523-971efeeb3d86',
+  LUZ: '9fefc7d1-a029-4e14-be2e-f6cb74978b81',
+  CASA: '73c7aa0a-cd20-4fd3-a565-f8192eb93f28',
+  TELEFONO: 'd0cb6486-11c2-4e67-93d9-659c95fbef37',
 
-// Videos reales (ver local/VIDEOS_DB.md — GET /api/videos). Sólo las lecciones
-// cuyo contenido coincide sin ambigüedad con lo grabado; el resto sigue en
-// VIDEO_1/2/3 hasta confirmar guion (diálogos) o señas faltantes (De nada,
-// Teléfono) — ver el hilo de PR sobre esto.
-const VIDEO_COMO_ESTAS = 'https://res.cloudinary.com/qvourcmn/video/upload/v1785214492/VID_20260726_155230-00.00.00.466-00.00.06.478-seg01_hor4kh.mp4'
-const VIDEO_COMO_TE_LLAMAS = 'https://res.cloudinary.com/qvourcmn/video/upload/v1785214505/VID_20260726_155230-00.01.18.450-00.01.24.862-seg14_rmkyqz.mp4'
-// Misma seña hecha mal a propósito: la usa m2-l3 para el ejercicio de
-// "identificá cuál está bien hecha" (antes un placeholder 'Como1'/'Como2').
-const VIDEO_COMO_TE_LLAMAS_INCORRECTO = 'https://res.cloudinary.com/qvourcmn/video/upload/v1785214505/VID_20260726_155230-00.01.28.277-00.01.32.084-seg15_qxcpbm.mp4'
-const VIDEO_BIEN = 'https://res.cloudinary.com/qvourcmn/video/upload/v1785214474/VID_20260726_155230-00.00.11.237-00.00.15.033-seg03_mjhzaz.mp4'
-const VIDEO_MAS_O_MENOS = 'https://res.cloudinary.com/qvourcmn/video/upload/v1785214478/VID_20260726_155230-00.00.19.459-00.00.24.377-seg05_yirqu0.mp4'
-const VIDEO_MAL = 'https://res.cloudinary.com/qvourcmn/video/upload/v1785214472/VID_20260726_155230-00.00.15.559-00.00.18.797-seg04_wow4xu.mp4'
-const VIDEO_KAI = 'https://res.cloudinary.com/qvourcmn/video/upload/v1785214409/VID_20260726_155230-00.01.11.158-00.01.16.498-seg13_pvsour.mp4'
-const VIDEO_SOL = 'https://res.cloudinary.com/qvourcmn/video/upload/v1785214410/VID_20260726_155230-00.01.05.533-00.01.10.603-seg12_p2mg7x.mp4'
-const VIDEO_ANA = 'https://res.cloudinary.com/qvourcmn/video/upload/v1785214416/VID_20260726_155230-00.00.59.863-00.01.04.906-seg11_c9s9zb.mp4'
-const VIDEO_POR_FAVOR = 'https://res.cloudinary.com/qvourcmn/video/upload/v1785214453/VID_20260726_155230-00.00.31.629-00.00.35.987-seg07_eysb5j.mp4'
-const VIDEO_GRACIAS = 'https://res.cloudinary.com/qvourcmn/video/upload/v1785214438/VID_20260726_155230-00.00.36.904-00.00.41.327-seg08_orgzi5.mp4'
-// No hay video de "De nada" grabado — la lección usa "Perdón" en su lugar.
-const VIDEO_PERDON = 'https://res.cloudinary.com/qvourcmn/video/upload/v1785214430/VID_20260726_155230-00.00.42.167-00.00.48.992-seg09_hehejq.mp4'
+  // ⚠️ PROVISORIOS — usados como relleno en m1-l5 y m2-l5 hasta que se graben
+  // los videos de las conversaciones completas (ver PENDIENTES_DB.md §0.6).
+  // Son videos reales y del tema correcto, así que las lecciones se pueden
+  // jugar y completar; pero NO representan el diálogo entero, y por eso esas
+  // dos lecciones no tienen filas en `lesson_signs` (acreditan 0 señas).
+  HOLA_COMO_ESTAS: '046db8db-ad6d-4383-8323-22e6d497d81d',
+  ME_PRESTAS_TELEFONO: '1c059eb0-2983-4452-ba65-46a058166303',
+} as const
 
 /**
  * Contenido de cada lección, indexado por `lessons.content_key` de la DB
@@ -85,22 +127,22 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
         id: 'm1-l1-content-1',
         type: 'content',
         contentTitle: '¿Cómo estás?',
-        videoUrl: VIDEO_COMO_ESTAS,
+        videoId: V.COMO_ESTAS,
       },
       {
         id: 'm1-l1-content-2',
         type: 'content',
         contentTitle: '¿Cómo te llamás?',
-        videoUrl: VIDEO_COMO_TE_LLAMAS,
+        videoId: V.COMO_TE_LLAMAS,
       },
       {
         id: 'm1-l1-quiz',
         type: 'quiz',
         question: 'Seleccioná el video que representa la seña: "¿Cómo te llamás?"',
         options: ['¿Cómo estás?', '¿Cómo te llamás?'],
-        videoUrls: {
-          '¿Cómo estás?': VIDEO_COMO_ESTAS,
-          '¿Cómo te llamás?': VIDEO_COMO_TE_LLAMAS,
+        videoIds: {
+          '¿Cómo estás?': V.COMO_ESTAS,
+          '¿Cómo te llamás?': V.COMO_TE_LLAMAS,
         },
         correctAnswer: '¿Cómo te llamás?',
         tip: 'Observá la posición y el movimiento de las manos antes de responder.',
@@ -117,17 +159,17 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
         type: 'content',
         contentTitle: 'Observá las siguientes 3 palabras para continuar.',
         options: ['Bien', 'Más o menos', 'Mal'],
-        videoUrls: {
-          'Bien': VIDEO_BIEN,
-          'Más o menos': VIDEO_MAS_O_MENOS,
-          'Mal': VIDEO_MAL,
+        videoIds: {
+          'Bien': V.BIEN,
+          'Más o menos': V.MAS_O_MENOS,
+          'Mal': V.MAL,
         },
       },
       {
         id: 'm1-l2-quiz',
         type: 'quiz',
         question: '¿Qué palabra representa esta seña?',
-        videoUrl: VIDEO_BIEN,
+        videoId: V.BIEN,
         options: ['Bien', 'Más o menos', 'Mal'],
         correctAnswer: 'Bien',
         tip: 'Observá la posición y el movimiento de las manos antes de responder.',
@@ -144,11 +186,11 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
         type: 'quiz',
         question: '¿Cuál de estos videos representa "Más o menos"?',
         options: ['¿Cómo estás?', '¿Cómo te llamás?', 'Bien', 'Más o menos'],
-        videoUrls: {
-          '¿Cómo estás?': VIDEO_COMO_ESTAS,
-          '¿Cómo te llamás?': VIDEO_COMO_TE_LLAMAS,
-          'Bien': VIDEO_BIEN,
-          'Más o menos': VIDEO_MAS_O_MENOS,
+        videoIds: {
+          '¿Cómo estás?': V.COMO_ESTAS,
+          '¿Cómo te llamás?': V.COMO_TE_LLAMAS,
+          'Bien': V.BIEN,
+          'Más o menos': V.MAS_O_MENOS,
         },
         correctAnswer: 'Más o menos',
         tip: 'Observá la posición y el movimiento de las manos antes de responder.',
@@ -165,10 +207,10 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
         type: 'content',
         contentTitle: 'Observá las siguientes 3 palabras para continuar.',
         options: ['Por favor', 'Gracias', 'Perdón'],
-        videoUrls: {
-          'Por favor': VIDEO_POR_FAVOR,
-          'Gracias': VIDEO_GRACIAS,
-          'Perdón': VIDEO_PERDON,
+        videoIds: {
+          'Por favor': V.POR_FAVOR,
+          'Gracias': V.GRACIAS,
+          'Perdón': V.PERDON,
         },
       },
       {
@@ -176,9 +218,9 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
         type: 'matching',
         question: 'Uní cada video con la palabra correcta.',
         pairs: [
-          { videoUrl: VIDEO_POR_FAVOR, word: 'Por favor' },
-          { videoUrl: VIDEO_GRACIAS, word: 'Gracias' },
-          { videoUrl: VIDEO_PERDON, word: 'Perdón' },
+          { videoId: V.POR_FAVOR, word: 'Por favor' },
+          { videoId: V.GRACIAS, word: 'Gracias' },
+          { videoId: V.PERDON, word: 'Perdón' },
         ],
       },
     ],
@@ -192,13 +234,15 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
         id: 'm1-l5-content-1',
         type: 'content',
         contentTitle: 'Conversar',
-        videoUrl: VIDEO_1,
+        // ⚠️ Relleno provisorio: falta grabar la conversación completa.
+        videoId: V.HOLA_COMO_ESTAS,
       },
       {
         id: 'm1-l5-dialogue',
         type: 'dialogue',
         question: 'Completá la conversación arrastrando cada palabra a su lugar.',
-        videoUrl: VIDEO_2,
+        // ⚠️ Relleno provisorio (ver arriba).
+        videoId: V.HOLA_COMO_ESTAS,
         options: ['¿cómo te llamás?', 'Bien', 'De nada', 'Adiós', 'Por favor'],
         dialogue: [
           { speaker: 'Ana', text: 'Hola, [blank].' },
@@ -222,7 +266,11 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
         id: 'm2-l1-composition',
         type: 'composition',
         question: 'Formá la pregunta arrastrando cada palabra a su lugar',
-        videoUrl: VIDEO_1,
+        // Misma seña que enseña m1-l1: en LSA "¿Cuál es tu nombre?" y "¿Cómo te
+        // llamás?" se signan igual. Se reusa el mismo video a propósito — y con
+        // él el mismo id en lesson_signs, así la RPC NO vuelve a acreditar la
+        // seña a quien ya la aprendió en m1-l1 (ver PENDIENTES_DB.md §0.5).
+        videoId: V.COMO_TE_LLAMAS,
         options: ['apellido', 'dirección', 'Cuál', 'nombre', 'tu', 'edad', 'es'],
         sentence: '¿ [blank] [blank] [blank] [blank] ?',
         correctAnswer: '¿Cuál es tu nombre?',
@@ -239,17 +287,17 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
         type: 'content',
         contentTitle: 'Observá los siguientes nombres.',
         options: ['Kai', 'Sol', 'Ana'],
-        videoUrls: {
-          'Kai': VIDEO_KAI,
-          'Sol': VIDEO_SOL,
-          'Ana': VIDEO_ANA,
+        videoIds: {
+          'Kai': V.KAI,
+          'Sol': V.SOL,
+          'Ana': V.ANA,
         },
       },
       {
         id: 'm2-l2-quiz',
         type: 'quiz',
         question: '¿Qué nombre representa esta seña?',
-        videoUrl: VIDEO_KAI,
+        videoId: V.KAI,
         options: ['Kai', 'Sol', 'Ana'],
         correctAnswer: 'Kai',
         tip: 'Podés consultar el ABC desde el menú de la aplicación. ¡Practicá tu nombre!',
@@ -265,19 +313,25 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
         id: 'm2-l3-content-interactive',
         type: 'content',
         contentTitle: 'Observá la siguiente seña.\n¿Cómo te llamás?',
-        videoUrl: VIDEO_COMO_TE_LLAMAS,
+        videoId: V.COMO_TE_LLAMAS,
       },
       {
         id: 'm2-l3-quiz',
         type: 'quiz',
-        // Sin videoUrl propio: dos opciones = grilla de dos videos (una bien
+        // Sin video propio: dos opciones = grilla de dos videos (una bien
         // hecha, otra mal a propósito), no un video único + botones de texto —
         // el objetivo es que el usuario compare las señas, no lea etiquetas.
+        // Ambas son la variante "ej_siguiente", grabadas como par para este
+        // ejercicio (la versión plana de la seña se enseña en m1-l1/m2-l3-content).
         question: 'Seleccioná el video donde la seña "¿Cómo te llamás?" está bien hecha.',
         options: ['Opción A', 'Opción B'],
-        videoUrls: {
-          'Opción A': VIDEO_COMO_TE_LLAMAS,
-          'Opción B': VIDEO_COMO_TE_LLAMAS_INCORRECTO,
+        // Sin mezclar: son etiquetas de posición, no palabras. Mezclarlas
+        // mostraba "Opción B" a la izquierda y "Opción A" a la derecha, sin
+        // esconder nada a cambio (ver `shuffleOptions` en LessonStep).
+        shuffleOptions: false,
+        videoIds: {
+          'Opción A': V.COMO_TE_LLAMAS_CORRECTO_EJ,
+          'Opción B': V.COMO_TE_LLAMAS_INCORRECTO,
         },
         correctAnswer: 'Opción A',
         tip: 'Podés consultar el ABC desde el menú de la aplicación. ¡Practicá tu nombre!',
@@ -294,17 +348,17 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
         type: 'content',
         contentTitle: 'Observá las siguientes señas.',
         options: ['Luz', 'Casa', 'Teléfono'],
-        videoUrls: {
-          'Luz': VIDEO_2,
-          'Casa': VIDEO_3,
-          'Teléfono': VIDEO_3,
+        videoIds: {
+          'Luz': V.LUZ,
+          'Casa': V.CASA,
+          'Teléfono': V.TELEFONO,
         },
       },
       {
         id: 'm2-l4-composition',
         type: 'composition',
         question: '¿Qué palabra representa esta seña?\nOrdená las letras para formar la palabra correcta.',
-        videoUrl: VIDEO_1,
+        videoId: V.TELEFONO,
         options: ['o', 'é', 't', 'l', 'a', 'n', 'e', 'c', 'o', 'f'],
         sentence: '[blank] [blank] [blank] [blank] [blank] [blank] [blank] [blank]',
         correctAnswer: 'teléfono',
@@ -320,13 +374,15 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
         id: 'm2-l5-content-1',
         type: 'content',
         contentTitle: 'Conversar',
-        videoUrl: VIDEO_1,
+        // ⚠️ Relleno provisorio: es la frase suelta, no la conversación entera.
+        videoId: V.ME_PRESTAS_TELEFONO,
       },
       {
         id: 'm2-l5-dialogue',
         type: 'dialogue',
         question: 'Completá la conversación arrastrando cada palabra a su lugar.',
-        videoUrl: VIDEO_2,
+        // ⚠️ Relleno provisorio (ver arriba).
+        videoId: V.ME_PRESTAS_TELEFONO,
         options: ['Hola, ¿cómo te llamás?', 'Hola, ¿cómo estás?', 'teléfono', 'Gracias', 'Luz', 'Adiós'],
         dialogue: [
           { speaker: 'Ana', text: '[blank].' },

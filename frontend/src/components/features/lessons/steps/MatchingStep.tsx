@@ -46,7 +46,7 @@ export function MatchingStep({ step, matchingState, onSelect, muted = false }: M
           {step.pairs?.map((pair, index) => (
             <Pressable
               key={`video-${index}`}
-              onPress={() => onSelect('video', pair.videoUrl)}
+              onPress={() => pair.videoUrl && onSelect('video', pair.videoUrl)}
               className={cn(
                 'h-12 rounded-2xl border-2 items-center justify-center relative',
                 matchingState.selectedVideo === pair.videoUrl

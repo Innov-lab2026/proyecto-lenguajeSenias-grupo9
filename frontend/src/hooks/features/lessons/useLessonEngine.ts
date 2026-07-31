@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { LESSON_CONTENT, type Lesson, type MatchingState } from '@/src/types/lessons'
 import { LESSONS_POR_MODULO } from '@/src/constants/lessons'
 import { useCompleteLesson } from './useCompleteLesson'
+import { useVideos } from '@/src/hooks/features/alphabet/useVideos'
+import { resolveLessonVideos } from '@/src/utils/lessonVideos'
 import { useFavoritesStore } from '@/src/store/favoritesStore'
 import { usePreferencesStore } from '@/src/store/preferencesStore'
 
@@ -54,7 +56,27 @@ export function useLessonEngine({ lessonId, lessonNumber, contentKey }: UseLesso
   // confunde más de lo que ayuda. `hasContent` deja que la pantalla avise.
   const content = contentKey ? LESSON_CONTENT[contentKey] : undefined
   const hasContent = content != null
-  const lesson = content ?? EMPTY_LESSON
+
+  // Los videos se referencian por id en LESSON_CONTENT y se resuelven contra el
+  // catálogo (ver utils/lessonVideos.ts). Se hace acá y no en la pantalla porque
+  // este hook también lee `videoUrl`/`pairs[].videoUrl` internamente (matching,
+  // favoritos, quiz): resolviendo en el origen, todo lo de abajo ve URLs reales.
+  //
+  // ⚠️ useMemo NO es una optimización acá — es correctitud, y no lo saques.
+  // `resolveLessonVideos` arma un objeto nuevo (`{...lesson, steps: map()}`), así
+  // que sin memo `lesson` (y con él `currentStep`) cambia de identidad en cada
+  // render. El efecto que mezcla las opciones del quiz depende de `currentStep`:
+  // se re-dispararía siempre, llamando setShuffledQuizOptions con un orden nuevo
+  // → re-render → loop infinito ("Maximum update depth exceeded", con las
+  // opciones del quiz parpadeando y sin poder elegir ninguna).
+  const videosQuery = useVideos()
+  const videos = videosQuery.data
+  const lesson = useMemo(
+    () => resolveLessonVideos(content ?? EMPTY_LESSON, videos),
+    [content, videos],
+  )
+  /** El catálogo todavía no llegó: la pantalla espera antes de montar el ejercicio. */
+  const isLoadingVideos = videosQuery.isPending
 
   const completeLessonMutation = useCompleteLesson()
 
@@ -120,7 +142,7 @@ export function useLessonEngine({ lessonId, lessonNumber, contentKey }: UseLesso
       if (currentStep?.type === 'matching' && currentStep.pairs) {
         const words = currentStep.pairs.map(p => p.word)
         const defaultVideo = currentStep.id === 'm1-l4-matching' && currentStep.pairs.length > 0
-          ? currentStep.pairs[0].videoUrl
+          ? currentStep.pairs[0].videoUrl ?? null
           : null
         setMatchingState(prev => ({
           ...prev,
@@ -129,15 +151,27 @@ export function useLessonEngine({ lessonId, lessonNumber, contentKey }: UseLesso
         }))
       }
 
-      // Mezcla las opciones del quiz con varios videos
-      if (currentStep?.type === 'quiz' && !currentStep.videoUrl && currentStep.options) {
+      // Mezcla las opciones del quiz con varios videos, salvo que el step pida
+      // el orden declarado (`shuffleOptions: false`, ver LessonStep).
+      if (
+        currentStep?.type === 'quiz' &&
+        !currentStep.videoUrl &&
+        currentStep.options &&
+        currentStep.shuffleOptions !== false
+      ) {
         setShuffledQuizOptions(prev => ({
           ...prev,
           [currentStepIndex]: [...currentStep.options!].sort(() => Math.random() - 0.5)
         }))
       }
     }
-  }, [currentStepIndex, currentStep])
+    // Depende del ID del step, no del objeto: este efecto tiene que correr
+    // cuando el usuario CAMBIA de step, no cada vez que `currentStep` cambia de
+    // identidad. `lesson` se recalcula si el catálogo de videos se refetchea
+    // (staleTime de 5 min), y con el objeto como dependencia eso volvería a
+    // mezclar el quiz a mitad de ejercicio.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentStepIndex, currentStep?.id])
 
   const isLastStep = currentStepIndex === lesson.steps.length - 1
 
@@ -498,6 +532,8 @@ export function useLessonEngine({ lessonId, lessonNumber, contentKey }: UseLesso
     lesson,
     /** false si la lección no tiene contenido cargado para su `content_key`. */
     hasContent,
+    /** true mientras se descarga el catálogo de videos (sus URLs todavía no están resueltas). */
+    isLoadingVideos,
     currentStep,
     currentStepIndex,
     isLastStep,
