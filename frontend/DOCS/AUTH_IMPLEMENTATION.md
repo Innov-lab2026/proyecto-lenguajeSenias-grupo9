@@ -286,8 +286,21 @@ Probado en **web** y **Expo Go (Android)** con la capa mock:
 
 ## 7. Pendiente
 
-- **Recuperar contraseña:** flujo completo (hoy la pantalla es un stub sin backend).
-- **Backend:** `GET /me` (validar sesión al arranque), `POST /logout`, **refresh token** (la sesión
-  dura ~1h; el login ya recibe `expires_in`). Confirmar valores canónicos de `gender` en `profiles.gender`.
-- **Google OAuth:** habilitar el provider en Supabase + probar el flujo nativo con un *development build*.
-- **Estadísticas de perfil** (racha/puntos) siguen mockeadas: faltan endpoints.
+> Revisado el 2026-07-30. Varios ítems de esta lista ya se resolvieron; se dejan tachados para que
+> no se vuelvan a "arreglar".
+
+- **Recuperar contraseña:** flujo completo (hoy la pantalla es un stub sin backend). **Sigue
+  pendiente.**
+- ~~**Refresh token**~~ ✅ **Implementado**: refresh single-flight en el interceptor 401 de
+  `services/http.ts`, refresh proactivo al hidratar en `useSessionHydration`, y `signOut` unificado
+  que limpia storage + cache. La sesión ya no muere a la hora.
+- **Backend:** `GET /me` y `POST /logout` siguen sin existir — el refresh proactivo cubre buena
+  parte de lo que hacía falta `/me`. Confirmar valores canónicos de `gender` en `profiles.gender`
+  sigue pendiente (hay un `TODO(backend)` en `src/types/auth.ts`).
+- ~~**Borrar cuenta**~~ ✅ **Implementado** (no estaba en esta lista): `DELETE /api/auth/account`,
+  con limpieza del avatar en Storage. El resto cae por `on delete cascade`.
+- **Google OAuth:** habilitar el provider en Supabase + probar el flujo nativo con un *development
+  build*. **Sigue pendiente** de verificación en nativo.
+- ~~**Estadísticas de perfil mockeadas**~~ ✅ Resuelto: XP/puntos/señas salen de `GET /api/stats`.
+  El badge "Nivel 1 · Principiante" hardcodeado se eliminó. (Las **rachas** nunca existieron: no hay
+  columna en `user_stats` ni lógica, y la mención en la pantalla de Ayuda ya se sacó.)

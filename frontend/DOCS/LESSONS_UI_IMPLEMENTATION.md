@@ -234,16 +234,27 @@ video.
 
 ## 8. Pendiente
 
-- **HUD en vivo + texto de feedback** (aprobado, sin implementar): que el HUD sume `earnedStats`
-  sobre `MOCK_HOME_STATS` en vez de mostrar el mock fijo, y que el texto del feedback incorrecto lea
-  `PUNTOS_CON_ERRORES[step]` en lugar del "75 puntos" hardcodeado. Es un cambio **puramente de
-  cliente**: no hay integración con backend/DB todavía.
-- **`useLessonEngine`**: mover los 18 `useState` + `handleNext`/`handleRetry` a
-  `src/hooks/features/lessons/`. Sin cambios de comportamiento.
-- **Tablas de puntaje a constantes**: `xpValues` / `pointsNoErrors` / `pointsWithErrors` siguen siendo
-  arrays sueltos dentro del componente.
-- **Backend de lecciones**: todo el contenido sigue viniendo de los mocks de `src/types/lessons.ts`.
-  El guardado de progreso (`updateProgress`) no se tocó.
-- **Contenido real**: reemplazar los 3 videos de prueba por los videos que correspondan a cada seña.
-- **Performance en Android**: el quiz de opciones-video monta hasta 4 players a la vez. Hoy solo
-  reproduce el seleccionado; si llegara a pesar, cargar el player recién al seleccionar la opción.
+> ⚠️ **Esta lista es de la época del modelo mock y quedó casi toda obsoleta.** Se conserva tachada
+> como registro. Revisado el 2026-07-30.
+
+- ~~**HUD en vivo + texto de feedback**~~ ✅ El HUD lee `GET /api/stats` real; `MOCK_HOME_STATS` ya
+  no lo consume ninguna pantalla. El feedback de error usa `points_retry` de la lección, no un
+  número hardcodeado.
+- ~~**`useLessonEngine`**: mover los 18 `useState`~~ ✅ Hecho: el motor vive en
+  `src/hooks/features/lessons/useLessonEngine.ts`.
+- ~~**Tablas de puntaje a constantes**~~ ✅ Superado: la economía **ya no vive en el cliente**. XP,
+  puntos y señas los calcula y persiste la RPC `complete_user_lesson` a partir de
+  `lessons.xp_reward` / `points_perfect` / `points_retry` y `lesson_signs`.
+- ~~**Backend de lecciones** / `updateProgress`~~ ✅ Superado: el progreso se guarda vía
+  `POST /api/lessons/:id/complete`. `updateProgress` y el modelo `user_progress` se eliminaron.
+- ~~**Contenido real**: reemplazar los 3 videos de prueba~~ ✅ Hecho: los videos se referencian
+  **por id** y se resuelven contra `GET /api/videos` (ver `utils/lessonVideos.ts`). No queda
+  ninguna URL de video hardcodeada.
+- **Performance en Android**: el quiz de opciones-video monta hasta 4 players a la vez. **Sigue
+  vigente** — hoy sólo reproduce el seleccionado; si llegara a pesar, cargar el player recién al
+  seleccionar la opción.
+
+**Lo que sí sigue pendiente hoy** (ver la auditoría en `local/` para el detalle): los videos de las
+dos conversaciones (`m1-l5`, `m2-l5`), y sacar de los componentes los ids de contenido hardcodeados
+(`m1-l1-quiz`, `m2-l4-composition`, etc.) moviéndolos a flags declarativas en `LessonStep` — el
+patrón que ya estrenó `shuffleOptions`.

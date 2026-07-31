@@ -361,41 +361,48 @@ posible a futuro.
 
 ## 7. Qué falta / pendiente
 
-### 7.1. Bloqueante para que esto llegue a producción
+> ⚠️ **Revisado el 2026-07-30: casi toda esta sección quedó obsoleta.** Se escribió cuando el
+> sistema recién se conectaba a la base; desde entonces se implementó casi todo. Se conserva
+> tachada como registro de la evolución. **Para el estado real y priorizado, ver la auditoría y
+> `PENDIENTES_DB.md` en `local/`.**
 
-- **Ya está commiteado** (`test`, `eecf851`), pero **sin deployar todavía**. El backend
-  deployado en Vercel (`carpiseniasback.vercel.app`) sigue corriendo el código viejo.
-- Consecuencia práctica ahora mismo: probar desde **Expo Go** requiere apuntar
-  `EXPO_PUBLIC_API_URL` a la IP de LAN de la máquina que corre el backend local (`localhost`
-  no sirve desde un dispositivo físico — ver la sesión de debugging correspondiente). Una vez
-  deployado, este problema desaparece.
+### 7.1. ~~Bloqueante para que esto llegue a producción~~ ✅ Superado
+
+- ~~Sin deployar todavía~~ — `main` está desplegado y es la rama definitiva.
+- Sigue vigente sólo esto: probar desde **Expo Go** en un dispositivo físico requiere apuntar
+  `EXPO_PUBLIC_API_URL` a la **IP de LAN** de la máquina que corre el backend (`localhost` no
+  sirve desde el celular).
 
 ### 7.2. Contenido pendiente (no es código, es trabajo de producto/UX)
 
-- **La lección 5 sigue sin contenido definitivo.** Cuántas señas acredita y el diálogo real a
-  completar es el pendiente **P2/P3** de siempre (`notas.md`). El seed tiene un placeholder
-  de 1 seña ("Conversación Base").
+- **Las dos lecciones de cierre (`m1-l5`, `m2-l5`) siguen sin su video.** El guion **sí** está
+  definido y aprobado; lo que falta es grabar **un video de la conversación completa** para cada
+  una. Hoy usan un video de relleno: se pueden jugar, dan XP y puntos, pero acreditan 0 señas.
+  Receta exacta para cerrarlo en `PENDIENTES_DB.md` §0.6.
+  > Nota: se acreditan 3 señas con **un solo video** (`videos.signs_reward = 3` + una fila en
+  > `lesson_signs`), no con 3 filas — la RPC suma esa columna, no cuenta filas.
 - **P1 (cómo penaliza cada error) sigue sin resolver por UX.** Hoy `complete_user_lesson`
   implementa la lectura más simple (cualquier error → monto reducido fijo). Si UX define una
   penalización progresiva, es un cambio de columnas en `lessons`, no de arquitectura.
-- **Módulo 2 y 3 no tienen lecciones.** Son placeholders bloqueados a propósito (§2.5).
+- ~~**Módulo 2 y 3 no tienen lecciones**~~ — el **Módulo 2 tiene sus 5 lecciones** desde
+  `20260728000000`. El Módulo 3 sigue sembrado y vacío, bloqueado a propósito.
 
-### 7.3. Frontend sin construir todavía
+### 7.3. ~~Frontend sin construir todavía~~ ✅ Casi todo construido
 
-- **Pantallas de favoritos, stickers y logros.** La API completa existe (§5.4/5.5); no hay
-  ninguna UI que la consuma.
-- **El contenido del ejercicio sigue siendo mock del lado del cliente** (§1.2). Conectarlo al
-  backend real requeriría modelar `videos`/opciones/respuesta-correcta por ejercicio en la
-  base — hoy sólo existe `lesson_signs` (qué señas acredita), no la estructura completa del
-  ejercicio. Es una pieza de arquitectura nueva, no una extensión chica.
-- **Reproducción de video: resuelta, con videos de prueba.** `expo-video` ya está integrado
-  y los 6 lugares reproducen video real (§6.4-bis) — dejó de ser el riesgo técnico pendiente.
-  Lo que falta es reemplazar los 3 videos de Cloudinary (de prueba, sin relación semántica con
-  el ejercicio) por el contenido definitivo de cada seña.
-- **Hover feedback en el drag de la isla 5** (§6.5) — pulido opcional.
-- **Cascada de desbloqueo entre módulos** (§6.3) — la lógica de "el módulo N se abre si el
-  N-1 está 100% completo" no está implementada más allá del primer módulo; hoy no hay con qué
-  probarla.
+- ~~**Pantallas de favoritos, stickers y logros**~~ ✅ Las tres existen. Stickers está cableado a
+  la API real (`purchase_sticker` descuenta en el server). **Favoritos y Logros siguen resolviendo
+  contra el cliente**, no contra `/api/favorites` ni `achievements` — pendiente real, en la
+  auditoría.
+- **El contenido del ejercicio sigue siendo del lado del cliente** (§1.2) — vigente y por diseño.
+  Lo que **sí** cambió: los **videos** ya no son mock, se referencian por id y se resuelven contra
+  `GET /api/videos` (`utils/lessonVideos.ts`). Modelar el ejercicio completo en la base sigue
+  siendo una pieza de arquitectura nueva, no una extensión chica.
+- ~~**Reemplazar los 3 videos de Cloudinary de prueba**~~ ✅ Hecho: no queda ninguna URL de video
+  hardcodeada en el código.
+- **Hover feedback en el drag de la isla 5** (§6.5) — pulido opcional, sigue pendiente.
+- ~~**Cascada de desbloqueo entre módulos**~~ ✅ Implementada y en uso: el módulo N se abre al
+  completar el N-1, y un módulo sembrado sin lecciones (el 3) corta la cadena en vez de
+  desbloquear módulos vacíos.
 
 ### 7.4. Menores / conocidos, no bloqueantes
 
