@@ -129,7 +129,7 @@ export function FeedbackModal({
 
       <View className="w-full gap-3 mt-4">
         {!isCorrect && (
-          <Button label="Reintentar" onPress={onRetry} variant="white" className="border-2 border-primary" />
+          <Button label="Reintentar" onPress={onRetry} variant="white" className="border-2 border-primary w-52" />
         )}
         <Button label="Siguiente" onPress={onNext} />
       </View>
