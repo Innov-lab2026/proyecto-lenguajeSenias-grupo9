@@ -21,9 +21,14 @@ export function QuizStep({ step, options, selectedOption, onSelectOption, isLock
   // Obtener el estado responsivo del dispositivo para adaptar el layout
   const { isMobile } = useResponsive()
 
-  // Para las lecciones m1-l1-quiz y m1-l3-quiz, el video correcto se pre-carga como principal
-  const mainVideoUrl = step.videoUrl || 
-    ((step.id === 'm1-l1-quiz' || step.id === 'm1-l3-quiz') && step.videoUrls && step.correctAnswer ? step.videoUrls[step.correctAnswer] : undefined)
+  // Para m1-l1-quiz, el video correcto se pre-carga como principal (el enunciado
+  // pide "seleccioná el video que representa la seña", con sólo 2 opciones).
+  // ⚠️ m1-l3-quiz salió de acá a propósito: tenía el mismo tratamiento y
+  // precargaba el video de la respuesta correcta antes de que el usuario
+  // eligiera nada — regalaba la respuesta. Ese step ahora cae en el layout de
+  // grilla (más abajo), que muestra/carga el video de cada opción por separado.
+  const mainVideoUrl = step.videoUrl ||
+    (step.id === 'm1-l1-quiz' && step.videoUrls && step.correctAnswer ? step.videoUrls[step.correctAnswer] : undefined)
 
   const isHorizontalQuiz = step.id === 'm1-l2-quiz' || step.id === 'm2-l2-quiz'
 
@@ -73,8 +78,11 @@ export function QuizStep({ step, options, selectedOption, onSelectOption, isLock
     )
   }
 
-  // Si no hay videoUrl principal, se asume que las opciones tienen videos asociados (múltiples videos)
-  if (isMobile) {
+  // Si no hay videoUrl principal, se asume que las opciones tienen videos asociados (múltiples videos).
+  // Este layout (un solo video, el de la opción elegida) es el default en mobile;
+  // `singleVideoAtATime` lo fuerza también en pantallas anchas, para steps donde
+  // NO conviene mostrar todos los videos a la vez (ver LessonStep).
+  if (isMobile || step.singleVideoAtATime) {
     return (
       <View className="flex-1 items-center w-full">
         {/* Contenedor con moldura para el video activo o el placeholder en móvil */}

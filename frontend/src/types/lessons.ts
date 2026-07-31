@@ -49,6 +49,15 @@ export interface LessonStep {
    * derecha.
    */
   shuffleOptions?: boolean
+
+  /**
+   * `true` para mostrar un solo video por vez (el de la opción elegida), como
+   * ya hace `ContentStep` con sus selectores (ej. `m1-l4-content-interactive`:
+   * Por favor / Gracias / Perdón). Sin esto, un quiz de varios videos los
+   * muestra TODOS a la vez, lado a lado, en pantallas anchas — sólo en mobile
+   * se ve uno por vez por default.
+   */
+  singleVideoAtATime?: boolean
 }
 
 /** Estado del ejercicio "matching" (relacionar video con palabra). */
@@ -138,7 +147,11 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
       {
         id: 'm1-l1-quiz',
         type: 'quiz',
-        question: 'Seleccioná el video que representa la seña: "¿Cómo te llamás?"',
+        // El video que se muestra es siempre el de la respuesta correcta
+        // (ver QuizStep.tsx: mainVideoUrl para 'm1-l1-quiz'). La pregunta pide
+        // identificar la PALABRA que representa, no "el video" — eso implicaría
+        // varios videos para comparar, y acá sólo hay uno.
+        question: '¿Qué palabra representa esta seña?',
         options: ['¿Cómo estás?', '¿Cómo te llamás?'],
         videoIds: {
           '¿Cómo estás?': V.COMO_ESTAS,
@@ -185,14 +198,22 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
         id: 'm1-l3-quiz',
         type: 'quiz',
         question: '¿Cuál de estos videos representa "Más o menos"?',
-        options: ['¿Cómo estás?', '¿Cómo te llamás?', 'Bien', 'Más o menos'],
+        // Etiquetas de posición, no palabras: no deben mezclarse (mismo
+        // criterio que m2-l3-quiz) — "Opción 3" tiene que renderizar siempre
+        // en el tercer lugar, si no el número deja de tener sentido.
+        options: ['Opción 1', 'Opción 2', 'Opción 3', 'Opción 4'],
+        shuffleOptions: false,
+        // Un solo video en pantalla, el de la opción elegida — no las 4 a la
+        // vez lado a lado (que es lo que hace por default el layout de
+        // desktop). Mismo patrón que ya usa m1-l4-content-interactive.
+        singleVideoAtATime: true,
         videoIds: {
-          '¿Cómo estás?': V.COMO_ESTAS,
-          '¿Cómo te llamás?': V.COMO_TE_LLAMAS,
-          'Bien': V.BIEN,
-          'Más o menos': V.MAS_O_MENOS,
+          'Opción 1': V.COMO_ESTAS,
+          'Opción 2': V.COMO_TE_LLAMAS,
+          'Opción 3': V.BIEN,
+          'Opción 4': V.MAS_O_MENOS,
         },
-        correctAnswer: 'Más o menos',
+        correctAnswer: 'Opción 4',
         tip: 'Observá la posición y el movimiento de las manos antes de responder.',
       },
     ],
