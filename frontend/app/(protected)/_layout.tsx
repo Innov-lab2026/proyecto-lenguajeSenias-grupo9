@@ -1,5 +1,5 @@
 import { ActivityIndicator, Pressable, Text, View } from 'react-native'
-import { Slot } from 'expo-router'
+import { Slot, usePathname } from 'expo-router'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { SideBar } from '@/src/components/features/navigation/SideBar'
 import { BottomBar } from '@/src/components/features/navigation/BottomBar'
@@ -14,10 +14,14 @@ export default function ProtectedLayout() {
   const { isMobile, isTablet } = useResponsive()
   const { data: profile, isPending, isError, refetch } = useProfile()
   const logout = useLogout()
+  const pathname = usePathname()
   // useSafeAreaInsets (no el componente SafeAreaView): lee del contexto ya
   // resuelto por el SafeAreaProvider raíz, sin remedir de forma nativa en
   // cada montaje — evita el salto de layout al reentrar a esta pantalla.
   const insets = useSafeAreaInsets()
+
+  // Pantallas que usan su propia navbar y no necesitan la BottomBar general.
+  const hideBottomBar = pathname.startsWith('/alphabet/')
 
   // Cargando el perfil: spinner centrado (evita el flash de pantalla en blanco).
   if (isPending) {
@@ -68,7 +72,7 @@ export default function ProtectedLayout() {
         <View className="flex-1">
           <Slot />
         </View>
-        <BottomBar />
+        {!hideBottomBar && <BottomBar />}
       </View>
     )
   }

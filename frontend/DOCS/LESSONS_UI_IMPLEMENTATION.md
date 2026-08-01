@@ -47,7 +47,7 @@ src/components/features/lessons/
   LessonModalCard.tsx           # overlay + card centrado con tope de ancho (compartido)
   IntroModal.tsx                # inicio: dificultad, isla, título, descripción
   FeedbackModal.tsx             # correcto/incorrecto — responsive (card en desktop, full en mobile)
-  SettingsModal.tsx             # silenciar audio / salir de la lección
+  PauseModal.tsx                # pausar / salir de la lección
   HintModal.tsx                 # pista del step actual
   steps/
     ContentStep.tsx             # mostrar una seña (video único o selector de señas)

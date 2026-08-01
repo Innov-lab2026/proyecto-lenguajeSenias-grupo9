@@ -144,16 +144,29 @@ export function FavoritesList() {
     )
   }
 
-  const alphabetFavorites = favoritesStore.items.filter((item) => item.type === 'letter')
+  const alphabetFavorites = favoritesStore.items
+    .filter((item) => item.type === 'letter')
+    .sort((a, b) => {
+      const la = (a.letter ?? a.title.replace('Letra ', '')).toUpperCase()
+      const lb = (b.letter ?? b.title.replace('Letra ', '')).toUpperCase()
+      return la.localeCompare(lb)
+    })
   const hasLessonFavorites = favoritesStore.items.some((item) => item.type === 'lesson')
 
   return (
     <View className="flex-1 w-full">
       <ScrollView className="flex-1 pt-6" showsVerticalScrollIndicator={false}>
         {modulesList.map((m) => {
-          const moduleFavorites = favoritesStore.items.filter(
-            (item) => item.type === 'lesson' && item.moduleNumber === m.number
-          )
+          const moduleFavorites = favoritesStore.items
+            .filter((item) => item.type === 'lesson' && item.moduleNumber === m.number)
+            .sort((a, b) => {
+              // Ordenar por número de lección extraído del contentKey (mX-lY)
+              const getLesson = (ck?: string) => {
+                const match = ck?.match(/m\d+-l(\d+)/)
+                return match ? parseInt(match[1]) : 999
+              }
+              return getLesson(a.contentKey) - getLesson(b.contentKey)
+            })
 
           // Ocultar el grupo si no posee videos favoritos seleccionados
           if (moduleFavorites.length === 0) return null

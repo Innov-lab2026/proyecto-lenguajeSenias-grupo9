@@ -57,6 +57,7 @@ export interface StatItemProps {
   valueClassName?: string
   /** Texto fijo antes del número (ej. "+" en la card de puntos del resumen de lección). */
   prefix?: string
+  labelClassName?: string
 }
 
 /**
@@ -79,6 +80,7 @@ export function StatItem({
   badgeSize = 30,
   valueClassName = 'text-xl',
   prefix = '',
+  labelClassName,
 }: StatItemProps) {
   const [burst, setBurst] = useState(0)
   const [gain, setGain] = useState<{ amount: number; id: number } | null>(null)
@@ -120,7 +122,7 @@ export function StatItem({
       className={cn(layout === 'column' ? 'items-center' : 'flex-row items-center gap-2')}
     >
       <StatBadge kind={kind} size={badgeSize} burstTrigger={burst} />
-      {showLabel && <Text className="font-nunito text-xs font-bold text-ink mb-1 mt-1">{label}</Text>}
+      {showLabel && <Text className={cn('font-nunito font-bold text-ink mb-1 mt-1', labelClassName || 'text-xs')}>{label}</Text>}
       <View style={{ position: 'relative' }}>
         <Animated.View style={pumpStyle}>
           <Text className={cn('font-nunito font-bold text-ink', valueClassName)}>

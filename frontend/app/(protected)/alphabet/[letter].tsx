@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Pressable, Text, View, Modal, ActivityIndicator, Platform } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
 import { Button } from '@/src/components/common/Button'
+import { LessonFooter } from '@/src/components/features/lessons/LessonFooter'
+import { HintModal } from '@/src/components/features/lessons/HintModal'
 import { LessonVideo } from '@/src/components/features/lessons/LessonVideo'
 import { useVideos } from '@/src/hooks/features/alphabet/useVideos'
 import { useCompleteLetter } from '@/src/hooks/features/alphabet/useCompleteLetter'
@@ -14,9 +16,11 @@ import { Image } from 'expo-image'
 
 export default function LetterScreen() {
   const router = useRouter()
+  const insets = useSafeAreaInsets()
   const params = useLocalSearchParams<{ letter?: string }>()
   const letter = Array.isArray(params.letter) ? params.letter[0] : params.letter
   const [showPractice, setShowPractice] = useState(false)
+  const [showHint, setShowHint] = useState(false)
   const isMuted = usePreferencesStore((s) => s.isMuted)
 
   const favoritesStore = useFavoritesStore()
@@ -67,22 +71,13 @@ export default function LetterScreen() {
     <SafeAreaView className="flex-1 bg-background" edges={['top', 'bottom']}>
       <View className="flex-1 px-5 pb-6 pt-4">
         {/* Header */}
-        <View className="flex-row items-center justify-between w-full relative">
-          <View className="flex-1 pr-12">
+        <View className="flex-row items-center justify-between w-full">
+          <View className="flex-1">
             <Text className="font-nunito text-2xl font-bold text-ink">Letra {letter ?? '?'}</Text>
             <Text className="font-nunito text-xs text-muted">
               {'Mirá el video para aprender la seña. Después, ¡practicá vos!'}
             </Text>
           </View>
-          <Pressable
-            onPress={() => router.replace('/alphabet')}
-            accessibilityRole="button"
-            accessibilityLabel="Volver al Abecedario"
-            hitSlop={12}
-            className="absolute top-0 right-0 h-10 w-10 items-center justify-center active:scale-95 z-20"
-          >
-            <Ionicons name="arrow-undo" size={32} color="#518BC9" />
-          </Pressable>
         </View>
 
         {/* No bloquea la pantalla: el video se puede seguir viendo igual,
@@ -119,41 +114,39 @@ export default function LetterScreen() {
                 </Text>
               </View>
             )}
-            {/* Favorite button – Instagram-style overlay */}
-            <Pressable
-              onPress={() => {
-                if (!letter || !video) return
-                favoritesStore.toggleFavorite({
-                  id: 'letter-' + letter,
-                  type: 'letter',
-                  title: `Letra ${letter}`,
-                  videoUrl: video.url,
-                  letter: letter
-                })
-              }}
-              accessibilityRole="button"
-              accessibilityLabel={isFavorite ? "Quitar de favoritos" : "Añadir a favoritos"}
-              hitSlop={8}
-              className="absolute bottom-4 right-4 h-11 w-11 items-center justify-center rounded-full bg-black/30"
-            >
-              <Ionicons
-                name={isFavorite ? "heart" : "heart-outline"}
-                size={24}
-                color={isFavorite ? "#EF4444" : "#FFFFFF"}
-              />
-            </Pressable>
           </View>
         </View>
 
-        {/* Footer Action */}
-        <View className="mt-auto w-56 self-center">
-          <Button
-            label="Practicar"
-            onPress={handleOpenPractice}
-            leftIcon={<Ionicons name="play-outline" size={20} color="#1F2937" />}
-          />
-        </View>
       </View>
+
+      {/* Navbar inferior estilo LessonFooter */}
+      <LessonFooter
+        ctaLabel="Practicar"
+        ctaDisabled={false}
+        onNext={handleOpenPractice}
+        showBack={true}
+        onBack={() => router.replace('/alphabet')}
+        onSettings={() => { }}
+        isFavorite={isFavorite}
+        onToggleFavorite={() => {
+          if (!letter || !video) return
+          favoritesStore.toggleFavorite({
+            id: 'letter-' + letter,
+            type: 'letter',
+            title: `Letra ${letter}`,
+            videoUrl: video.url,
+            letter: letter,
+          })
+        }}
+        hintViewed={false}
+        onHint={() => setShowHint(true)}
+      />
+
+      <HintModal
+        visible={showHint}
+        tip={`Observá bien la posición de los dedos para formar la letra ${letter ?? ''}.`}
+        onClose={() => setShowHint(false)}
+      />
 
       {/* Práctica embebida: iframe en web, WebView en nativo. En web no se abre
           en pestaña nueva a propósito — el Space necesita permiso de cámara y
@@ -164,38 +157,51 @@ export default function LetterScreen() {
         presentationStyle="pageSheet"
         onRequestClose={() => setShowPractice(false)}
       >
-        <SafeAreaView className="flex-1 bg-surface">
-          <View className="h-14 flex-row items-center justify-end px-5 border-b border-black/5 bg-[#F0F7FF]">
-            <Pressable
-              onPress={() => setShowPractice(false)}
-              className="p-1 active:scale-95"
-              accessibilityRole="button"
-              accessibilityLabel="Cerrar práctica"
-            >
-              <Ionicons name="arrow-undo" size={32} color="#518BC9" />
-            </Pressable>
+        <SafeAreaView className="flex-1 bg-surface" edges={['top']}>
+          {/* Header vacío celeste para empujar el texto del Iframe/Gradio hacia abajo */}
+          <View className="h-12 bg-[#F0F9FF] w-full" />
+
+          {/* Contenedor del Iframe/WebView con overflow-hidden para recortar el footer de Gradio */}
+          <View className="flex-1 overflow-hidden">
+            {Platform.OS === 'web' ? (
+              // allow="camera": el Space usa la cámara para reconocer la seña.
+              <iframe
+                src={practiceUrl}
+                allow="camera; microphone"
+                style={{ flex: 1, border: 'none', width: '100%', height: '100%', marginBottom: -50 }}
+                title="Práctica de Señas"
+              />
+            ) : (
+              <WebView
+                source={{ uri: practiceUrl }}
+                style={{ flex: 1, marginBottom: -50 }}
+                startInLoadingState
+                renderLoading={() => (
+                  <View className="absolute inset-0 items-center justify-center bg-surface">
+                    <ActivityIndicator size="large" color="#4A90E2" />
+                  </View>
+                )}
+              />
+            )}
           </View>
 
-          {Platform.OS === 'web' ? (
-            // allow="camera": el Space usa la cámara para reconocer la seña.
-            <iframe
-              src={practiceUrl}
-              allow="camera; microphone"
-              style={{ flex: 1, border: 'none', width: '100%', height: '100%' }}
-              title="Práctica de Señas"
-            />
-          ) : (
-            <WebView
-              source={{ uri: practiceUrl }}
-              className="flex-1"
-              startInLoadingState
-              renderLoading={() => (
-                <View className="absolute inset-0 items-center justify-center bg-surface">
-                  <ActivityIndicator size="large" color="#4A90E2" />
-                </View>
-              )}
-            />
-          )}
+          {/* Navbar inferior del modal usando LessonFooter configurada solo con el botón volver */}
+          <LessonFooter
+            ctaLabel=""
+            ctaDisabled={false}
+            onNext={() => {}}
+            showBack={true}
+            onBack={() => setShowPractice(false)}
+            onSettings={() => {}}
+            isFavorite={false}
+            onToggleFavorite={() => {}}
+            hintViewed={false}
+            onHint={() => {}}
+            showSettingsButton={false}
+            showFavoriteButton={false}
+            showHintButton={false}
+            showCTA={false}
+          />
         </SafeAreaView>
       </Modal>
     </SafeAreaView>

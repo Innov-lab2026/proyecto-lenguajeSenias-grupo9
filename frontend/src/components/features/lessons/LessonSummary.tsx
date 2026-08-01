@@ -95,36 +95,41 @@ export function LessonSummary({ result, isPending, nextLevel, contentKey, onClos
       className="flex-1 bg-[#EAF8FF] items-center justify-start px-4 overflow-hidden"
       style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
     >
-      <View className="flex-1 w-full max-w-md items-center justify-center">
-        <Text className="font-nunito text-4xl font-bold text-ink mb-0 text-center">
-          {titleText}
-        </Text>
-        <Text className="font-nunito text-lg text-muted mb-2 text-center">
-          {subtitleText}
-        </Text>
-
+      <View className="flex-1 w-full max-w-md items-center justify-around py-0" style={{ marginBottom: 40 }}>
+        {/* 1º La imagen */}
         <Image
           source={imageSource}
-          className="w-full max-w-[360px] h-[60%] max-h-[350px] mt-6 mb-4 self-center"
+          className="w-full max-w-[360px] h-[50%] max-h-[320px] self-center"
           contentFit="contain"
         />
 
-        {earnedAchievements.length > 0 ? (
-          <Text className="font-nunito text-base font-bold text-secondary text-center px-4">
-            ¡Nuevo logro! {earnedAchievements.map((a) => a.name).join(', ')}
+        {/* 2º El texto */}
+        <View className="w-full items-center">
+          <Text className="font-nunito text-4xl font-extrabold text-ink mb-1 text-center">
+            {titleText}
           </Text>
-        ) : null}
-      </View>
+          <Text className="font-nunito text-xl text-muted text-center">
+            {subtitleText}
+          </Text>
 
-      <View className="w-full max-w-md flex-row justify-between gap-2 mt-auto" style={{ marginBottom: 80 }}>
-        <View className="flex-1 min-h-[116px] bg-surface rounded-2xl border-2 border-[#4A90E2] items-center justify-center px-1">
-          <StatItem kind="xp" label="Experiencia" value={revealed.xp} layout="column" showLabel badgeSize={34} valueClassName="text-2xl" />
+          {earnedAchievements.length > 0 ? (
+            <Text className="font-nunito text-base font-bold text-secondary text-center px-4 mt-2">
+              ¡Nuevo logro! {earnedAchievements.map((a) => a.name).join(', ')}
+            </Text>
+          ) : null}
         </View>
-        <View className="flex-1 min-h-[116px] bg-surface rounded-2xl border-2 border-[#4A90E2] items-center justify-center px-1">
-          <StatItem kind="star" label="Puntos" value={revealed.points} layout="column" showLabel badgeSize={34} valueClassName="text-2xl" />
-        </View>
-        <View className="flex-1 min-h-[116px] bg-surface rounded-2xl border-2 border-[#4A90E2] items-center justify-center px-1">
-          <StatItem kind="paw" label="Señas" value={revealed.signs} layout="column" showLabel badgeSize={34} valueClassName="text-2xl" />
+
+        {/* 3º Los stats */}
+        <View className="w-full flex-row justify-between gap-2">
+          <View className="flex-1 min-h-[116px] bg-surface rounded-2xl border-2 border-[#4A90E2] items-center justify-center px-1">
+            <StatItem kind="xp" label="Experiencia" value={revealed.xp} layout="column" showLabel badgeSize={34} valueClassName="text-3xl" labelClassName="text-sm" />
+          </View>
+          <View className="flex-1 min-h-[116px] bg-surface rounded-2xl border-2 border-[#4A90E2] items-center justify-center px-1">
+            <StatItem kind="star" label="Puntos" value={revealed.points} layout="column" showLabel badgeSize={34} valueClassName="text-3xl" labelClassName="text-sm" />
+          </View>
+          <View className="flex-1 min-h-[116px] bg-surface rounded-2xl border-2 border-[#4A90E2] items-center justify-center px-1">
+            <StatItem kind="paw" label="Señas" value={revealed.signs} layout="column" showLabel badgeSize={34} valueClassName="text-3xl" labelClassName="text-sm" />
+          </View>
         </View>
       </View>
 

@@ -1,9 +1,10 @@
 import { useState } from 'react'
-import { Pressable, ScrollView, Text, View } from 'react-native'
+import { Linking, Pressable, ScrollView, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
 import { Image } from 'expo-image'
+import { Button } from '@/src/components/common/Button'
 
 const HELP_ITEMS = [
   {
@@ -104,6 +105,28 @@ export default function HelpScreen() {
               </View>
             )
           })}
+        </View>
+
+        {/* Bloque de contacto */}
+        <View className="mt-8 mb-4 rounded-2xl bg-surface border border-muted/15 p-5 shadow-sm">
+          <View className="flex-row items-center gap-3 mb-3">
+            <View className="w-10 h-10 rounded-full bg-accent/20 items-center justify-center">
+              <Ionicons name="mail" size={20} color="#4A90E2" />
+            </View>
+            <Text className="font-nunito text-lg font-bold text-ink">
+              ¿Tenés dudas o sugerencias?
+            </Text>
+          </View>
+          <Text className="font-nunito text-sm text-muted leading-6 mb-4">
+            Escribinos y te responderemos a la brevedad. Tu opinión nos ayuda a mejorar Carpiseñas.
+          </Text>
+          <Button
+            label="Enviar email"
+            onPress={() => Linking.openURL('mailto:carpisenas@gmail.com.ar?subject=Consulta%20desde%20Carpise%C3%B1as')}
+          />
+          <Text className="font-nunito text-xs text-muted text-center mt-3">
+            carpisenas@gmail.com.ar
+          </Text>
         </View>
       </ScrollView>
 

@@ -14,10 +14,12 @@ import { LessonHeader } from '@/src/components/features/lessons/LessonHeader'
 import { LessonFooter } from '@/src/components/features/lessons/LessonFooter'
 import { IntroModal } from '@/src/components/features/lessons/IntroModal'
 import { FeedbackModal } from '@/src/components/features/lessons/FeedbackModal'
-import { SettingsModal } from '@/src/components/features/lessons/SettingsModal'
+import { PauseModal } from '@/src/components/features/lessons/PauseModal'
 import { HintModal } from '@/src/components/features/lessons/HintModal'
+import { FeedbackCompleteModal } from '@/src/components/features/lessons/FeedbackCompleteModal'
 import { useLessonEngine } from '@/src/hooks/features/lessons/useLessonEngine'
 import { useStats } from '@/src/hooks/features/lessons/useStats'
+import { useCompletedLessons } from '@/src/hooks/features/lessons/useCompletedLessons'
 import { useFavoritesStore } from '@/src/store/favoritesStore'
 import { LESSON_SHELL } from '@/src/constants/lessons'
 import { cn } from '@/src/utils/cn'
@@ -65,11 +67,14 @@ export default function LessonScreen() {
   }
 
   const statsQuery = useStats()
+  const completedLessonsQuery = useCompletedLessons()
+  const isAlreadyCompleted = (completedLessonsQuery.data ?? []).some((c) => c.lesson_id === id)
 
   const {
     lesson,
     hasContent,
     isLoadingVideos,
+    isRestoring,
     currentStep,
     currentStepIndex,
     selectedOption,
@@ -101,12 +106,28 @@ export default function LessonScreen() {
     handleNext,
     handleRetry,
     handleBack,
+    handleBackToIntro,
     markWatched,
     toggleFavorite,
     handleMatchSelection,
     handleAddWordToComposition,
     handleRemoveWordFromComposition,
   } = useLessonEngine({ lessonId: id as string, lessonNumber, contentKey })
+
+  // Steps donde el botón "atrás" vuelve al intro modal de la lección.
+  const introBackStepIds = new Set([
+    'm1-l1-content-1',
+    'm1-l2-content-interactive',
+    'm1-l3-quiz',
+    'm1-l4-content-interactive',
+    'm1-l5-content-1',
+    'm2-l1-composition',
+    'm2-l2-content-interactive',
+    'm2-l3-content-interactive',
+    'm2-l4-content-interactive',
+    'm2-l5-content-1',
+  ])
+  const isIntroBackStep = !!currentStep && introBackStepIds.has(currentStep.id)
 
   // Lección sembrada en la DB pero sin contenido cargado para su content_key.
   if (!hasContent) {
@@ -130,7 +151,7 @@ export default function LessonScreen() {
   // Los videos de los steps se resuelven por id contra el catálogo: hasta que
   // llega, las URLs están vacías. Montar igual dejaría los players sin fuente
   // (y el gate de "ya lo viste" nunca se destrabaría).
-  if (isLoadingVideos) {
+  if (isLoadingVideos || isRestoring) {
     return (
       <View
         className="flex-1 bg-background items-center justify-center"
@@ -138,10 +159,19 @@ export default function LessonScreen() {
       >
         <ActivityIndicator size="large" color="#5F9BA4" />
       </View>
-    )
+    );
   }
 
   if (showSummary) {
+    if (isAlreadyCompleted) {
+      return (
+        <FeedbackCompleteModal
+          visible={showSummary}
+          onContinue={() => router.replace('/home')}
+        />
+      )
+    }
+
     return (
       <LessonSummary
         result={completionResult}
@@ -240,13 +270,12 @@ export default function LessonScreen() {
         onNext={handleNext}
       />
 
-      <SettingsModal
+      <PauseModal
         visible={showSettings}
         isMuted={isMuted}
         onToggleMute={() => setIsMuted(!isMuted)}
         onExit={() => {
           setShowSettings(false)
-          // Se usa setTimeout para evitar problemas de navegación concurrentes con el cierre del Modal
           setTimeout(() => {
             exitLesson()
           }, 100)
@@ -261,8 +290,8 @@ export default function LessonScreen() {
           ctaLabel={footerLabel}
           ctaDisabled={footerDisabled}
           onNext={handleNext}
-          showBack={currentStepIndex > 0}
-          onBack={handleBack}
+          showBack={currentStepIndex > 0 || isIntroBackStep}
+          onBack={isIntroBackStep ? handleBackToIntro : handleBack}
           onSettings={() => setShowSettings(true)}
           isFavorite={favorites.has(currentStep?.id || '')}
           onToggleFavorite={toggleFavorite}

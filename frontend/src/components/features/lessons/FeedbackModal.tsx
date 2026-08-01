@@ -78,22 +78,14 @@ export function FeedbackModal({
       {isCorrect ? (
         <View className="w-full flex-1 justify-center items-center gap-2">
           {positive ? (
-            <>
-              <Text className="font-nunito text-lg font-bold text-ink text-center leading-relaxed">
-                {positive.title}
+            <View className="gap-1 items-center">
+              <Text className="font-nunito text-base font-bold text-ink text-center">
+                {positive.hintTitle}
               </Text>
-
-              <View className="border-t border-secondary/20 my-1 w-3/4 mx-auto" />
-
-              <View className="gap-1 items-center">
-                <Text className="font-nunito text-base font-bold text-ink text-center">
-                  {positive.hintTitle}
-                </Text>
-                <Text className="font-nunito text-sm text-ink leading-relaxed text-center">
-                  {positive.hintText}
-                </Text>
-              </View>
-            </>
+              <Text className="font-nunito text-sm text-ink leading-relaxed text-center">
+                {positive.hintText}
+              </Text>
+            </View>
           ) : (
             <Text className="font-nunito text-base text-ink leading-relaxed text-center">{tip}</Text>
           )}

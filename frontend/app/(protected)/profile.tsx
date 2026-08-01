@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react"
 import { Image, Modal, Pressable, ScrollView, Switch, Text, View } from "react-native"
 import * as ImagePicker from "expo-image-picker"
+import Constants from "expo-constants"
 import { useSafeAreaInsets } from "react-native-safe-area-context"
 import { Ionicons } from "@expo/vector-icons"
 import { Button } from "@/src/components/common/Button"
@@ -46,7 +47,7 @@ export default function ProfileScreen() {
   const user = useSessionStore((state) => state.user)
   const token = useSessionStore((state) => state.token)
   const updateUser = useSessionStore((state) => state.updateUser)
-  
+
   const insets = useSafeAreaInsets()
 
   const [editingPersonal, setEditingPersonal] = useState(false)
@@ -303,9 +304,9 @@ export default function ProfileScreen() {
                       }}
                       className="flex-1"
                     />
-                    <Button 
-                      label="Guardar" 
-                      onPress={saveSecurity} 
+                    <Button
+                      label="Guardar"
+                      onPress={saveSecurity}
                       className="flex-1"
                       loading={savingSecurity}
                     />
@@ -365,8 +366,13 @@ export default function ProfileScreen() {
               onPress={() => { setDeleteStep(1); setShowDeleteModal(true) }}
               className="mt-2 h-14 w-full self-center items-center justify-center rounded-full border border-red-200 bg-red-50 px-4"
             >
-              <Text className="font-nunito text-base font-bold text-red-600">Borrar Cuenta</Text>
+              <Text className="font-nunito text-base font-bold text-red-600">Borrar cuenta</Text>
             </Pressable>
+
+            {/* Versión de la app */}
+            <Text className="font-nunito text-xs text-muted text-center mt-4 mb-2">
+              Carpiseñas v{Constants.expoConfig?.version ?? '1.0.0'}
+            </Text>
           </View>
         </View>
       </ScrollView>
