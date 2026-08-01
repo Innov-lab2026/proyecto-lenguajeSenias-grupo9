@@ -1,6 +1,7 @@
 import { Pressable, Text, View } from 'react-native'
 import type { LessonStep } from '@/src/types/lessons'
 import { LessonVideo } from '@/src/components/features/lessons/LessonVideo'
+import { VideoFrame } from '@/src/components/features/lessons/VideoFrame'
 import { cn } from '@/src/utils/cn'
 import { Ionicons } from '@expo/vector-icons'
 import { useResponsive } from '@/src/hooks/common/useResponsive'
@@ -36,11 +37,9 @@ export function QuizStep({ step, options, selectedOption, onSelectOption, isLock
   if (mainVideoUrl) {
     return (
       <View className="flex-1 w-full">
-        <View className="flex-1 w-full items-center justify-center mb-2">
-          <View className="w-full flex-1 max-h-[560px] rounded-[40px] border border-muted/20 bg-surface p-2 shadow-sm relative">
-            <LessonVideo uri={mainVideoUrl} muted={muted} className="flex-1 w-full rounded-[32px]" />
-          </View>
-        </View>
+        <VideoFrame className="mb-2">
+          <LessonVideo uri={mainVideoUrl} muted={muted} className="flex-1 w-full rounded-[32px]" />
+        </VideoFrame>
 
         <Text className="font-nunito text-xl font-bold text-ink text-center py-4 px-2">{step.question}</Text>
 
@@ -86,25 +85,23 @@ export function QuizStep({ step, options, selectedOption, onSelectOption, isLock
     return (
       <View className="flex-1 items-center w-full">
         {/* Contenedor con moldura para el video activo o el placeholder en móvil */}
-        <View className="flex-1 w-full items-center justify-center mb-2">
-          {selectedOption && step.videoUrls?.[selectedOption] ? (
-            <View className="w-full flex-1 max-h-[560px] rounded-[40px] border border-muted/20 bg-surface p-2 shadow-sm relative">
-              <LessonVideo
-                key={selectedOption}
-                uri={step.videoUrls[selectedOption]}
-                muted={muted}
-                className="flex-1 w-full rounded-[32px]"
-              />
-            </View>
-          ) : (
-            <View className="w-full flex-1 max-h-[560px] rounded-[40px] border border-muted/20 bg-surface p-8 shadow-sm justify-center items-center">
-              <Ionicons name="videocam-outline" size={60} color="#9BA8B1" />
-              <Text className="font-nunito text-muted mt-2 text-center text-sm">
-                Seleccioná una opción para ver el video
-              </Text>
-            </View>
-          )}
-        </View>
+        {selectedOption && step.videoUrls?.[selectedOption] ? (
+          <VideoFrame className="mb-2">
+            <LessonVideo
+              key={selectedOption}
+              uri={step.videoUrls[selectedOption]}
+              muted={muted}
+              className="flex-1 w-full rounded-[32px]"
+            />
+          </VideoFrame>
+        ) : (
+          <VideoFrame className="mb-2" frameClassName="items-center justify-center px-4">
+            <Ionicons name="videocam-outline" size={60} color="#9BA8B1" />
+            <Text className="font-nunito text-muted mt-2 text-center text-sm">
+              Seleccioná una opción para ver el video
+            </Text>
+          </VideoFrame>
+        )}
 
         <Text className="font-nunito text-xl font-bold text-ink text-center py-4 px-2">{step.question}</Text>
 
@@ -157,7 +154,10 @@ export function QuizStep({ step, options, selectedOption, onSelectOption, isLock
               isLocked && 'opacity-80',
             )}
           >
-            <View className="w-full h-full min-h-[160px] rounded-xl overflow-hidden relative">
+            <VideoFrame
+              padding={0}
+              frameClassName="rounded-xl border-0 bg-transparent shadow-none overflow-hidden"
+            >
               <LessonVideo
                 uri={step.videoUrls?.[option] ?? ''}
                 muted={muted}
@@ -169,7 +169,7 @@ export function QuizStep({ step, options, selectedOption, onSelectOption, isLock
               <View className="absolute bottom-1 inset-x-1 bg-black/40 rounded-md px-1.5 py-0.5">
                 <Text className="font-nunito text-xs text-white font-bold text-center">{option}</Text>
               </View>
-            </View>
+            </VideoFrame>
           </Pressable>
         ))}
       </View>

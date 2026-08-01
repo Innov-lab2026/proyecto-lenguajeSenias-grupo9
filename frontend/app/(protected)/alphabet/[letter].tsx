@@ -9,6 +9,7 @@ import { HintModal } from '@/src/components/features/lessons/HintModal'
 import { PauseModal } from '@/src/components/features/lessons/PauseModal'
 import { setItem, deleteItem } from '@/src/lib/storage'
 import { LessonVideo } from '@/src/components/features/lessons/LessonVideo'
+import { VideoFrame } from '@/src/components/features/lessons/VideoFrame'
 import { useVideos } from '@/src/hooks/features/alphabet/useVideos'
 import { useCompleteLetter } from '@/src/hooks/features/alphabet/useCompleteLetter'
 import { useFavoritesStore } from '@/src/store/favoritesStore'
@@ -113,28 +114,28 @@ export default function LetterScreen() {
 
         {/* Content Area */}
         <View className="flex-1 items-center justify-top py-4">
-          <View className="w-full flex-1 max-w-lg max-h-[900px] items-center rounded-[40px] border border-muted/20 bg-surface p-2 mb-2 shadow-sm relative">
-            {video ? (
+          {video ? (
+            <VideoFrame className="mb-2">
               <LessonVideo
                 uri={video.url}
                 className="flex-1 w-full rounded-[32px]"
                 muted={isMuted}
               />
-            ) : (
-              <View className="flex-1 items-center justify-center rounded-[32px] border border-dashed border-muted/40 bg-muted/10 overflow-hidden">
-                <Ionicons
-                  name={videosQuery.isPending ? 'hourglass-outline' : 'videocam-outline'}
-                  size={80}
-                  color="#9BA8B1"
-                />
-                <Text className="px-4 mt-4 text-center font-nunito text-sm text-muted">
-                  {videosQuery.isPending
-                    ? 'Cargando video...'
-                    : 'Todavía no hay un video grabado para esta letra.'}
-                </Text>
-              </View>
-            )}
-          </View>
+            </VideoFrame>
+          ) : (
+            <VideoFrame className="mb-2" frameClassName="items-center justify-center">
+              <Ionicons
+                name={videosQuery.isPending ? 'hourglass-outline' : 'videocam-outline'}
+                size={80}
+                color="#9BA8B1"
+              />
+              <Text className="px-4 mt-4 text-center font-nunito text-sm text-muted">
+                {videosQuery.isPending
+                  ? 'Cargando video...'
+                  : 'Todavía no hay un video grabado para esta letra.'}
+              </Text>
+            </VideoFrame>
+          )}
         </View>
 
       </View>
