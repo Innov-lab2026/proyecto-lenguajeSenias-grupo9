@@ -35,7 +35,7 @@ export function MatchingStep({ step, matchingState, onSelect, muted = false }: M
         </VideoFrame>
       )}
 
-      <Text className="font-nunito text-xl font-bold text-ink text-center py-4 px-2">{step.question}</Text>
+      <Text className="font-nunito text-lg sm:text-xl font-bold text-ink text-center py-4 px-2">{step.question}</Text>
 
       <View className="flex-row justify-between gap-4 mb-2 w-full max-w-2xl self-center flex-1">
         {/* Columna de Videos — antes cada opción era flex-1 (se estiraba a

@@ -38,7 +38,7 @@ export function IntroModal({ visible, levelId, title, description, islandNumber 
   return (
     <Modal visible={visible} transparent animationType="fade">
       <View className="flex-1 bg-black/50 items-center justify-center px-6">
-        <View className="w-full max-w-[340px] aspect-[13/16] relative items-center justify-between p-6">
+        <View className="w-full max-w-[340px] relative items-center justify-between p-6">
           {/* Imagen de fondo del modal */}
           <Image
             source={require('@/assets/images/lessons/intro_modal.svg')}
@@ -90,7 +90,7 @@ export function IntroModal({ visible, levelId, title, description, islandNumber 
           </View>
 
           {/* Botón de acción */}
-          <Button label="¡A Jugar!" onPress={onStart} className="mb-2" />
+          <Button label="¡A Jugar!" onPress={onStart} className="mb-2  max-w-[95%]" />
         </View>
       </View>
     </Modal>
