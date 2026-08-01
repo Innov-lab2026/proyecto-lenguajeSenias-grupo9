@@ -35,11 +35,11 @@ export function PauseModal({
             contentFit="fill"
           />
 
-          {/* Botón salir (X) - sirve para salir de la lección */}
+          {/* Botón cerrar (X) - cierra el modal y continúa la lección */}
           <Pressable
-            onPress={onExit}
+            onPress={onClose}
             accessibilityRole="button"
-            accessibilityLabel="Salir de la lección"
+            accessibilityLabel="Cerrar"
             hitSlop={8}
             className="absolute top-2 -right-1 w-10 h-10 items-center justify-center active:opacity-60 z-20"
           >
