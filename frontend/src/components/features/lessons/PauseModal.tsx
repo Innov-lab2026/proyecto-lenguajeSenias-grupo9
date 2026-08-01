@@ -52,7 +52,7 @@ export function PauseModal({
 
           {/* Texto de título en el tab superior */}
           <View className="absolute top-4 left-0 right-0 items-center">
-            <Text className="font-nunito text-base font-bold text-ink">{title}</Text>
+            <Text className="font-nunito text-base text-center max-w-28 font-bold text-ink">{title}</Text>
           </View>
 
           {/* Contenido principal */}
