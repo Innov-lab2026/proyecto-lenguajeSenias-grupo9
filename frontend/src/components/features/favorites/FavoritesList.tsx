@@ -250,7 +250,7 @@ export function FavoritesList() {
         presentationStyle="pageSheet"
         onRequestClose={() => setPlayingItem(null)}
       >
-        <View className="flex-1 bg-black justify-center items-center relative">
+        <View className="flex-1 max-w-96 mx-auto justify-center items-center relative">
           <Pressable
             className="absolute top-10 right-5 z-50 p-2 bg-black/50 rounded-full"
             onPress={() => setPlayingItem(null)}
