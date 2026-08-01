@@ -45,7 +45,7 @@ export function ContentStep({ step, selectedOption, onSelectOption, onWatched, m
         </VideoFrame>
       )}
 
-      <Text className="font-nunito text-xl font-bold text-ink text-center py-4 px-2">
+      <Text className="font-nunito text-lg sm:text-xl font-bold text-ink text-center py-4 px-2">
         {step.contentTitle}
       </Text>
 

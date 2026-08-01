@@ -1,5 +1,5 @@
 /** Columna de la lección: mobile-first a ancho completo, acotada y centrada en desktop. */
-export const LESSON_SHELL = 'mx-auto w-full max-w-5xl'
+export const LESSON_SHELL = 'mx-auto w-full max-w-xl'
 
 /**
  * Lecciones (islas) por módulo. Define hasta qué número hay "siguiente nivel"

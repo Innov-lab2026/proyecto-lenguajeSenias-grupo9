@@ -41,7 +41,7 @@ export function QuizStep({ step, options, selectedOption, onSelectOption, isLock
           <LessonVideo uri={mainVideoUrl} muted={muted} className="flex-1 w-full rounded-[32px]" />
         </VideoFrame>
 
-        <Text className="font-nunito text-xl font-bold text-ink text-center py-4 px-2">{step.question}</Text>
+        <Text className="font-nunito text-lg sm:text-xl font-bold text-ink text-center py-4 px-2">{step.question}</Text>
 
         <View
           className={cn(
@@ -103,7 +103,7 @@ export function QuizStep({ step, options, selectedOption, onSelectOption, isLock
           </VideoFrame>
         )}
 
-        <Text className="font-nunito text-xl font-bold text-ink text-center py-4 px-2">{step.question}</Text>
+        <Text className="font-nunito text-lg sm:text-xl font-bold text-ink text-center py-4 px-2">{step.question}</Text>
 
         {/* Botones de opciones distribuidos de manera uniforme (cuadrícula de 2x2 para 4 opciones) */}
         <View className="flex-row flex-wrap justify-between gap-y-2 w-full">
@@ -174,7 +174,7 @@ export function QuizStep({ step, options, selectedOption, onSelectOption, isLock
         ))}
       </View>
 
-      <Text className="font-nunito text-xl font-bold text-ink text-center py-4 px-2">{step.question}</Text>
+      <Text className="font-nunito text-lg sm:text-xl font-bold text-ink text-center py-4 px-2">{step.question}</Text>
     </View>
   )
 }
