@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { Stack } from 'expo-router'
+import Head from 'expo-router/head'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { SafeAreaProvider, initialWindowMetrics } from 'react-native-safe-area-context'
@@ -33,7 +34,13 @@ export default function RootLayout() {
   }, [ready])
 
   // Mientras no esté listo, el splash sigue visible (evita parpadeo entre rutas).
-  if (!ready) return null
+  if (!ready) {
+    return (
+      <Head>
+        <title>CarpiSeñas</title>
+      </Head>
+    )
+  }
 
   const isAuthenticated = status === 'authenticated'
 
@@ -43,6 +50,9 @@ export default function RootLayout() {
     // los gestos no responden en ningún lado. Usado por primera vez en el
     // drag & drop de la isla 5 (DraggableWord).
     <GestureHandlerRootView style={{ flex: 1 }}>
+      <Head>
+        <title>CarpiSeñas</title>
+      </Head>
       <QueryClientProvider client={queryClient}>
         {/* initialMetrics: evita el "flash" de insets en 0 (contenido pegado al
             borde superior, tapado por la barra de estado, que luego "salta" a
