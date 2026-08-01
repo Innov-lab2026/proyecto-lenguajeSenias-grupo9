@@ -90,7 +90,7 @@ export function IntroModal({ visible, levelId, title, description, islandNumber 
           </View>
 
           {/* Botón de acción */}
-          <Button label="¡A Jugar!" onPress={onStart} className="mb-2" />
+          <Button label="¡A Jugar!" onPress={onStart} className="mb-2  max-w-[95%]" />
         </View>
       </View>
     </Modal>
