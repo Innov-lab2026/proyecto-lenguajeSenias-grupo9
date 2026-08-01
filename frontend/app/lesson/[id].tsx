@@ -82,7 +82,6 @@ export default function LessonScreen() {
     lesson,
     hasContent,
     isLoadingVideos,
-    isRestoring,
     currentStep,
     currentStepIndex,
     selectedOption,
@@ -159,7 +158,7 @@ export default function LessonScreen() {
   // Los videos de los steps se resuelven por id contra el catálogo: hasta que
   // llega, las URLs están vacías. Montar igual dejaría los players sin fuente
   // (y el gate de "ya lo viste" nunca se destrabaría).
-  if (isLoadingVideos || isRestoring) {
+  if (isLoadingVideos) {
     return (
       <View
         className="flex-1 bg-background items-center justify-center"

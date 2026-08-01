@@ -6,7 +6,6 @@ import { useVideos } from '@/src/hooks/features/alphabet/useVideos'
 import { resolveLessonVideos } from '@/src/utils/lessonVideos'
 import { useFavoritesStore } from '@/src/store/favoritesStore'
 import { usePreferencesStore } from '@/src/store/preferencesStore'
-import { getItem, setItem, deleteItem } from '@/src/lib/storage'
 
 interface UseLessonEngineArgs {
   /** UUID real de la lección (el que consume completeLesson). */
@@ -82,32 +81,6 @@ export function useLessonEngine({ lessonId, lessonNumber, contentKey }: UseLesso
   const completeLessonMutation = useCompleteLesson()
 
   const [currentStepIndex, setCurrentStepIndex] = useState(-1) // -1 = modal de intro
-  const [isRestoring, setIsRestoring] = useState(true)
-
-  // Restaurar el step guardado al montar la lección
-  useEffect(() => {
-    async function restoreProgress() {
-      try {
-        const saved = await getItem(`paused_step:${lessonId}`)
-        if (saved !== null) {
-          const stepIdx = parseInt(saved, 10)
-          if (stepIdx >= 0 && stepIdx < lesson.steps.length) {
-            setCurrentStepIndex(stepIdx)
-          }
-        }
-      } catch (e) {
-        console.error('Error al restaurar progreso:', e)
-      } finally {
-        setIsRestoring(false)
-      }
-    }
-    if (lesson.steps.length > 0) {
-      restoreProgress()
-    } else if (!isLoadingVideos) {
-      setIsRestoring(false)
-    }
-  }, [lessonId, lesson.steps.length, isLoadingVideos])
-
 
   const [selectedOption, setSelectedOption] = useState<string | null>(null)
   const [stepAnswers, setStepAnswers] = useState<Record<number, string | null>>({})
@@ -139,21 +112,6 @@ export function useLessonEngine({ lessonId, lessonNumber, contentKey }: UseLesso
     attempts: {},
     shuffledWords: []
   })
-
-  // Persistir el progreso de la lección al cambiar de step
-  useEffect(() => {
-    if (isRestoring) return
-    if (currentStepIndex >= 0 && !showSummary) {
-      setItem(`paused_step:${lessonId}`, currentStepIndex.toString()).catch(err => {
-        console.error('Error al guardar progreso:', err)
-      })
-    } else if (showSummary) {
-      deleteItem(`paused_step:${lessonId}`).catch(err => {
-        console.error('Error al eliminar progreso:', err)
-      })
-    }
-  }, [currentStepIndex, showSummary, lessonId, isRestoring])
-
 
   useEffect(() => {
     if (!showSummary) return
@@ -601,7 +559,6 @@ export function useLessonEngine({ lessonId, lessonNumber, contentKey }: UseLesso
     hasContent,
     /** true mientras se descarga el catálogo de videos (sus URLs todavía no están resueltas). */
     isLoadingVideos,
-    isRestoring,
     currentStep,
     currentStepIndex,
     isLastStep,
