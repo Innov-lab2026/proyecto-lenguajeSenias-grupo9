@@ -2,6 +2,7 @@ import { Fragment } from 'react'
 import { Pressable, Text, View } from 'react-native'
 import type { LessonStep } from '@/src/types/lessons'
 import { LessonVideo } from '@/src/components/features/lessons/LessonVideo'
+import { VideoFrame } from '@/src/components/features/lessons/VideoFrame'
 import { cn } from '@/src/utils/cn'
 
 interface CompositionStepProps {
@@ -28,14 +29,11 @@ export function CompositionStep({
 
   return (
     <View className="flex-1 w-full">
-      {step.videoUrl && (
-        <View className="w-full flex-[2.5] items-center justify-center mb-1" style={{ maxHeight: '68%' }}>
-          {/* El video principal del step */}
-          <View className="w-full flex-1 rounded-[40px] border border-muted/20 bg-surface p-2 shadow-sm relative">
-            <LessonVideo uri={step.videoUrl} muted={muted} className="flex-1 w-full rounded-[32px]" />
-          </View>
-        </View>
-      )}
+      {step.videoUrl ? (
+        <VideoFrame className="flex-[2.5] mb-1" style={{ maxHeight: '68%' }}>
+          <LessonVideo uri={step.videoUrl} muted={muted} className="flex-1 w-full rounded-[32px]" />
+        </VideoFrame>
+      ) : null}
 
       {/* Enunciado/Pregunta */}
       <Text className="font-nunito text-base font-bold text-ink text-center py-1 px-2">
