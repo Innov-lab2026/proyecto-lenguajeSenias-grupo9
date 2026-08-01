@@ -483,13 +483,31 @@ export function useLessonEngine({ lessonId, lessonNumber, contentKey }: UseLesso
       if (keys.length > 0) videoUrl = currentStep.videoUrls[keys[0]]
     }
 
+    let subtitle = currentStep.subtitle || ''
+    if (!subtitle) {
+      if (currentStep.type === 'content') {
+        if (currentStep.contentTitle && !currentStep.contentTitle.startsWith('Observá')) {
+          subtitle = currentStep.contentTitle
+        } else if (currentStep.options) {
+          subtitle = currentStep.options.join(', ')
+        }
+      } else if (currentStep.correctAnswer) {
+        if (!currentStep.correctAnswer.startsWith('Opción')) {
+          subtitle = currentStep.correctAnswer.replace(/\|/g, ', ')
+        }
+      } else if (currentStep.type === 'matching') {
+        subtitle = 'Relacionar señas'
+      }
+    }
+
     favoritesStore.toggleFavorite({
       id: currentStep.id,
       type: 'lesson',
       title,
       videoUrl,
       moduleNumber,
-      contentKey: contentKey ?? undefined
+      contentKey: contentKey ?? undefined,
+      subtitle: subtitle || undefined
     })
   }
 

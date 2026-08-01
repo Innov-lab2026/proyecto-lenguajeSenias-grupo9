@@ -120,7 +120,10 @@ export function FavoritesList() {
     return (
       <View key={item.id} className={cn(isCarousel ? 'w-28 mr-3' : 'w-[48%] mb-4')}>
         <Pressable
-          className="aspect-square bg-[#BEE3F8]/30 rounded-[24px] items-center justify-center border-b-[3px] border-black/5 active:mt-0.5 active:border-b-0 relative overflow-hidden px-2.5"
+          className={cn(
+            "aspect-square bg-[#BEE3F8]/30 rounded-[24px] items-center border-b-[3px] border-black/5 active:mt-0.5 active:border-b-0 relative overflow-hidden px-2.5",
+            isLetter ? "justify-center" : "justify-between"
+          )}
           onPress={() => setPlayingItem(item)}
         >
           {isLetter ? (
@@ -128,15 +131,31 @@ export function FavoritesList() {
               {displayLetter}
             </Text>
           ) : (
-            <View className="items-center justify-center">
-              {levelNumber && (
-                <Text className="font-nunito text-[11px] font-bold text-muted/70 text-center mb-0.5">
-                  Nivel {levelNumber}
+            <View className="flex-1 w-full items-center justify-between py-3">
+              <View className="items-center w-full">
+                {levelNumber && (
+                  <Text className="font-nunito text-[10px] font-bold text-muted/60 text-center">
+                    Nivel {levelNumber}
+                  </Text>
+                )}
+                <Text className="font-nunito text-[10px] font-bold text-center text-muted leading-tight" numberOfLines={1}>
+                  {lessonTitle}
                 </Text>
+              </View>
+
+              {item.subtitle ? (
+                <View className="flex-1 justify-center items-center w-full mt-1">
+                  <Text className="font-nunito text-xs font-black text-center text-secondary leading-tight px-1" numberOfLines={2}>
+                    {item.subtitle}
+                  </Text>
+                </View>
+              ) : (
+                <View className="flex-1 justify-center items-center w-full mt-1">
+                  <Text className="font-nunito text-xs font-black text-center text-ink leading-tight" numberOfLines={2}>
+                    {lessonTitle}
+                  </Text>
+                </View>
               )}
-              <Text className="font-nunito text-xs font-black text-center text-ink leading-tight" numberOfLines={2}>
-                {lessonTitle}
-              </Text>
             </View>
           )}
         </Pressable>

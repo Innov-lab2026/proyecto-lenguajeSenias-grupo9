@@ -24,6 +24,7 @@ export interface LessonStep {
   correctAnswer?: string
   tip?: string
   contentTitle?: string
+  subtitle?: string
   /** Plantilla del step `composition`: la frase a armar, con `[blank]` por hueco. */
   sentence?: string
 
@@ -136,12 +137,14 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
         id: 'm1-l1-content-1',
         type: 'content',
         contentTitle: '¿Cómo estás?',
+        subtitle: '¿Cómo estás?',
         videoId: V.COMO_ESTAS,
       },
       {
         id: 'm1-l1-content-2',
         type: 'content',
         contentTitle: '¿Cómo te llamás?',
+        subtitle: '¿Cómo te llamás?',
         videoId: V.COMO_TE_LLAMAS,
       },
       {
@@ -151,6 +154,7 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
         // (ver QuizStep.tsx: mainVideoUrl para 'm1-l1-quiz'). La pregunta pide
         // identificar la PALABRA que representa, no "el video" — eso implicaría
         // varios videos para comparar, y acá sólo hay uno.
+        subtitle: 'Quiz: Presentaciones',
         question: '¿Qué palabra representa esta seña?',
         options: ['¿Cómo estás?', '¿Cómo te llamás?'],
         videoIds: {
@@ -171,6 +175,7 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
         id: 'm1-l2-content-interactive',
         type: 'content',
         contentTitle: 'Observá las siguientes 3 palabras para continuar.',
+        subtitle: 'Estados de ánimo',
         options: ['Bien', 'Más o menos', 'Mal'],
         videoIds: {
           'Bien': V.BIEN,
@@ -181,6 +186,7 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
       {
         id: 'm1-l2-quiz',
         type: 'quiz',
+        subtitle: 'Quiz: Estados de ánimo',
         question: '¿Qué palabra representa esta seña?',
         videoId: V.BIEN,
         options: ['Bien', 'Más o menos', 'Mal'],
@@ -197,6 +203,7 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
       {
         id: 'm1-l3-quiz',
         type: 'quiz',
+        subtitle: 'Desafío: Estados de ánimo',
         question: '¿Cuál de estos videos representa "Más o menos"?',
         // Etiquetas de posición, no palabras: no deben mezclarse (mismo
         // criterio que m2-l3-quiz) — "Opción 3" tiene que renderizar siempre
@@ -226,6 +233,7 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
       {
         id: 'm1-l4-content-interactive',
         type: 'content',
+        subtitle: 'Expresiones de Cortesía',
         contentTitle: 'Observá las siguientes 3 palabras para continuar.',
         options: ['Por favor', 'Gracias', 'Perdón'],
         videoIds: {
@@ -237,6 +245,7 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
       {
         id: 'm1-l4-matching',
         type: 'matching',
+        subtitle: 'Relacionar video y expressión',
         question: 'Uní cada video con la palabra correcta.',
         pairs: [
           { videoId: V.POR_FAVOR, word: 'Por favor' },
@@ -254,6 +263,7 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
       {
         id: 'm1-l5-content-1',
         type: 'content',
+        subtitle: 'Charla: Presentaciones',
         contentTitle: 'Conversar',
         // ⚠️ Relleno provisorio: falta grabar la conversación completa.
         videoId: V.HOLA_COMO_ESTAS,
@@ -261,6 +271,7 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
       {
         id: 'm1-l5-dialogue',
         type: 'dialogue',
+        subtitle: 'Completar charla: Presentaciones',
         question: 'Completá la conversación arrastrando cada palabra a su lugar.',
         // ⚠️ Relleno provisorio (ver arriba).
         videoId: V.HOLA_COMO_ESTAS,
@@ -286,6 +297,7 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
       {
         id: 'm2-l1-composition',
         type: 'composition',
+        subtitle: 'Armar frase: Presentaciones',
         question: 'Formá la pregunta arrastrando cada palabra a su lugar',
         // Misma seña que enseña m1-l1: en LSA "¿Cuál es tu nombre?" y "¿Cómo te
         // llamás?" se signan igual. Se reusa el mismo video a propósito — y con
@@ -306,6 +318,7 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
       {
         id: 'm2-l2-content-interactive',
         type: 'content',
+        subtitle: 'Nombres',
         contentTitle: 'Observá los siguientes nombres.',
         options: ['Kai', 'Sol', 'Ana'],
         videoIds: {
@@ -317,6 +330,7 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
       {
         id: 'm2-l2-quiz',
         type: 'quiz',
+        subtitle: 'Quiz: Nombres',
         question: '¿Qué nombre representa esta seña?',
         videoId: V.KAI,
         options: ['Kai', 'Sol', 'Ana'],
@@ -333,12 +347,14 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
       {
         id: 'm2-l3-content-interactive',
         type: 'content',
+        subtitle: 'Preguntar el nombre',
         contentTitle: 'Observá la siguiente seña.\n¿Cómo te llamás?',
         videoId: V.COMO_TE_LLAMAS,
       },
       {
         id: 'm2-l3-quiz',
         type: 'quiz',
+        subtitle: 'Quiz: Preguntar el nombre',
         // Sin video propio: dos opciones = grilla de dos videos (una bien
         // hecha, otra mal a propósito), no un video único + botones de texto —
         // el objetivo es que el usuario compare las señas, no lea etiquetas.
@@ -367,6 +383,7 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
       {
         id: 'm2-l4-content-interactive',
         type: 'content',
+        subtitle: 'Objetos',
         contentTitle: 'Observá las siguientes señas.',
         options: ['Luz', 'Casa', 'Teléfono'],
         videoIds: {
@@ -378,6 +395,7 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
       {
         id: 'm2-l4-composition',
         type: 'composition',
+        subtitle: 'Armar palabra',
         question: '¿Qué palabra representa esta seña?\nOrdená las letras para formar la palabra correcta.',
         videoId: V.TELEFONO,
         options: ['o', 'é', 't', 'l', 'a', 'n', 'e', 'c', 'o', 'f'],
@@ -394,6 +412,7 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
       {
         id: 'm2-l5-content-1',
         type: 'content',
+        subtitle: 'Charla: Presentaciones',
         contentTitle: 'Conversar',
         // ⚠️ Relleno provisorio: es la frase suelta, no la conversación entera.
         videoId: V.ME_PRESTAS_TELEFONO,
@@ -401,6 +420,7 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
       {
         id: 'm2-l5-dialogue',
         type: 'dialogue',
+        subtitle: 'Charla: Pedir prestado',
         question: 'Completá la conversación arrastrando cada palabra a su lugar.',
         // ⚠️ Relleno provisorio (ver arriba).
         videoId: V.ME_PRESTAS_TELEFONO,

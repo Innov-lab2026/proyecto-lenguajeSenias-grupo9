@@ -4,14 +4,26 @@ import { Button } from '@/src/components/common/Button'
 
 interface PauseModalProps {
   visible: boolean
-  isMuted: boolean
-  onToggleMute: () => void
+  isMuted?: boolean
+  onToggleMute?: () => void
   onExit: () => void
   onClose: () => void
+  title?: string
+  message?: string
+  closeLabel?: string
+  exitLabel?: string
 }
 
 /** Modal de lección pausada: muestra a Carpi durmiendo y opciones de continuar o salir. */
-export function PauseModal({ visible, onExit, onClose }: PauseModalProps) {
+export function PauseModal({
+  visible,
+  onExit,
+  onClose,
+  title = "Pausa",
+  message = "Podés continuar ahora o volver más tarde.",
+  closeLabel = "Continuar",
+  exitLabel = "Salir"
+}: PauseModalProps) {
   return (
     <Modal visible={visible} transparent animationType="fade">
       <View className="flex-1 bg-black/50 items-center justify-center px-6">
@@ -38,9 +50,9 @@ export function PauseModal({ visible, onExit, onClose }: PauseModalProps) {
             />
           </Pressable>
 
-          {/* Texto "Lección pausada" en el tab superior */}
+          {/* Texto de título en el tab superior */}
           <View className="absolute top-4 left-0 right-0 items-center">
-            <Text className="font-nunito text-base font-bold text-ink">Lección pausada</Text>
+            <Text className="font-nunito text-base font-bold text-ink">{title}</Text>
           </View>
 
           {/* Contenido principal */}
@@ -56,21 +68,21 @@ export function PauseModal({ visible, onExit, onClose }: PauseModalProps) {
 
             {/* Mensaje de pausa */}
             <Text className="font-nunito text-sm text-ink text-center px-4 mb-6 leading-tight">
-              Podés continuar ahora o volver más tarde.
+              {message}
             </Text>
           </View>
 
           {/* Botones de acción centrados verticalmente */}
           <View className="w-full items-center gap-3 mb-2">
             <Button
-              label="Continuar"
+              label={closeLabel}
               onPress={onClose}
               variant="primary"
               className="w-[60%] h-12"
               textClassName="text-sm"
             />
             <Button
-              label="Salir"
+              label={exitLabel}
               onPress={onExit}
               variant="white"
               className="w-[60%] h-12 border border-gray-300"

@@ -19,14 +19,15 @@ interface FeedbackModalProps {
   contentKey?: string | null
   onRetry: () => void
   onNext: () => void
+  onExit?: () => void
 }
 
 /** Texto del error según qué se estaba resolviendo. */
 const ERROR_POR_STEP: Partial<Record<StepType, string>> = {
-  quiz: '¡Casi! Probemos otra vez.',
-  matching: '¡Casi! Probemos otra vez.',
-  dialogue: '¡Casi! Probemos otra vez.',
-  composition: '¡Casi! Probemos otra vez.',
+  quiz: '¡Estás cerca!',
+  matching: '¡Estás cerca!',
+  dialogue: '¡Estás cerca!',
+  composition: '¡Estás cerca!',
 }
 
 /** Feedback de correcto/incorrecto tras responder un step: full-screen en mobile, card centrado en desktop. */
@@ -39,6 +40,7 @@ export function FeedbackModal({
   contentKey,
   onRetry,
   onNext,
+  onExit,
 }: FeedbackModalProps) {
   const { isMobile } = useResponsive()
   const insets = useSafeAreaInsets()
@@ -120,10 +122,14 @@ export function FeedbackModal({
       )}
 
       <View className="w-full gap-3 mt-4">
-        {!isCorrect && (
-          <Button label="Reintentar" onPress={onRetry} variant="white" className="border-2 border-primary" />
+        {isCorrect ? (
+          <Button label="Siguiente" onPress={onNext} />
+        ) : (
+          <>
+            <Button label="Reintentar" onPress={onRetry} variant="primary" />
+            <Button label="Volver" onPress={onExit} variant="white" className="border-2 border-primary" />
+          </>
         )}
-        <Button label="Siguiente" onPress={onNext} />
       </View>
     </>
   )

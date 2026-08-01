@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { useRouter, useLocalSearchParams } from 'expo-router'
 import { ActivityIndicator, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -68,7 +69,14 @@ export default function LessonScreen() {
 
   const statsQuery = useStats()
   const completedLessonsQuery = useCompletedLessons()
-  const isAlreadyCompleted = (completedLessonsQuery.data ?? []).some((c) => c.lesson_id === id)
+  const [wasAlreadyCompleted, setWasAlreadyCompleted] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    if (completedLessonsQuery.data && wasAlreadyCompleted === null) {
+      const isCompleted = completedLessonsQuery.data.some((c) => c.lesson_id === id)
+      setWasAlreadyCompleted(isCompleted)
+    }
+  }, [completedLessonsQuery.data, id, wasAlreadyCompleted])
 
   const {
     lesson,
@@ -163,7 +171,7 @@ export default function LessonScreen() {
   }
 
   if (showSummary) {
-    if (isAlreadyCompleted) {
+    if (wasAlreadyCompleted) {
       return (
         <FeedbackCompleteModal
           visible={showSummary}
@@ -268,6 +276,7 @@ export default function LessonScreen() {
         contentKey={contentKey}
         onRetry={handleRetry}
         onNext={handleNext}
+        onExit={() => router.replace('/home')}
       />
 
       <PauseModal

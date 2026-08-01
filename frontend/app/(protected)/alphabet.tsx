@@ -1,9 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Pressable, Text, View, useWindowDimensions } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
 import { useAlphabetProgress } from '@/src/hooks/features/alphabet/useAlphabetProgress'
+import { PauseModal } from '@/src/components/features/lessons/PauseModal'
+import { getItem, deleteItem } from '@/src/lib/storage'
 import { cn } from '@/src/utils/cn'
 
 // Orden tradicional del alfabeto español (el que usan las cartillas de LSA):
@@ -30,6 +32,21 @@ export default function AlphabetScreen() {
   const [contentWidth, setContentWidth] = useState<number | null>(null)
   const [gridHeight, setGridHeight] = useState<number | null>(null)
   const { width } = useWindowDimensions()
+  const [pausedLetter, setPausedLetter] = useState<string | null>(null)
+
+  useEffect(() => {
+    async function checkPausedLetter() {
+      try {
+        const val = await getItem('paused_letter')
+        if (val) {
+          setPausedLetter(val)
+        }
+      } catch (err) {
+        console.error('[alphabet] error al chequear letra pausada:', err)
+      }
+    }
+    checkPausedLetter()
+  }, [])
 
   const progressQuery = useAlphabetProgress()
   const visitedLetters = new Set(progressQuery.data?.map((p) => p.letter))
@@ -133,6 +150,27 @@ export default function AlphabetScreen() {
           )}
         </View>
       </View>
+
+      <PauseModal
+        visible={pausedLetter !== null}
+        title="Pausa"
+        message={`Pausaste la práctica de la letra ${pausedLetter}. ¿Querés continuar con ella o elegir otra?`}
+        closeLabel="Continuar"
+        exitLabel="Elegir otra"
+        onClose={() => {
+          const letterToResume = pausedLetter
+          setPausedLetter(null)
+          if (letterToResume) {
+            router.push({ pathname: '/alphabet/[letter]', params: { letter: letterToResume } })
+          }
+        }}
+        onExit={() => {
+          deleteItem('paused_letter').catch((err) =>
+            console.error('[alphabet] error eliminando letra pausada:', err)
+          )
+          setPausedLetter(null)
+        }}
+      />
     </View>
   )
 }

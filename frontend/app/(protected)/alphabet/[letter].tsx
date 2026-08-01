@@ -6,6 +6,8 @@ import { Ionicons } from '@expo/vector-icons'
 import { Button } from '@/src/components/common/Button'
 import { LessonFooter } from '@/src/components/features/lessons/LessonFooter'
 import { HintModal } from '@/src/components/features/lessons/HintModal'
+import { PauseModal } from '@/src/components/features/lessons/PauseModal'
+import { setItem, deleteItem } from '@/src/lib/storage'
 import { LessonVideo } from '@/src/components/features/lessons/LessonVideo'
 import { useVideos } from '@/src/hooks/features/alphabet/useVideos'
 import { useCompleteLetter } from '@/src/hooks/features/alphabet/useCompleteLetter'
@@ -21,7 +23,25 @@ export default function LetterScreen() {
   const letter = Array.isArray(params.letter) ? params.letter[0] : params.letter
   const [showPractice, setShowPractice] = useState(false)
   const [showHint, setShowHint] = useState(false)
+  const [showPauseModal, setShowPauseModal] = useState(false)
   const isMuted = usePreferencesStore((s) => s.isMuted)
+
+  const handlePauseExit = () => {
+    if (letter) {
+      setItem('paused_letter', letter).catch((err) =>
+        console.error('[alphabet] error guardando letra pausada:', err)
+      )
+    }
+    setShowPauseModal(false)
+    router.replace('/home')
+  }
+
+  const handleNormalBack = () => {
+    deleteItem('paused_letter').catch((err) =>
+      console.error('[alphabet] error eliminando letra pausada:', err)
+    )
+    router.replace('/alphabet')
+  }
 
   const favoritesStore = useFavoritesStore()
 
@@ -125,8 +145,8 @@ export default function LetterScreen() {
         ctaDisabled={false}
         onNext={handleOpenPractice}
         showBack={true}
-        onBack={() => router.replace('/alphabet')}
-        onSettings={() => { }}
+        onBack={handleNormalBack}
+        onSettings={() => setShowPauseModal(true)}
         isFavorite={isFavorite}
         onToggleFavorite={() => {
           if (!letter || !video) return
@@ -146,6 +166,14 @@ export default function LetterScreen() {
         visible={showHint}
         tip={`Observá bien la posición de los dedos para formar la letra ${letter ?? ''}.`}
         onClose={() => setShowHint(false)}
+      />
+
+      <PauseModal
+        visible={showPauseModal}
+        title="Práctica pausada"
+        message={`Podés continuar aprendiendo la letra ${letter ?? ''} ahora o volver más tarde.`}
+        onClose={() => setShowPauseModal(false)}
+        onExit={handlePauseExit}
       />
 
       {/* Práctica embebida: iframe en web, WebView en nativo. En web no se abre

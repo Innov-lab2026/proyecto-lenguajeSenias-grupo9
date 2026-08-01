@@ -9,6 +9,7 @@ export interface FavoriteItem {
   moduleNumber?: number
   contentKey?: string
   letter?: string
+  subtitle?: string
 }
 
 interface FavoritesState {

@@ -117,44 +117,44 @@ export interface LessonNegativeFeedback {
 
 export const LESSON_NEGATIVE_FEEDBACK: Record<string, LessonNegativeFeedback> = {
   'm1-l1': {
-    title: 'La práctica hace la diferencia.\n¡Seguí aprendiendo!',
+    title: '¡Estás cerca!',
     text: '',
   },
   'm1-l2': {
-    title: 'La práctica hace la diferencia.\n¡Seguí aprendiendo!',
+    title: '¡Estás cerca!',
     text: '',
   },
   'm1-l3': {
-    title: 'La práctica hace la diferencia.\n¡Seguí aprendiendo!',
+    title: '¡Estás cerca!',
     text: '',
   },
   'm1-l4': {
-    title: 'La práctica hace la diferencia.\n¡Seguí aprendiendo!',
+    title: '¡Estás cerca!',
     text: '',
   },
   'm1-l5': {
-    title: 'La práctica hace la diferencia.\n¡Seguí aprendiendo!',
+    title: '¡Estás cerca!',
     text: '',
   },
 
   'm2-l1': {
-    title: 'La práctica hace la diferencia.\n¡Seguí aprendiendo!',
+    title: '¡Estás cerca!',
     text: '',
   },
   'm2-l2': {
-    title: 'La práctica hace la diferencia.\n¡Seguí aprendiendo!',
+    title: '¡Estás cerca!',
     text: '',
   },
   'm2-l3': {
-    title: 'La práctica hace la diferencia.\n¡Seguí aprendiendo!',
+    title: '¡Estás cerca!',
     text: '',
   },
   'm2-l4': {
-    title: 'La práctica hace la diferencia.\n¡Seguí aprendiendo!',
+    title: '¡Estás cerca!',
     text: '',
   },
   'm2-l5': {
-    title: 'La práctica hace la diferencia.\n¡Seguí aprendiendo!',
+    title: '¡Estás cerca!',
     text: '',
   },
 }
