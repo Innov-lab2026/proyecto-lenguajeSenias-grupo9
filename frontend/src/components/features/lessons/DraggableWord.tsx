@@ -12,6 +12,7 @@ interface DraggableWordProps {
    * posición de cada blank.
    */
   onDrop: (word: string, absoluteX: number, absoluteY: number) => void
+  onPress?: (word: string) => void
 }
 
 /**
@@ -20,7 +21,7 @@ interface DraggableWordProps {
  * en el Animated.View) para no depender de que className funcione sobre un
  * componente animado — el View interno se encarga de todo el look visual.
  */
-export function DraggableWord({ word, disabled = false, onDrop }: DraggableWordProps) {
+export function DraggableWord({ word, disabled = false, onDrop, onPress }: DraggableWordProps) {
   const translateX = useSharedValue(0)
   const translateY = useSharedValue(0)
   const isDragging = useSharedValue(false)
@@ -42,6 +43,16 @@ export function DraggableWord({ word, disabled = false, onDrop }: DraggableWordP
       runOnJS(onDrop)(word, absoluteX, absoluteY)
     })
 
+  const tap = Gesture.Tap()
+    .enabled(!disabled)
+    .onEnd(() => {
+      if (onPress) {
+        runOnJS(onPress)(word)
+      }
+    })
+
+  const gesture = Gesture.Exclusive(pan, tap)
+
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [
       { translateX: translateX.value },
@@ -52,7 +63,7 @@ export function DraggableWord({ word, disabled = false, onDrop }: DraggableWordP
   }))
 
   return (
-    <GestureDetector gesture={pan}>
+    <GestureDetector gesture={gesture}>
       <Animated.View style={animatedStyle}>
         <View
           className="px-3 py-1.5 rounded-xl border-2 bg-surface border-black/5"

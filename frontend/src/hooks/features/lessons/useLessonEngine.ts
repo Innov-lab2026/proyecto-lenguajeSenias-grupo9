@@ -129,6 +129,8 @@ export function useLessonEngine({ lessonId, lessonNumber, contentKey }: UseLesso
     if (currentStepIndex !== -1) {
       const targetStepIds = [
         'm1-l2-content-interactive',
+        'm1-l3-content-interactive',
+        'm1-l3-quiz',
         'm1-l4-content-interactive',
         'm1-l5-content-1',
         'm2-l2-content-interactive',

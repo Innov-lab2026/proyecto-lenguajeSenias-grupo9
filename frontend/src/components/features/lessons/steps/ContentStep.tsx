@@ -50,13 +50,31 @@ export function ContentStep({ step, selectedOption, onSelectOption, onWatched, m
       </Text>
 
       {step.options && (
-        <View className={cn(step.id === 'm1-l2-content-interactive' || step.id === 'm1-l4-content-interactive' || step.id === 'm1-l5-content-1' || step.id === 'm2-l2-content-interactive' || step.id === 'm2-l4-content-interactive' ? 'flex-row' : 'flex-col md:flex-row', 'gap-2 mb-2')}>
+        <View
+          className={cn(
+            step.options.length === 4
+              ? 'flex-row flex-wrap justify-between gap-y-2 w-full mb-2'
+              : cn(
+                step.id === 'm1-l2-content-interactive' ||
+                  step.id === 'm1-l3-content-interactive' ||
+                  step.id === 'm1-l4-content-interactive' ||
+                  step.id === 'm1-l5-content-1' ||
+                  step.id === 'm2-l2-content-interactive' ||
+                  step.id === 'm2-l4-content-interactive'
+                  ? 'flex-row'
+                  : 'flex-col md:flex-row',
+                'gap-2 mb-2'
+              )
+          )}
+        >
           {step.options.map((option) => (
             <Pressable
               key={option}
               onPress={() => onSelectOption(option)}
               className={cn(
-                'flex-1 h-12 rounded-2xl border-2 flex-row items-center justify-center px-4',
+                step.options!.length === 4
+                  ? 'h-12 w-[48%] rounded-2xl border-2 flex-row items-center justify-center px-3'
+                  : 'flex-1 h-12 rounded-2xl border-2 flex-row items-center justify-center px-4',
                 selectedOption === option ? 'bg-accent/20 border-secondary' : 'bg-surface border-black/5',
               )}
             >
@@ -64,9 +82,14 @@ export function ContentStep({ step, selectedOption, onSelectOption, onWatched, m
                 name="play"
                 size={16}
                 color={selectedOption === option ? '#4A90E2' : '#9BA8B1'}
-                style={{ marginRight: 8 }}
+                style={{ marginRight: 6 }}
               />
-              <Text className="font-nunito text-sm font-bold text-ink">{option}</Text>
+              <Text
+                numberOfLines={2}
+                className="font-nunito text-xs sm:text-sm font-bold text-ink text-center flex-1 leading-tight"
+              >
+                {option}
+              </Text>
             </Pressable>
           ))}
         </View>

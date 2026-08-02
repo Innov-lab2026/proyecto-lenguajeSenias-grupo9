@@ -60,7 +60,7 @@ export const LESSON_POSITIVE_FEEDBACK: Record<string, LessonPositiveFeedback> = 
   'm1-l1': {
     title: '¡Muy bien!\nCada acierto te acerca a comunicarte en LSA.',
     hintTitle: '¿Sabías que...?',
-    hintText: 'Las expresiones faciales también forman parte de la Lengua de Señas Argentina y ayudan a transmitir el significado de una seña.',
+    hintText: 'Las expresiones faciales ayudan a dar significado a las señas.',
   },
   'm1-l2': {
     title: '¡Muy bien!\nSeguí así.',

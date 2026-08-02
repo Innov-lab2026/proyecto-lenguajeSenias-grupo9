@@ -131,7 +131,7 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
   // ─────────────────────────── MÓDULO 1 ───────────────────────────
   'm1-l1': {
     title: 'Presentarte',
-    description: 'Aprendé las señas para comenzar una conversación.',
+    description: 'Aprendé las señas básicas para iniciar una conversación.',
     steps: [
       {
         id: 'm1-l1-content-1',
@@ -174,7 +174,7 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
       {
         id: 'm1-l2-content-interactive',
         type: 'content',
-        contentTitle: 'Observá las siguientes 3 palabras para continuar.',
+        contentTitle: 'Observá las tres señas antes de continuar.',
         subtitle: 'Estados de ánimo',
         options: ['Bien', 'Más o menos', 'Mal'],
         videoIds: {
@@ -198,8 +198,21 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
 
   'm1-l3': {
     title: 'Desafío',
-    description: '¡Demostrá lo que ya aprendiste!',
+    description: '¡Demostrá lo que ya sabés!',
     steps: [
+      {
+        id: 'm1-l3-content-interactive',
+        type: 'content',
+        contentTitle: 'Observá las cuatro señas antes de continuar.',
+        subtitle: 'Expresiones varias',
+        options: ['Más o menos', 'Perdón', 'Gracias', '¿Cómo estás?'],
+        videoIds: {
+          'Más o menos': V.MAS_O_MENOS,
+          'Perdón': V.PERDON,
+          'Gracias': V.GRACIAS,
+          '¿Cómo estás?': V.COMO_ESTAS,
+        },
+      },
       {
         id: 'm1-l3-quiz',
         type: 'quiz',
@@ -216,8 +229,8 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
         singleVideoAtATime: true,
         videoIds: {
           'Opción 1': V.COMO_ESTAS,
-          'Opción 2': V.COMO_TE_LLAMAS,
-          'Opción 3': V.BIEN,
+          'Opción 2': V.PERDON,
+          'Opción 3': V.GRACIAS,
           'Opción 4': V.MAS_O_MENOS,
         },
         correctAnswer: 'Opción 4',
@@ -234,7 +247,7 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
         id: 'm1-l4-content-interactive',
         type: 'content',
         subtitle: 'Expresiones de Cortesía',
-        contentTitle: 'Observá las siguientes 3 palabras para continuar.',
+        contentTitle: 'Observá las tres señas antes de continuar.',
         options: ['Por favor', 'Gracias', 'Perdón'],
         videoIds: {
           'Por favor': V.POR_FAVOR,
@@ -246,7 +259,7 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
         id: 'm1-l4-matching',
         type: 'matching',
         subtitle: 'Relacionar video y expressión',
-        question: 'Uní cada video con la palabra correcta.',
+        question: 'Uní cada video con la expresión correcta.',
         pairs: [
           { videoId: V.POR_FAVOR, word: 'Por favor' },
           { videoId: V.GRACIAS, word: 'Gracias' },
@@ -264,7 +277,7 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
         id: 'm1-l5-content-1',
         type: 'content',
         subtitle: 'Charla: Presentaciones',
-        contentTitle: 'Observá las siguientes 3 palabras para continuar.',
+        contentTitle: 'Observá las tres señas antes de continuar.',
         options: ['Bien', 'Más o menos', '¿cómo te llamás?'],
         videoIds: {
           'Bien': V.BIEN,
@@ -276,7 +289,7 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
         id: 'm1-l5-dialogue',
         type: 'dialogue',
         subtitle: 'Completar charla: Presentaciones',
-        question: 'Completá la conversación arrastrando cada palabra a su lugar.',
+        question: 'Completá la conversación arrastrando cada expresión a su lugar.',
         videoId: V.HOLA_COMO_ESTAS,
         options: ['¿cómo te llamás?', 'Bien', 'De nada', 'Adiós', 'Por favor', 'Más o menos'],
         dialogue: [

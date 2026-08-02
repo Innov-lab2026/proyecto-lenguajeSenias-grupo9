@@ -55,9 +55,7 @@ export function FeedbackModal({
       : require('@/assets/images/lessons/feedback_incorrecto.svg')
 
   const positive = contentKey ? LESSON_POSITIVE_FEEDBACK[contentKey] : undefined
-  const negative = contentKey ? LESSON_NEGATIVE_FEEDBACK[contentKey] : undefined
   const errorText = (stepType && ERROR_POR_STEP[stepType]) ?? 'Esa no es la respuesta correcta.'
-  const negativeText = tip || negative?.text || errorText
 
   // Seleccionar el ícono correspondiente según el tipo de feedback
   const iconSource = isCorrect
@@ -107,13 +105,13 @@ export function FeedbackModal({
             </>
           ) : (
             <>
-              {negative?.title ? (
-                <Text className="font-nunito text-lg font-bold text-ink text-center leading-relaxed">
-                  {negative.title}
-                </Text>
+              <Text className="font-nunito text-lg font-bold text-ink text-center leading-relaxed">
+                La práctica hace la diferencia.{"\n"}¡Seguí aprendiendo!
+              </Text>
+              {tip ? (
+                <Text className="font-nunito text-base text-ink text-center leading-relaxed mt-2">{tip}</Text>
               ) : null}
-              <Text className="font-nunito text-base text-ink text-center leading-relaxed">{negativeText}</Text>
-              <Text className="font-nunito text-sm font-bold text-ink text-center mt-1">
+              <Text className="font-nunito text-sm font-bold text-ink text-center mt-3">
                 Ya no obtenés puntos en este ejercicio, pero cada intento te ayuda a mejorar.
               </Text>
             </>

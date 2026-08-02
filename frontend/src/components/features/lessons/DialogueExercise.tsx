@@ -78,6 +78,26 @@ export function DialogueExercise({
     })
   }
 
+  const handlePressWord = (word: string) => {
+    const totalBlanksCount = dialogue.reduce(
+      (acc, l) => acc + (l.text.match(/\[blank\]/g)?.length || 0),
+      0
+    )
+    let firstEmptyIdx = -1
+    for (let i = 0; i < totalBlanksCount; i++) {
+      if (!answers[i]) {
+        firstEmptyIdx = i
+        break
+      }
+    }
+    if (firstEmptyIdx !== -1) {
+      onAnswersChange((prev) => ({ ...prev, [firstEmptyIdx]: word }))
+    }
+  }
+
+  // Obtener los nombres de speakers únicos para diferenciar alineación y colores
+  const uniqueSpeakers = Array.from(new Set(dialogue.map((d) => d.speaker.toLowerCase())))
+
   return (
     <View className="flex-1">
       <Text className="font-nunito text-xl font-bold text-ink text-center py-4 px-2">{question}</Text>
@@ -92,27 +112,28 @@ export function DialogueExercise({
               .slice(0, lineIdx)
               .reduce((acc, l) => acc + (l.text.match(/\[blank\]/g)?.length || 0), 0)
 
-            const isAna = line.speaker.toLowerCase() === 'ana'
+            const speakerIdx = uniqueSpeakers.indexOf(line.speaker.toLowerCase())
+            const isFirstSpeaker = speakerIdx === 0
 
             return (
               <View
                 key={lineIdx}
                 className={cn(
                   "mb-3 p-2.5 rounded-2xl max-w-[85%]",
-                  isAna
+                  isFirstSpeaker
                     ? "bg-[#EAF8FF] border border-[#BEE3F8] self-start items-start"
-                    : "bg-orange-50 border border-orange-100 self-end items-start"
+                    : "bg-orange-50 border border-[#FFEBC2] self-end items-start"
                 )}
               >
-                <View className="flex-row items-center flex-wrap gap-x-1.5">
-                  <Text
-                    className={cn(
-                      "font-nunito text-sm font-bold",
-                      isAna ? "text-secondary" : "text-[#D97706]"
-                    )}
-                  >
-                    {line.speaker}:
-                  </Text>
+                <Text
+                  className={cn(
+                    "font-nunito text-xs font-bold mb-1",
+                    isFirstSpeaker ? "text-secondary" : "text-[#D97706]"
+                  )}
+                >
+                  {line.speaker}
+                </Text>
+                <View className="flex-row items-center flex-wrap gap-x-1 gap-y-1">
                   {parts.map((part, partIdx) => (
                     <View key={partIdx} className="flex-row items-center flex-wrap">
                       {part ? <Text className="font-nunito text-sm md:text-base text-ink">{part}</Text> : null}
@@ -128,7 +149,7 @@ export function DialogueExercise({
                               onLayout={() => measureBlank(globalIdx)}
                               onPress={() => clearBlank(globalIdx)}
                               className={cn(
-                                'mx-1 min-w-[64px] h-7 rounded-md border-b-2 items-center justify-center px-1',
+                                'mx-1 min-w-[64px] h-7 rounded-md border-b-2 items-center justify-center px-1.5',
                                 answers[globalIdx] ? 'bg-accent/20 border-secondary' : 'bg-slate-100 border-slate-300',
                               )}
                             >
@@ -151,7 +172,15 @@ export function DialogueExercise({
       <View className="flex-row flex-wrap gap-2 justify-center mb-1">
         {options.map((option) => {
           const isUsed = Object.values(answers).includes(option)
-          return <DraggableWord key={option} word={option} disabled={isUsed} onDrop={handleDrop} />
+          return (
+            <DraggableWord
+              key={option}
+              word={option}
+              disabled={isUsed}
+              onDrop={handleDrop}
+              onPress={handlePressWord}
+            />
+          )
         })}
       </View>
     </View>
