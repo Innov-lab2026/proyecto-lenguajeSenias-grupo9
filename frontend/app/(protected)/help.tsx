@@ -83,9 +83,8 @@ export default function HelpScreen() {
                 {/* Cabecera del acordeón */}
                 <Pressable
                   onPress={() => handleToggle(index)}
-                  className={`flex-row items-center justify-between p-4 bg-[#6BA4E8] ${
-                    isOpen ? 'rounded-t-2xl' : 'rounded-2xl'
-                  }`}
+                  className={`flex-row items-center justify-between p-4 bg-[#6BA4E8] ${isOpen ? 'rounded-t-2xl' : 'rounded-2xl'
+                    }`}
                   style={{ elevation: 1 }}
                 >
                   <Text className="font-nunito text-[17px] font-bold text-ink flex-1 pr-4">
@@ -126,10 +125,10 @@ export default function HelpScreen() {
           </Text>
           <Button
             label="Enviar email"
-            onPress={() => Linking.openURL('mailto:carpisenas@gmail.com.ar?subject=Consulta%20desde%20Carpise%C3%B1as')}
+            onPress={() => Linking.openURL('mailto:carpisenas@gmail.com?subject=Consulta%20desde%20Carpise%C3%B1as')}
           />
           <Text className="font-nunito text-xs text-muted text-center mt-3">
-            carpisenas@gmail.com.ar
+            carpisenas@gmail.com
           </Text>
         </View>
       </ScrollView>
