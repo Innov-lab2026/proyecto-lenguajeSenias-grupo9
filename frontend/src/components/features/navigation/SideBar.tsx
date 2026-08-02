@@ -3,6 +3,7 @@ import { usePathname, useRouter } from 'expo-router'
 import { NAVIGATION_ITEMS } from './constants'
 import { cn } from '@/src/utils/cn'
 import { NavBarIcon } from './NavBarIcon'
+import { PawIcon } from '@/src/components/features/home/stats'
 
 interface SideBarProps {
   isTablet: boolean
@@ -26,8 +27,11 @@ export function SideBar({ isTablet }: SideBarProps) {
           isTablet ? '' : 'flex-row gap-3 px-3 justify-start'
         )}
       >
-        <View className="h-10 w-10 items-center justify-center rounded-xl bg-primary shadow-sm">
-          <NavBarIcon name="home" active size={22} />
+        {/* Sin fondo propio: la huella es transparente y se apoya sobre el color
+            de la sidebar. `animated={false}` la deja en su frame de reposo, sin
+            el vaivén que hace en las estadísticas. */}
+        <View className="h-10 w-10 items-center justify-center">
+          <PawIcon size={30} animated={false} />
         </View>
         {isTablet ? null : (
           <View>

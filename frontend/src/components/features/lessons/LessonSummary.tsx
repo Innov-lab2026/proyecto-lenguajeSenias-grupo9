@@ -198,10 +198,17 @@ export function LessonSummary({ result, isPending, nextLevel, contentKey, onClos
               </Text>
             </View>
           ) : null}
+          {/* El botón se ajusta a su texto: con un ancho relativo, "Continuar"
+              quedaba desproporcionado en pantallas anchas y "Empezar Módulo N"
+              se partía en dos líneas en las angostas.
+
+              `w-auto` hay que pasarlo sí o sí — no alcanza con omitir la clase,
+              porque la variante del Button trae `w-full` y sin pisarlo el botón
+              se estira a todo el ancho del pie. */}
           <Button
             label={buttonLabel}
             onPress={onContinue}
-            className="w-1/2"
+            className="w-auto px-8"
             disabled={isPending}
           />
         </View>

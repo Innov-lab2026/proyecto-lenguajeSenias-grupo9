@@ -35,10 +35,13 @@ export const LESSON_SUMMARY_CONFIG: Record<string, LessonSummaryConfig> = {
     footerBg: FOOTER_BG_CIERRE,
   },
 
-  'm2-l1': { title: '¡Excelente trabajo!', subtitle: 'Completaste el nivel 1' },
-  'm2-l2': { title: '¡Excelente trabajo!', subtitle: 'Completaste el nivel 2' },
-  'm2-l3': { title: '¡Excelente trabajo!', subtitle: 'Completaste el nivel 3' },
-  'm2-l4': { title: '¡Excelente trabajo!', subtitle: 'Completaste el nivel 4' },
+  // El nivel es ABSOLUTO, no la posición dentro del módulo: `(módulo - 1) * 5 +
+  // lección`, igual que el "Nivel N desbloqueado" del pie y el que muestra el
+  // home. El módulo 2 va del 6 al 10.
+  'm2-l1': { title: '¡Excelente trabajo!', subtitle: 'Completaste el nivel 6' },
+  'm2-l2': { title: '¡Excelente trabajo!', subtitle: 'Completaste el nivel 7' },
+  'm2-l3': { title: '¡Excelente trabajo!', subtitle: 'Completaste el nivel 8' },
+  'm2-l4': { title: '¡Excelente trabajo!', subtitle: 'Completaste el nivel 9' },
   'm2-l5': {
     title: '¡Excelente trabajo!',
     subtitle: 'Completaste el Módulo 2',
