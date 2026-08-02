@@ -24,7 +24,15 @@
     "web": {
       "output": "static",
       "favicon": "./assets/images/favicon.png",
-      "bundler": "metro"
+      "bundler": "metro",
+      "name": "CarpiSeñas",
+      "shortName": "CarpiSeñas",
+      "lang": "es",
+      "themeColor": "#4A90E2",
+      "backgroundColor": "#000000",
+      "display": "standalone",
+      "orientation": "portrait",
+      "startUrl": "/"
     },
     "plugins": [
       "expo-router",
