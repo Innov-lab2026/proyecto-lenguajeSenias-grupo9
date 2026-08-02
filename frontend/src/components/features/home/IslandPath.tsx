@@ -219,34 +219,28 @@ export function IslandPath({ module, moduleNumber, onIslandPress }: IslandPathPr
 
   // Controlador al presionar una isla con animación de recorrido de Carpi
   const handleIslandPress = (n: number) => {
-    console.log('[IslandPath] handleIslandPress clicked for:', n, 'completedIslands:', module.completedIslands, 'current progress:', animProgress.value);
     if (!onIslandPress || isAnimating) return
 
     const completed = module.completedIslands
     // Si hace click en la siguiente lección activa (completed + 1)
     if (n === completed + 1) {
       const targetProgress = n - 1 // parte inferior de la isla n
-      console.log('[IslandPath] Target progress:', targetProgress, 'Current progress:', animProgress.value);
 
       // Si ya está en la posición de destino, abrimos la lección inmediatamente
       if (Math.abs(animProgress.value - targetProgress) < 0.01) {
-        console.log('[IslandPath] Already at target, opening immediately');
         onIslandPress(n)
         return
       }
 
       setIsAnimating(true)
       animProgress.value = withSpring(targetProgress, { damping: 15, stiffness: 60 })
-      console.log('[IslandPath] Started spring animation to:', targetProgress);
 
       // Usamos un temporizador seguro en el hilo de JS para evitar problemas de callbacks en React Native Web
       setTimeout(() => {
-        console.log('[IslandPath] Timer finished, opening lesson:', n);
         handleAnimationComplete(n)
       }, 650)
     } else {
       // Para lecciones ya completadas, se abre inmediatamente
-      console.log('[IslandPath] Completed lesson, opening immediately');
       onIslandPress(n)
     }
   }

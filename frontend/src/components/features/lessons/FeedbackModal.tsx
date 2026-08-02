@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { Modal, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Image } from 'expo-image'
@@ -45,7 +46,18 @@ export function FeedbackModal({
 }: FeedbackModalProps) {
   const { isMobile } = useResponsive()
   const insets = useSafeAreaInsets()
-  const isCorrect = feedback === 'correct'
+
+  // Al tocar "Siguiente", `feedback` pasa a null y arranca la animación de
+  // salida, pero el contenido del Modal sigue montado hasta que termina. Sin
+  // recordar el último valor, `isCorrect` caería a false y la pantalla de
+  // acierto se convertiría en la de error durante todo el cierre.
+  const [lastFeedback, setLastFeedback] = useState<'correct' | 'incorrect'>('correct')
+
+  useEffect(() => {
+    if (feedback) setLastFeedback(feedback)
+  }, [feedback])
+
+  const isCorrect = (feedback ?? lastFeedback) === 'correct'
   // Al segundo error se cambia la ilustración por una más empática.
   const isRepeatedError = !isCorrect && errorCount >= 2
 

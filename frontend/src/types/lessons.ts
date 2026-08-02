@@ -28,6 +28,17 @@ export interface LessonStep {
   subtitle?: string
   /** Plantilla del step `composition`: la frase a armar, con `[blank]` por hueco. */
   sentence?: string
+  /**
+   * Respuesta correcta desglosada hueco por hueco, en el orden de los `[blank]`
+   * de `sentence`. Sólo la usa `handleRetry` para decidir qué palabras conservar
+   * tras un error; la validación sigue siendo contra `correctAnswer`.
+   *
+   * Hace falta cuando alguna opción tiene más de una palabra: sin esto se parte
+   * `correctAnswer` por espacios, que asume una palabra por hueco y borraría
+   * respuestas correctas (ej. el hueco de `'por favor'` se compararía contra
+   * `'por'`). Si se omite, se mantiene el desglose por espacios.
+   */
+  correctParts?: string[]
 
   /**
    * `public.videos.id` del video de este step. Se resuelve contra el catálogo
@@ -437,6 +448,9 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
         sentence: '[blank]',
         options: ['Hola, ¿cómo estás?', 'Hola, ¿cómo te llamás?'],
         correctAnswer: 'Hola, ¿cómo estás?',
+        // Un solo hueco con una frase entera: sin esto se partiría en 3 palabras
+        // y al reintentar se borraría la respuesta aunque estuviera bien.
+        correctParts: ['Hola, ¿cómo estás?'],
       },
       {
         id: 'm2-l5-dialogue-2',
@@ -448,6 +462,8 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
         sentence: '¿Me prestás un [blank] ,\n[blank] ?',
         options: ['gracias', 'por favor', 'celular', 'teléfono'],
         correctAnswer: 'teléfono por favor',
+        // 2 huecos pero 3 palabras: 'por favor' entra entero en el segundo.
+        correctParts: ['teléfono', 'por favor'],
       },
       {
         id: 'm2-l5-dialogue-3',
@@ -459,6 +475,9 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
         sentence: '[blank].',
         options: ['Gracias', 'Por favor', 'De nada', 'Adiós'],
         correctAnswer: 'Gracias',
+        // Una palabra sin espacios: sin esto se partiría letra por letra (el
+        // modo de los ejercicios de deletreo) y no coincidiría con la opción.
+        correctParts: ['Gracias'],
       },
       {
         id: 'm2-l5-dialogue-4',

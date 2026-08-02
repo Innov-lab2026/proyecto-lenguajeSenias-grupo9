@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { ActivityIndicator, Pressable, View } from 'react-native'
+import { ActivityIndicator, Pressable, Text, View } from 'react-native'
 import { useEvent, useEventListener } from 'expo'
 import { useVideoPlayer, VideoView } from 'expo-video'
 import { Ionicons } from '@expo/vector-icons'
@@ -72,6 +72,12 @@ export function LessonVideo({
     hasEnded.current = true
   })
 
+  /** Vuelve a cargar la fuente tras un fallo de red. */
+  const retry = () => {
+    hasEnded.current = false
+    player.replace(uri)
+  }
+
   const togglePlayback = () => {
     if (player.playing) {
       player.pause()
@@ -87,8 +93,29 @@ export function LessonVideo({
 
   if (status === 'error') {
     return (
-      <View className={cn('items-center justify-center overflow-hidden rounded-3xl border-2 border-black/5 bg-surface', className)}>
-        <Ionicons name="videocam-outline" size={compact ? 32 : 60} color="#9BA8B1" />
+      <View
+        className={cn(
+          'items-center justify-center overflow-hidden rounded-3xl border-2 border-black/5 bg-surface px-4',
+          className,
+        )}
+      >
+        <Ionicons name="cloud-offline-outline" size={compact ? 32 : 60} color="#9BA8B1" />
+        {compact ? null : (
+          <>
+            <Text className="font-nunito text-sm text-muted text-center mt-2">
+              No pudimos cargar el video. Revisá tu conexión.
+            </Text>
+            <Pressable
+              onPress={retry}
+              accessibilityRole="button"
+              accessibilityLabel="Reintentar la carga del video"
+              className="mt-3 flex-row items-center gap-1.5 rounded-2xl border-2 border-secondary bg-accent/20 px-4 py-2 active:opacity-80"
+            >
+              <Ionicons name="refresh" size={16} color="#4A90E2" />
+              <Text className="font-nunito text-sm font-bold text-ink">Reintentar</Text>
+            </Pressable>
+          </>
+        )}
       </View>
     )
   }
