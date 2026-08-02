@@ -27,6 +27,26 @@ const REVEAL_DELAY_MS = 300
 /** Celeste por defecto de la franja inferior (las lecciones de cierre lo pisan). */
 const DEFAULT_FOOTER_BG = '#67AEF5'
 
+/**
+ * Cuánto se mete la franja sólida por debajo de la onda. La forma del SVG no
+ * llega al borde inferior de su viewBox (deja ~1.3%) y además tiene las
+ * esquinas de abajo redondeadas, así que si las dos piezas sólo se tocan, por
+ * esos huecos se ve el fondo y aparece una línea entre medio. Solapándolas, la
+ * franja tapa el borde inferior de la onda y sólo queda a la vista el bulto.
+ */
+const WAVE_OVERLAP = 12
+
+/**
+ * Alto de la onda que corona la franja inferior. Va en el flujo (no como capa
+ * flotante), así que este alto es espacio real: el contenido de arriba se corta
+ * acá y no puede quedar tapado. Descontado el solape, quedan visibles los ~80px
+ * de bulto que se medían en las resoluciones donde la pantalla ya se veía bien.
+ */
+const WAVE_HEIGHT = 80 + WAVE_OVERLAP
+
+/** Cuánto sube el candado sobre la franja para quedar montado en el bulto. */
+const LOCK_OVERLAP = 56
+
 /** Pantalla de resumen al terminar la lección: recompensa del server + desbloqueo del próximo nivel. */
 export function LessonSummary({ result, isPending, nextLevel, contentKey, onClose, onContinue, insets }: LessonSummaryProps) {
   // El server responde success:false cuando la lección ya estaba completada:
@@ -92,16 +112,21 @@ export function LessonSummary({ result, isPending, nextLevel, contentKey, onClos
 
   return (
     <View
-      className="flex-1 bg-[#EAF8FF] items-center justify-start px-4 overflow-hidden"
+      className="flex-1 bg-[#EAF8FF] items-center justify-start overflow-hidden"
       style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
     >
-      <View className="flex-1 w-full max-w-md items-center justify-around py-0" style={{ marginBottom: 40 }}>
+      {/* Contenido: se queda con el alto que sobra tras la franja inferior y se
+          centra. La ilustración es la que cede espacio cuando la pantalla es
+          baja, así los textos y las tarjetas nunca se aprietan contra la onda. */}
+      <View className="flex-1 w-full max-w-md md:max-w-2xl items-center justify-center gap-3 px-4">
         {/* 1º La imagen */}
-        <Image
-          source={imageSource}
-          className="w-full max-w-[360px] h-[50%] max-h-[320px] self-center"
-          contentFit="contain"
-        />
+        <View className="w-full flex-1 min-h-[104px] max-h-[320px] items-center justify-center">
+          <Image
+            source={imageSource}
+            className="w-full h-full max-w-[360px]"
+            contentFit="contain"
+          />
+        </View>
 
         {/* 2º El texto */}
         <View className="w-full items-center">
@@ -133,56 +158,53 @@ export function LessonSummary({ result, isPending, nextLevel, contentKey, onClos
         </View>
       </View>
 
-      <View
-        className="h-[20%] min-h-[100px] self-stretch -mx-4 items-center justify-end pb-5 relative"
-        style={{ backgroundColor: footerBg }}
-      >
-        {/* Imagen de fondo con la onda celeste o azul oscuro según el nivel */}
+      {/* Franja inferior: onda + cuerpo, las dos en el flujo. Antes la onda era
+          un absolute con `top: -180` que se dibujaba encima del contenido sin
+          ocupar lugar, y en pantallas bajas o apaisadas se comía las tarjetas. */}
+      <View className="self-stretch">
+        {/* La imagen se estira más ancha que la pantalla a propósito: el SVG
+            trae margen propio y esquinas redondeadas, y a lo ancho quedaban
+            huecos del fondo en las puntas. El `overflow-hidden` del contenedor
+            raíz recorta lo que sobra. */}
         <Image
           source={require('@/assets/images/lessons/lesson_summary_celeste.svg')}
-          style={{
-            position: 'absolute',
-            top: -180,
-            left: -5,
-            right: -5,
-            bottom: 0,
-          }}
+          style={{ width: '108%', marginLeft: '-4%', height: WAVE_HEIGHT }}
           contentFit="fill"
           tintColor={footerBg}
         />
 
-        {showUnlock ? (
-          <View
-            pointerEvents="none" // Evita que este contenedor bloquee los clics en el botón Continuar
-            style={{
-              position: 'absolute',
-              top: -30, // Bajamos el candado para que quede dentro del área azul y no solape con las estadísticas
-              alignItems: 'center',
-              zIndex: 10,
-              gap: 12, // Damos un espacio mayor entre el candado y el texto
-            }}
-          >
-            <Image
-              source={require('@/assets/images/lessons/candado_abierto.svg')}
-              className="w-16 h-16"
-              contentFit="contain"
-            />
-            <Text
-              className={cn(
-                'font-nunito text-base font-bold text-center leading-4',
-                isDarkFooter ? 'text-white' : 'text-ink',
-              )}
+        <View
+          className={cn('items-center px-4 pb-5 gap-2', showUnlock ? null : 'pt-4')}
+          style={{ backgroundColor: footerBg, marginTop: -WAVE_OVERLAP }}
+        >
+          {showUnlock ? (
+            <View
+              pointerEvents="none" // Evita que este contenedor bloquee los clics en el botón Continuar
+              className="items-center gap-2"
+              style={{ marginTop: -LOCK_OVERLAP }} // Monta el candado sobre el bulto de la onda
             >
-              {unlockLabel}
-            </Text>
-          </View>
-        ) : null}
-        <Button
-          label={buttonLabel}
-          onPress={onContinue}
-          className="z-30 w-1/2" // Usamos el ancho estándar (w-1/2 self-center) y garantizamos el nivel de zIndex
-          disabled={isPending}
-        />
+              <Image
+                source={require('@/assets/images/lessons/candado_abierto.svg')}
+                className="w-16 h-16"
+                contentFit="contain"
+              />
+              <Text
+                className={cn(
+                  'font-nunito text-base font-bold text-center leading-5',
+                  isDarkFooter ? 'text-white' : 'text-ink',
+                )}
+              >
+                {unlockLabel}
+              </Text>
+            </View>
+          ) : null}
+          <Button
+            label={buttonLabel}
+            onPress={onContinue}
+            className="w-1/2"
+            disabled={isPending}
+          />
+        </View>
       </View>
     </View>
   )

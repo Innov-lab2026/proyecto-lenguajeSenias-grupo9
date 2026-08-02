@@ -593,8 +593,6 @@ export function useLessonEngine({ lessonId, lessonNumber, contentKey }: UseLesso
 
     showFeedback,
     showSummary,
-    /** Errores acumulados en el step actual (cambia el tono del feedback). */
-    currentStepErrorCount: retryCount[currentStepIndex] ?? 0,
     /** Resultado de completeLesson: `undefined` mientras la request está en vuelo. */
     completionResult: completeLessonMutation.data,
     isSaving: completeLessonMutation.isPending,
