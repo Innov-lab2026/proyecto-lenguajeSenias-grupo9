@@ -8,6 +8,7 @@ import Project from './sections/Project'
 import Team from './sections/Team'
 import PrivacyPolicy from './sections/PrivacyPolicy'
 import TermsAndConditions from './sections/TermsAndConditions'
+import InstallPWAButton from './components/ui/InstallPWAButton'
 
 function App() {
   const [currentView, setCurrentView] = useState(() => window.location.hash)
@@ -64,6 +65,7 @@ function App() {
         )}
       </main>
       <Footer />
+      <InstallPWAButton />
     </>
   )
 }

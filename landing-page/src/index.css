@@ -79,3 +79,27 @@ body {
     transform: translateX(0%) translateY(0);
   }
 }
+
+@keyframes downloadArrow {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(5px);
+  }
+}
+
+/* Transform en <g> del SVG del botón instalar */
+.pwa-download-arrow {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: downloadArrow 1.45s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pwa-download-arrow {
+    animation: none;
+  }
+}
