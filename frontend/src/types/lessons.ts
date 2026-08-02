@@ -1,4 +1,4 @@
-export type StepType = 'content' | 'quiz' | 'matching' | 'dialogue' | 'composition'
+export type StepType = 'content' | 'quiz' | 'matching' | 'dialogue' | 'composition' | 'dialogue-composition' | 'dialogue-sequence'
 
 export interface DialogueLine {
   speaker: string
@@ -8,6 +8,7 @@ export interface DialogueLine {
 export interface LessonStep {
   id: string
   type: StepType
+  speaker?: string
   /**
    * URL ya resuelta. `LESSON_CONTENT` no la declara nunca: todos los steps
    * referencian su video por `videoId` y el resolver completa este campo
@@ -35,8 +36,9 @@ export interface LessonStep {
    * URLs hardcodeadas apuntando a archivos borrados (ver local/VIDEOS_DB.md §4).
    */
   videoId?: string
-  /** Ídem `videoId`, por opción (el equivalente por-id de `videoUrls`). */
   videoIds?: Record<string, string>
+  videoSequenceIds?: string[]
+  videoSequenceUrls?: string[]
 
   /**
    * `false` para que las opciones se muestren en el orden declarado en vez de
@@ -320,9 +322,9 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
         // él el mismo id en lesson_signs, así la RPC NO vuelve a acreditar la
         // seña a quien ya la aprendió en m1-l1 (ver PENDIENTES_DB.md §0.5).
         videoId: V.COMO_TE_LLAMAS,
-        options: ['apellido', 'dirección', 'Cuál', 'nombre', 'tu', 'edad', 'es'],
-        sentence: '¿ [blank] [blank] [blank] [blank] ?',
-        correctAnswer: '¿Cuál es tu nombre?',
+        options: ['apellido', 'dirección', 'Cómo', 'edad', 'te', 'llamás', 'es'],
+        sentence: '¿ [blank] [blank] [blank] ?',
+        correctAnswer: '¿Cómo te llamás?',
       },
     ],
   },
@@ -423,31 +425,50 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
 
   'm2-l5': {
     title: 'Conversar',
-    description: 'Combiná las frases aprendidas para mantener una conversación.',
+    description: 'Completá una conversación en LSA paso a paso.',
     steps: [
       {
-        id: 'm2-l5-content-1',
-        type: 'content',
-        subtitle: 'Charla: Presentaciones',
-        contentTitle: 'Conversar',
-        // ⚠️ Relleno provisorio: es la frase suelta, no la conversación entera.
-        videoId: V.ME_PRESTAS_TELEFONO,
+        id: 'm2-l5-dialogue-1',
+        type: 'dialogue-composition',
+        subtitle: 'Charla: Pedir prestado',
+        question: 'Comenzá la conversación arrastrando la frase correcta.',
+        speaker: 'Pedro',
+        videoId: V.HOLA_COMO_ESTAS,
+        sentence: '[blank]',
+        options: ['Hola, ¿cómo estás?', 'Hola, ¿cómo te llamás?'],
+        correctAnswer: 'Hola, ¿cómo estás?',
       },
       {
-        id: 'm2-l5-dialogue',
-        type: 'dialogue',
+        id: 'm2-l5-dialogue-2',
+        type: 'dialogue-composition',
         subtitle: 'Charla: Pedir prestado',
-        question: 'Completá la conversación arrastrando cada palabra a su lugar.',
-        // ⚠️ Relleno provisorio (ver arriba).
+        question: 'Continuá la conversación completando la frase.',
+        speaker: 'Pedro',
         videoId: V.ME_PRESTAS_TELEFONO,
-        options: ['Hola, ¿cómo te llamás?', 'Hola, ¿cómo estás?', 'teléfono', 'Gracias', 'Luz', 'Adiós'],
+        sentence: '¿Me prestás un [blank] ,\n[blank] ?',
+        options: ['gracias', 'por favor', 'celular', 'teléfono'],
+        correctAnswer: 'teléfono por favor',
+      },
+      {
+        id: 'm2-l5-dialogue-3',
+        type: 'dialogue-composition',
+        subtitle: 'Charla: Pedir prestado',
+        question: 'Terminá la conversación completando la frase.',
+        speaker: 'Pedro',
+        videoId: V.GRACIAS,
+        sentence: '[blank].',
+        options: ['Gracias', 'Por favor', 'De nada', 'Adiós'],
+        correctAnswer: 'Gracias',
+      },
+      {
+        id: 'm2-l5-dialogue-4',
+        type: 'dialogue-sequence',
+        subtitle: 'Charla: Pedir prestado',
+        question: 'Observá la conversación completa.',
+        videoSequenceIds: [V.HOLA_COMO_ESTAS, V.ME_PRESTAS_TELEFONO, V.GRACIAS],
         dialogue: [
-          { speaker: 'Pedro', text: '[blank].' },
-          { speaker: 'Pedro', text: 'Me prestás un [blank] por favor.' },
-          { speaker: 'Pedro', text: '[blank] ¡Chau!' },
+          { speaker: 'Pedro', text: 'Hola, ¿cómo estás?\n\n¿Me prestás un teléfono, por favor?\n\nGracias.' },
         ],
-        // Las respuestas van en el orden en que aparecen los [blank].
-        correctAnswer: 'Hola, ¿cómo estás?|teléfono|Gracias',
       },
     ],
   },

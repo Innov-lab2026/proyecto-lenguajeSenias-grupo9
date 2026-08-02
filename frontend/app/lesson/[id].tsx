@@ -8,6 +8,8 @@ import { ContentStep } from '@/src/components/features/lessons/steps/ContentStep
 import { QuizStep } from '@/src/components/features/lessons/steps/QuizStep'
 import { MatchingStep } from '@/src/components/features/lessons/steps/MatchingStep'
 import { CompositionStep } from '@/src/components/features/lessons/steps/CompositionStep'
+import { DialogueCompositionStep } from '@/src/components/features/lessons/steps/DialogueCompositionStep'
+import { DialogueSequenceStep } from '@/src/components/features/lessons/steps/DialogueSequenceStep'
 import { DialogueExercise } from '@/src/components/features/lessons/DialogueExercise'
 import { LessonVideo } from '@/src/components/features/lessons/LessonVideo'
 import { LessonSummary } from '@/src/components/features/lessons/LessonSummary'
@@ -115,6 +117,7 @@ export default function LessonScreen() {
     handleBack,
     handleBackToIntro,
     markWatched,
+    markStepVideoWatched,
     toggleFavorite,
     handleMatchSelection,
     handleAddWordToComposition,
@@ -132,7 +135,7 @@ export default function LessonScreen() {
     'm2-l2-content-interactive',
     'm2-l3-content-interactive',
     'm2-l4-content-interactive',
-    'm2-l5-content-1',
+    'm2-l5-dialogue-1',
   ])
   const isIntroBackStep = !!currentStep && introBackStepIds.has(currentStep.id)
 
@@ -242,6 +245,22 @@ export default function LessonScreen() {
               onRemoveWord={handleRemoveWordFromComposition}
               isLocked={correctSteps.has(currentStepIndex)}
               muted={isMuted}
+            />
+          ) : currentStep.type === 'dialogue-composition' ? (
+            <DialogueCompositionStep
+              step={currentStep}
+              compositionAnswers={compositionAnswers[currentStepIndex] ?? []}
+              onAddWord={handleAddWordToComposition}
+              onRemoveWord={handleRemoveWordFromComposition}
+              isLocked={correctSteps.has(currentStepIndex)}
+              muted={isMuted}
+              onVideoWatched={() => markStepVideoWatched(currentStepIndex)}
+            />
+          ) : currentStep.type === 'dialogue-sequence' ? (
+            <DialogueSequenceStep
+              step={currentStep}
+              muted={isMuted}
+              onVideoWatched={() => markStepVideoWatched(currentStepIndex)}
             />
           ) : currentStep.type === 'dialogue' ? (
             <View className="flex-1 w-full">

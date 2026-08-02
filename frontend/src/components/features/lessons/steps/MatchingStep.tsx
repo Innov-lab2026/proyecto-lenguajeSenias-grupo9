@@ -31,7 +31,7 @@ export function MatchingStep({ step, matchingState, onSelect, muted = false }: M
       ) : (
         <VideoFrame className="flex-[2] mb-2" frameClassName="items-center justify-center px-4">
           <Ionicons name="videocam-outline" size={48} color="#9BA8B1" />
-          <Text className="font-nunito text-sm text-muted mt-1 text-center">Selecciona un video</Text>
+          <Text className="font-nunito text-sm text-muted mt-1 text-center">Seleccioná un video</Text>
         </VideoFrame>
       )}
 

@@ -33,6 +33,12 @@ export function resolveStepVideos(step: LessonStep, videosById: Map<string, Vide
     resolved.videoUrls = { ...step.videoUrls, ...Object.fromEntries(entries) }
   }
 
+  if (step.videoSequenceIds) {
+    resolved.videoSequenceUrls = step.videoSequenceIds
+      .map((id) => videosById.get(id)?.url)
+      .filter((url): url is string => url != null)
+  }
+
   if (step.pairs) {
     resolved.pairs = step.pairs.map((pair) => ({
       ...pair,

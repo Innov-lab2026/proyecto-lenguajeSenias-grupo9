@@ -101,6 +101,7 @@ export function useLessonEngine({ lessonId, lessonNumber, contentKey }: UseLesso
   const favorites = new Set(favoritesStore.items.map((i) => i.id))
 
   const [watchedOptions, setWatchedOptions] = useState<Record<number, Set<string>>>({})
+  const [watchedSteps, setWatchedSteps] = useState<Record<number, boolean>>({})
   const [dialogueAnswers, setDialogueAnswers] = useState<Record<number, string>>({})
   // Por step: qué índice de `options` ocupa cada hueco de la frase (null = vacío).
   const [compositionAnswers, setCompositionAnswers] = useState<Record<number, (number | null)[]>>({})
@@ -233,7 +234,7 @@ export function useLessonEngine({ lessonId, lessonNumber, contentKey }: UseLesso
       return
     }
 
-    if (currentStep.type === 'content' || correctSteps.has(currentStepIndex)) {
+    if (currentStep.type === 'content' || currentStep.type === 'dialogue-sequence' || correctSteps.has(currentStepIndex)) {
       setStepAnswers(prev => ({ ...prev, [currentStepIndex]: selectedOption }))
       if (isLastStep) {
         setShowSummary(true)
@@ -287,16 +288,24 @@ export function useLessonEngine({ lessonId, lessonNumber, contentKey }: UseLesso
           [currentStepIndex]: (prev[currentStepIndex] || 0) + 1
         }))
       }
-    } else if (currentStep.type === 'composition') {
+    } else if (currentStep.type === 'composition' || currentStep.type === 'dialogue-composition') {
       // Se compara la frase armada contra correctAnswer ignorando espacios,
       // mayúsculas y puntuación: el banco de palabras no incluye los signos
       // (van fijos en `sentence`) y hay ejercicios que arman una palabra
       // letra por letra, donde no hay espacios que respetar.
       const answers = compositionAnswers[currentStepIndex] || []
+      const blankCount = countBlanks(currentStep?.sentence)
       const built = answers
+        .slice(0, blankCount)
         .map(idx => (idx !== null && idx !== undefined ? currentStep.options?.[idx] : ''))
         .filter(Boolean)
         .join('')
+
+      console.log('--- COMPOSITION CHECK ---')
+      console.log('built:', built)
+      console.log('correctAnswer:', currentStep.correctAnswer)
+      console.log('normalized built:', normalizeComposition(built))
+      console.log('normalized correctAnswer:', normalizeComposition(currentStep.correctAnswer || ''))
 
       if (normalizeComposition(built) === normalizeComposition(currentStep.correctAnswer || '')) {
         setShowFeedback('correct')
@@ -345,7 +354,7 @@ export function useLessonEngine({ lessonId, lessonNumber, contentKey }: UseLesso
     // En composition no se borra todo: se conservan las palabras que ya estaban
     // en su lugar y sólo se vacían las mal ubicadas, para no obligar a rehacer
     // una frase larga desde cero.
-    if (currentStep?.type === 'composition') {
+    if (currentStep?.type === 'composition' || currentStep?.type === 'dialogue-composition') {
       const options = currentStep.options ?? []
       const correct = currentStep.correctAnswer ?? ''
       // Una palabra por hueco, salvo que la respuesta no tenga espacios: ahí el
@@ -421,6 +430,10 @@ export function useLessonEngine({ lessonId, lessonNumber, contentKey }: UseLesso
       currentStepWatched.add(key)
       return { ...prev, [currentStepIndex]: currentStepWatched }
     })
+  }
+
+  const markStepVideoWatched = (stepIdx: number) => {
+    setWatchedSteps((prev) => ({ ...prev, [stepIdx]: true }))
   }
 
   const toggleFavorite = () => {
@@ -510,15 +523,17 @@ export function useLessonEngine({ lessonId, lessonNumber, contentKey }: UseLesso
 
   const compositionBlankCount = countBlanks(currentStep?.sentence)
   const isCompositionFilled =
-    currentStep?.type === 'composition' &&
+    (currentStep?.type === 'composition' || currentStep?.type === 'dialogue-composition') &&
     compositionBlankCount > 0 &&
-    (compositionAnswers[currentStepIndex] ?? Array(compositionBlankCount).fill(null)).every(idx => idx !== null)
+    (compositionAnswers[currentStepIndex] ?? Array(compositionBlankCount).fill(null))
+      .slice(0, compositionBlankCount)
+      .every(idx => idx !== null)
 
   const footerNeedsCheck =
     ((currentStep?.type === 'quiz' && !!selectedOption) ||
       (currentStep?.type === 'matching' && !!matchingState.selectedVideo && !!matchingState.selectedWord) ||
       (currentStep?.type === 'dialogue' && Object.keys(dialogueAnswers).length === dialogueBlanksCount) ||
-      (currentStep?.type === 'composition' && isCompositionFilled)) &&
+      ((currentStep?.type === 'composition' || currentStep?.type === 'dialogue-composition') && isCompositionFilled)) &&
     !correctSteps.has(currentStepIndex)
 
   const footerLabel = footerNeedsCheck ? 'Comprobar' : 'Siguiente'
@@ -539,9 +554,11 @@ export function useLessonEngine({ lessonId, lessonNumber, contentKey }: UseLesso
     (currentStep?.type === 'dialogue' &&
       Object.keys(dialogueAnswers).length < dialogueBlanksCount &&
       !correctSteps.has(currentStepIndex)) ||
-    (currentStep?.type === 'composition' &&
-      !isCompositionFilled &&
-      !correctSteps.has(currentStepIndex))
+    ((currentStep?.type === 'composition' || currentStep?.type === 'dialogue-composition') &&
+      (!isCompositionFilled || (currentStep?.type === 'dialogue-composition' && !watchedSteps[currentStepIndex])) &&
+      !correctSteps.has(currentStepIndex)) ||
+    (currentStep?.type === 'dialogue-sequence' &&
+      !watchedSteps[currentStepIndex])
 
   let absoluteLevel = lessonNumber
   if (contentKey) {
@@ -603,6 +620,7 @@ export function useLessonEngine({ lessonId, lessonNumber, contentKey }: UseLesso
     handleBack,
     handleBackToIntro,
     markWatched,
+    markStepVideoWatched,
     toggleFavorite,
     handleMatchSelection,
     handleAddWordToComposition,

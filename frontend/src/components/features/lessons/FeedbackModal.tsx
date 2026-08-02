@@ -3,7 +3,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Image } from 'expo-image'
 import { Button } from '@/src/components/common/Button'
 import { useResponsive } from '@/src/hooks/common/useResponsive'
-import { LESSON_POSITIVE_FEEDBACK, LESSON_NEGATIVE_FEEDBACK } from '@/src/constants/lessons'
+import { LESSON_POSITIVE_FEEDBACK } from '@/src/constants/lessons'
 import type { StepType } from '@/src/types/lessons'
 import { cn } from '@/src/utils/cn'
 
@@ -28,6 +28,7 @@ const ERROR_POR_STEP: Partial<Record<StepType, string>> = {
   matching: '¡Estás cerca!',
   dialogue: '¡Estás cerca!',
   composition: '¡Estás cerca!',
+  'dialogue-composition': '¡Estás cerca!',
 }
 
 /** Feedback de correcto/incorrecto tras responder un step: full-screen en mobile, card centrado en desktop. */
