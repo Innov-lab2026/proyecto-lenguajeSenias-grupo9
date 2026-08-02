@@ -301,12 +301,6 @@ export function useLessonEngine({ lessonId, lessonNumber, contentKey }: UseLesso
         .filter(Boolean)
         .join('')
 
-      console.log('--- COMPOSITION CHECK ---')
-      console.log('built:', built)
-      console.log('correctAnswer:', currentStep.correctAnswer)
-      console.log('normalized built:', normalizeComposition(built))
-      console.log('normalized correctAnswer:', normalizeComposition(currentStep.correctAnswer || ''))
-
       if (normalizeComposition(built) === normalizeComposition(currentStep.correctAnswer || '')) {
         setShowFeedback('correct')
       } else {
@@ -357,11 +351,16 @@ export function useLessonEngine({ lessonId, lessonNumber, contentKey }: UseLesso
     if (currentStep?.type === 'composition' || currentStep?.type === 'dialogue-composition') {
       const options = currentStep.options ?? []
       const correct = currentStep.correctAnswer ?? ''
-      // Una palabra por hueco, salvo que la respuesta no tenga espacios: ahí el
-      // ejercicio se arma letra por letra (ej. "teléfono").
-      const expected = correct.includes(' ')
-        ? correct.split(' ').map(normalizeComposition).filter(Boolean)
-        : correct.split('').map(normalizeComposition).filter(Boolean)
+      // `correctParts` manda cuando está: es el desglose explícito hueco por
+      // hueco, y es la única forma de acertar si alguna opción tiene más de una
+      // palabra (partir por espacios ahí desalinea los huecos y borra aciertos).
+      // Sin él: una palabra por hueco, salvo que la respuesta no tenga espacios,
+      // que es el ejercicio armado letra por letra (ej. "teléfono").
+      const expected = currentStep.correctParts
+        ? currentStep.correctParts.map(normalizeComposition)
+        : correct.includes(' ')
+          ? correct.split(' ').map(normalizeComposition).filter(Boolean)
+          : correct.split('').map(normalizeComposition).filter(Boolean)
 
       setCompositionAnswers(prev => ({
         ...prev,
@@ -594,8 +593,6 @@ export function useLessonEngine({ lessonId, lessonNumber, contentKey }: UseLesso
 
     showFeedback,
     showSummary,
-    /** Errores acumulados en el step actual (cambia el tono del feedback). */
-    currentStepErrorCount: retryCount[currentStepIndex] ?? 0,
     /** Resultado de completeLesson: `undefined` mientras la request está en vuelo. */
     completionResult: completeLessonMutation.data,
     isSaving: completeLessonMutation.isPending,

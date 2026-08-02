@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Text, View } from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
 import type { LessonStep } from '@/src/types/lessons'
 import { LessonVideo } from '@/src/components/features/lessons/LessonVideo'
 import { VideoFrame } from '@/src/components/features/lessons/VideoFrame'
@@ -20,10 +21,20 @@ export function DialogueSequenceStep({
   const [currentIdx, setCurrentIdx] = useState(0)
   const currentUrl = urls[currentIdx]
 
-  // Reinicia el índice si cambian los videos
+  // `resolveStepVideos` descarta en silencio los ids que no están en el catálogo:
+  // si no quedó ninguno, el step no tiene nada que reproducir.
+  const hasMissingVideos = (step.videoSequenceIds?.length ?? 0) > 0 && urls.length === 0
+
+  // Reinicia la secuencia al cambiar de step.
+  //
+  // ⚠️ Depende del id del step y NO de `step.videoSequenceUrls`: ese array lo
+  // rearma `resolveStepVideos` cada vez que se recalcula `lesson` (pasa si se
+  // refetchea el catálogo de videos, con staleTime de 5 min), así que como
+  // dependencia se compara por referencia y reiniciaría la conversación desde
+  // el primer video a mitad de reproducción.
   useEffect(() => {
     setCurrentIdx(0)
-  }, [step.videoSequenceUrls])
+  }, [step.id])
 
   const handleVideoEnded = () => {
     if (urls.length > 0) {
@@ -47,6 +58,20 @@ export function DialogueSequenceStep({
             onWatched={handleVideoEnded}
             className="flex-1 w-full rounded-[32px]"
           />
+        </VideoFrame>
+      ) : hasMissingVideos ? (
+        // Sin ningún video resuelto no hay forma de completar el step (avanzar
+        // exige verlos), así que se explica en vez de dejar el hueco en blanco.
+        <VideoFrame
+          className="flex-[5] mb-1"
+          style={{ maxHeight: '76%' }}
+          frameClassName="items-center justify-center px-4"
+        >
+          <Ionicons name="cloud-offline-outline" size={48} color="#9BA8B1" />
+          <Text className="font-nunito text-sm text-muted text-center mt-2">
+            No pudimos cargar los videos de esta conversación. Revisá tu conexión y volvé a entrar
+            a la lección.
+          </Text>
         </VideoFrame>
       ) : null}
 

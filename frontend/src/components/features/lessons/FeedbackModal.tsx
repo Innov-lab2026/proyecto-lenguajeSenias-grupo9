@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { Modal, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Image } from 'expo-image'
@@ -12,8 +13,6 @@ interface FeedbackModalProps {
   tip?: string
   /** points_retry de la lección: lo máximo que se puede ganar ya habiendo fallado. 0 = no mostrarlo. */
   retryPoints?: number
-  /** Errores acumulados en el step actual: a partir del segundo cambia la ilustración y el tono. */
-  errorCount?: number
   stepType?: StepType
   /** `lessons.content_key`: elige el mensaje de acierto personalizado de la lección. */
   contentKey?: string | null
@@ -36,7 +35,6 @@ export function FeedbackModal({
   feedback,
   tip,
   retryPoints = 0,
-  errorCount = 0,
   stepType,
   contentKey,
   onRetry,
@@ -45,15 +43,22 @@ export function FeedbackModal({
 }: FeedbackModalProps) {
   const { isMobile } = useResponsive()
   const insets = useSafeAreaInsets()
-  const isCorrect = feedback === 'correct'
-  // Al segundo error se cambia la ilustración por una más empática.
-  const isRepeatedError = !isCorrect && errorCount >= 2
+
+  // Al tocar "Siguiente", `feedback` pasa a null y arranca la animación de
+  // salida, pero el contenido del Modal sigue montado hasta que termina. Sin
+  // recordar el último valor, `isCorrect` caería a false y la pantalla de
+  // acierto se convertiría en la de error durante todo el cierre.
+  const [lastFeedback, setLastFeedback] = useState<'correct' | 'incorrect'>('correct')
+
+  useEffect(() => {
+    if (feedback) setLastFeedback(feedback)
+  }, [feedback])
+
+  const isCorrect = (feedback ?? lastFeedback) === 'correct'
 
   const image = isCorrect
     ? require('@/assets/images/lessons/feedback_correcto.svg')
-    : isRepeatedError
-      ? require('@/assets/images/lessons/feedback_incorrecto_double.svg')
-      : require('@/assets/images/lessons/feedback_incorrecto.svg')
+    : require('@/assets/images/lessons/feedback_incorrecto.svg')
 
   const positive = contentKey ? LESSON_POSITIVE_FEEDBACK[contentKey] : undefined
   const errorText = (stepType && ERROR_POR_STEP[stepType]) ?? 'Esa no es la respuesta correcta.'
@@ -93,30 +98,14 @@ export function FeedbackModal({
         </View>
       ) : (
         <View className="w-full flex-1 justify-center items-center gap-2">
-          {!isRepeatedError ? (
-            <>
-              <Text className="font-nunito text-base font-bold text-ink text-center leading-relaxed">
-                {errorText}
-              </Text>
-              {retryPoints > 0 ? (
-                <Text className="font-nunito text-sm font-bold text-ink text-center">
-                  Todavía podés obtener {retryPoints} puntos.
-                </Text>
-              ) : null}
-            </>
-          ) : (
-            <>
-              <Text className="font-nunito text-lg font-bold text-ink text-center leading-relaxed">
-                La práctica hace la diferencia.{"\n"}¡Seguí aprendiendo!
-              </Text>
-              {tip ? (
-                <Text className="font-nunito text-base text-ink text-center leading-relaxed mt-2">{tip}</Text>
-              ) : null}
-              <Text className="font-nunito text-sm font-bold text-ink text-center mt-3">
-                Ya no obtenés puntos en este ejercicio, pero cada intento te ayuda a mejorar.
-              </Text>
-            </>
-          )}
+          <Text className="font-nunito text-base font-bold text-ink text-center leading-relaxed">
+            {errorText}
+          </Text>
+          {retryPoints > 0 ? (
+            <Text className="font-nunito text-sm font-bold text-ink text-center">
+              Todavía podés obtener {retryPoints} puntos.
+            </Text>
+          ) : null}
         </View>
       )}
 

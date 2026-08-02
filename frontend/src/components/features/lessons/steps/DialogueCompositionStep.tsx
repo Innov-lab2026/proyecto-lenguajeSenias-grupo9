@@ -1,5 +1,6 @@
 import { Fragment } from 'react'
 import { Pressable, Text, View } from 'react-native'
+import { Ionicons } from '@expo/vector-icons'
 import type { LessonStep } from '@/src/types/lessons'
 import { LessonVideo } from '@/src/components/features/lessons/LessonVideo'
 import { VideoFrame } from '@/src/components/features/lessons/VideoFrame'
@@ -33,6 +34,20 @@ export function DialogueCompositionStep({
       {step.videoUrl ? (
         <VideoFrame className="flex-[4] mb-1" style={{ maxHeight: '74%' }}>
           <LessonVideo uri={step.videoUrl} muted={muted} onWatched={onVideoWatched} className="flex-1 w-full rounded-[32px]" />
+        </VideoFrame>
+      ) : step.videoId ? (
+        // El video es obligatorio para avanzar: si su id no está en el catálogo
+        // hay que decirlo, no dejar el espacio vacío y el botón sin explicación.
+        <VideoFrame
+          className="flex-[4] mb-1"
+          style={{ maxHeight: '74%' }}
+          frameClassName="items-center justify-center px-4"
+        >
+          <Ionicons name="cloud-offline-outline" size={48} color="#9BA8B1" />
+          <Text className="font-nunito text-sm text-muted text-center mt-2">
+            No pudimos cargar el video de este ejercicio. Revisá tu conexión y volvé a entrar a la
+            lección.
+          </Text>
         </VideoFrame>
       ) : null}
 

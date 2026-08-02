@@ -96,7 +96,6 @@ export default function LessonScreen() {
     correctSteps,
     showFeedback,
     showSummary,
-    currentStepErrorCount,
     completionResult,
     isSaving,
     isMuted,
@@ -289,7 +288,6 @@ export default function LessonScreen() {
         feedback={showFeedback}
         tip={currentStep?.tip}
         retryPoints={retryPoints}
-        errorCount={currentStepErrorCount}
         stepType={currentStep?.type}
         contentKey={contentKey}
         onRetry={handleRetry}
