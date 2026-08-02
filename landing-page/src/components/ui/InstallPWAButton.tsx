@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { downloadAppShortcut, usePwaInstall } from '../../hooks/usePwaInstall'
+import { usePwaInstall } from '../../hooks/usePwaInstall'
 import pawIcon from '../../assets/logoDownload-paw.png'
 
 function isIos(): boolean {
@@ -7,24 +7,20 @@ function isIos(): boolean {
   return /iphone|ipad|ipod/i.test(navigator.userAgent)
 }
 
-function isAndroid(): boolean {
-  if (typeof navigator === 'undefined') return false
-  return /android/i.test(navigator.userAgent)
-}
-
 /**
- * Botón flotante: instala el acceso directo vía manifest (prompt nativo).
- * Nunca navega a Vercel. Si el navegador no ofrece el prompt, en escritorio
- * descarga un .url; en móvil muestra cómo agregar a inicio.
+ * Botón flotante de instalación PWA.
+ * - Si el navegador ofrece beforeinstallprompt → solo ese diálogo (nada de abrir páginas).
+ * - Si no → tip de cómo instalar; nunca navega ni descarga .url.
+ * - Se oculta si ya está instalada.
  */
 export default function InstallPWAButton() {
-  const { isInstalled, install, ready, markInstalled } = usePwaInstall()
+  const { canInstall, isInstalled, install, ready } = usePwaInstall()
   const [tip, setTip] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
   useEffect(() => {
     if (!tip) return
-    const t = window.setTimeout(() => setTip(null), 7000)
+    const t = window.setTimeout(() => setTip(null), 8000)
     return () => window.clearTimeout(t)
   }, [tip])
 
@@ -36,33 +32,25 @@ export default function InstallPWAButton() {
     setTip(null)
 
     try {
-      // 1) Prompt nativo del navegador (manifest → “Instalar app”). No navega a ningún lado.
-      const result = await install()
-      if (result.ok) {
-        setTip('¡Listo! Se instaló el acceso directo de CarpiSeñas.')
-        return
-      }
-      if (result.reason === 'dismissed') {
-        setTip('Cancelaste la instalación. Podés intentarlo de nuevo cuando quieras.')
+      if (canInstall) {
+        const result = await install()
+        if (result.ok) {
+          setTip('¡Listo! CarpiSeñas se instaló en tu dispositivo.')
+        } else if (result.reason === 'dismissed') {
+          setTip('Cancelaste la instalación. Podés intentarlo de nuevo.')
+        }
         return
       }
 
-      // 2) iOS: no hay beforeinstallprompt
+      // El navegador todavía no habilitó el instalador nativo
       if (isIos()) {
         setTip('En iPhone/iPad: tocá Compartir → “Agregar a pantalla de inicio”.')
         return
       }
 
-      // 3) Android sin prompt todavía
-      if (isAndroid()) {
-        setTip('En Chrome: menú ⋮ → “Instalar app” o “Agregar a pantalla principal”.')
-        return
-      }
-
-      // 4) Escritorio sin prompt: descarga el acceso directo, sin abrir Vercel en esta pestaña
-      downloadAppShortcut()
-      markInstalled()
-      setTip('Se descargó “CarpiSeñas.url”. Abrilo o movelo al escritorio.')
+      setTip(
+        'Para instalar: en Chrome/Edge abrí el menú ⋮ y elegí “Instalar CarpiSeñas” o “Instalar app”.',
+      )
     } finally {
       setBusy(false)
     }

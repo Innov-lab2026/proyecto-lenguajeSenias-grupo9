@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react'
-import { APP_URL } from '../constants/app'
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>
@@ -8,7 +7,8 @@ type BeforeInstallPromptEvent = Event & {
 
 type Listener = () => void
 
-const STORAGE_KEY = 'carpisenias-pwa-installed'
+/** v2: invalida el flag viejo del fallback .url que abría Vercel. */
+const STORAGE_KEY = 'carpisenias-pwa-installed-v2'
 
 let deferredPrompt: BeforeInstallPromptEvent | null = null
 let installedFlag = false
@@ -32,6 +32,7 @@ function markInstalled() {
   deferredPrompt = null
   try {
     localStorage.setItem(STORAGE_KEY, '1')
+    localStorage.removeItem('carpisenias-pwa-installed')
   } catch {
     // ignore
   }
@@ -69,7 +70,7 @@ export function startPwaInstallListener() {
 
   if ('serviceWorker' in navigator) {
     void navigator.serviceWorker.register('/sw.js').catch(() => {
-      // Sin SW igual puede instalarse en Chrome modernos
+      // Chrome moderno puede instalar sin SW
     })
   }
 }
@@ -92,23 +93,9 @@ function getFalse() {
   return false
 }
 
-/** Descarga un acceso directo (.url) a la app — no navega la pestaña actual. */
-export function downloadAppShortcut() {
-  const body = `[InternetShortcut]\r\nURL=${APP_URL}\r\n`
-  const blob = new Blob([body], { type: 'application/internet-shortcut' })
-  const href = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = href
-  a.download = 'CarpiSeñas.url'
-  document.body.appendChild(a)
-  a.click()
-  a.remove()
-  URL.revokeObjectURL(href)
-}
-
 /**
  * Prompt nativo del navegador (manifest / beforeinstallprompt).
- * Nunca redirige a Vercel.
+ * Nunca navega ni descarga archivos .url (eso abría Vercel).
  */
 export function usePwaInstall() {
   const hasPrompt = useSyncExternalStore(subscribe, getHasPrompt, getFalse)
@@ -122,9 +109,8 @@ export function usePwaInstall() {
   }, [])
 
   const install = useCallback(async () => {
-    // Esperar un toque por si el evento llega tarde
     if (!deferredPrompt) {
-      await new Promise((r) => setTimeout(r, 400))
+      await new Promise((r) => setTimeout(r, 500))
     }
     if (!deferredPrompt) return { ok: false as const, reason: 'unavailable' as const }
 
@@ -141,10 +127,10 @@ export function usePwaInstall() {
 
   return {
     ready,
+    /** Solo true cuando el navegador YA puede mostrar el diálogo Instalar. */
     canInstall: ready && hasPrompt && !storedInstalled,
     isInstalled: storedInstalled,
     hasPrompt,
     install,
-    markInstalled,
   }
 }
