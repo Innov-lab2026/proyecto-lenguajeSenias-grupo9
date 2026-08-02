@@ -55,8 +55,30 @@ function subscribe(listener: Listener) {
   return () => listeners.delete(listener)
 }
 
-function getSnapshot() {
-  return { deferredPrompt, standalone }
+/**
+ * Los snapshots son PRIMITIVOS, no un objeto con los dos valores.
+ *
+ * `useSyncExternalStore` compara el snapshot con el anterior usando `Object.is`.
+ * Devolver `{ deferredPrompt, standalone }` construía un objeto nuevo en cada
+ * llamada, así que la comparación siempre daba distinto: React re-renderizaba,
+ * pedía el snapshot otra vez, volvía a diferir, y entraba en un bucle infinito
+ * que cortaba con "Maximum update depth exceeded".
+ *
+ * Con booleanos la comparación es por valor y el problema no puede repetirse.
+ * El evento en sí no hace falta durante el render — `install()` lo lee del
+ * módulo.
+ */
+function getHasPrompt() {
+  return deferredPrompt !== null
+}
+
+function getStandalone() {
+  return standalone
+}
+
+/** Snapshot de servidor: en el prerender estático no hay ni evento ni display-mode. */
+function getFalse() {
+  return false
 }
 
 /**
@@ -64,11 +86,8 @@ function getSnapshot() {
  * (sobrevive remounts del root layout).
  */
 export function usePwaInstall() {
-  const snapshot = useSyncExternalStore(
-    subscribe,
-    getSnapshot,
-    () => ({ deferredPrompt: null, standalone: false }),
-  )
+  const hasPrompt = useSyncExternalStore(subscribe, getHasPrompt, getFalse)
+  const isStandalone = useSyncExternalStore(subscribe, getStandalone, getFalse)
 
   const [ready, setReady] = useState(Platform.OS !== 'web')
 
@@ -90,12 +109,8 @@ export function usePwaInstall() {
   }, [])
 
   return {
-    canInstall:
-      Platform.OS === 'web' &&
-      ready &&
-      !!snapshot.deferredPrompt &&
-      !snapshot.standalone,
-    isStandalone: snapshot.standalone,
+    canInstall: Platform.OS === 'web' && ready && hasPrompt && !isStandalone,
+    isStandalone,
     install,
   }
 }
