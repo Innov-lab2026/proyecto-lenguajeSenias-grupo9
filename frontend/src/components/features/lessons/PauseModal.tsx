@@ -19,7 +19,7 @@ export function PauseModal({
   visible,
   onExit,
   onClose,
-  title = "Pausa",
+  title = "Práctica pausada",
   message = "Podés continuar ahora o volver más tarde.",
   closeLabel = "Continuar",
   exitLabel = "Salir"
@@ -78,14 +78,14 @@ export function PauseModal({
               label={closeLabel}
               onPress={onClose}
               variant="primary"
-              className="w-[60%] h-12"
+              className="w-1/2 h-12"
               textClassName="text-sm"
             />
             <Button
               label={exitLabel}
               onPress={onExit}
               variant="white"
-              className="w-[60%] h-12 border border-gray-300"
+              className="w-1/2 h-12 border border-gray-300"
               textClassName="text-sm"
             />
           </View>

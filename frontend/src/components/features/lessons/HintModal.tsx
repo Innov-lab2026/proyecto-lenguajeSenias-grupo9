@@ -59,7 +59,7 @@ export function HintModal({ visible, tip, onClose }: HintModalProps) {
           </View>
 
           {/* Botón de acción */}
-          <Button label="Entendido" onPress={onClose} className="mb-2" />
+          <Button label="Entendido" onPress={onClose} className="mb-2 w-1/2" />
         </View>
       </View>
     </Modal>

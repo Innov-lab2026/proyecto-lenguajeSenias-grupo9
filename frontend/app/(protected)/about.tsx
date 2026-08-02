@@ -23,11 +23,15 @@ export default function AboutScreen() {
             left: 0,
             right: 0,
             height: 120,
+            zIndex: 1,
           }}
           contentFit="fill"
         />
 
-        <Text className="font-nunito text-3xl font-bold text-white text-center z-10 relative mt-10">
+        <Text
+          className="font-nunito text-3xl font-bold text-white text-center relative mt-10"
+          style={{ zIndex: 10 }}
+        >
           Acerca de Carpiseñas
         </Text>
       </View>

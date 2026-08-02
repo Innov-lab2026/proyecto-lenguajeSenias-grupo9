@@ -1,13 +1,15 @@
 import { View, Text, Pressable, ScrollView, Alert, Modal, ActivityIndicator } from 'react-native'
 import { useState, useEffect } from 'react'
 import { Image } from 'expo-image'
-import { Ionicons } from '@expo/vector-icons'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import { cn } from '@/src/utils/cn'
 import { useFavoritesStore, type FavoriteItem } from '@/src/store/favoritesStore'
 import { useModules } from '@/src/hooks/features/lessons/useModules'
 import { useCompletedLessons } from '@/src/hooks/features/lessons/useCompletedLessons'
 import { useAllLessons } from '@/src/hooks/features/lessons/useAllLessons'
 import { LessonVideo } from '@/src/components/features/lessons/LessonVideo'
+import { VideoFrame } from '@/src/components/features/lessons/VideoFrame'
+import { LessonFooter } from '@/src/components/features/lessons/LessonFooter'
 import { usePreferencesStore } from '@/src/store/preferencesStore'
 
 /** Componente de lista de favoritos: agrupa favoritos por módulos (y su estado de bloqueo) y abecedario. */
@@ -250,42 +252,59 @@ export function FavoritesList() {
         presentationStyle="pageSheet"
         onRequestClose={() => setPlayingItem(null)}
       >
-        <View className="flex-1 max-w-2xl mx-auto justify-center items-center relative">
-          <Pressable
-            className="absolute top-10 right-5 z-50 p-2 bg-black/50 rounded-full"
-            onPress={() => setPlayingItem(null)}
-          >
-            <Ionicons name="close" size={32} color="white" />
-          </Pressable>
-          {playingItem && playingItem.videoUrl ? (
-            <View className="w-full h-full max-h-[85%] relative justify-center items-center">
-              <LessonVideo
-                uri={playingItem.videoUrl}
-                className="w-full h-full"
-                muted={isMuted}
-                autoPlay={true}
-              />
-              {/* Botón de corazón en la esquina inferior derecha para desfavoritar (estilo Instagram) */}
-              <Pressable
-                onPress={() => favoritesStore.toggleFavorite(playingItem)}
-                accessibilityRole="button"
-                accessibilityLabel={
-                  favoritesStore.isFavorite(playingItem.id)
-                    ? 'Quitar de favoritos'
-                    : 'Añadir a favoritos'
-                }
-                hitSlop={8}
-                className="absolute bottom-6 right-6 h-14 w-14 items-center justify-center rounded-full bg-black/40 z-50 border border-white/20 active:scale-95"
-              >
-                <Ionicons
-                  name={favoritesStore.isFavorite(playingItem.id) ? 'heart' : 'heart-outline'}
-                  size={30}
-                  color={favoritesStore.isFavorite(playingItem.id) ? '#EF4444' : '#FFFFFF'}
-                />
-              </Pressable>
+        <SafeAreaView className="flex-1 bg-background" edges={['top', 'bottom']}>
+          {/* Header del modal con título del video */}
+          <View className="flex-row items-center justify-between w-full px-5 pt-4 pb-2">
+            <View className="flex-1">
+              <Text className="font-nunito text-2xl font-bold text-ink text-center">
+                {playingItem?.title ? (playingItem.title.startsWith('Nivel') ? playingItem.title.split(',')[1].trim() : playingItem.title) : ''}
+              </Text>
+              {playingItem?.subtitle && (
+                <Text className="font-nunito text-sm text-muted text-center mt-1">
+                  {playingItem.subtitle}
+                </Text>
+              )}
             </View>
-          ) : null}
-        </View>
+          </View>
+
+          {/* Área de Contenido con VideoFrame */}
+          <View className="flex-1 items-center justify-center py-4 px-5">
+            {playingItem && playingItem.videoUrl ? (
+              <VideoFrame className="mb-2">
+                <LessonVideo
+                  uri={playingItem.videoUrl}
+                  className="flex-1 w-full rounded-[32px]"
+                  muted={isMuted}
+                  autoPlay={true}
+                />
+              </VideoFrame>
+            ) : (
+              <ActivityIndicator size="large" color="#4A90E2" />
+            )}
+          </View>
+
+          {/* Navbar inferior del modal usando LessonFooter */}
+          <LessonFooter
+            ctaLabel=""
+            ctaDisabled={false}
+            onNext={() => { }}
+            showBack={true}
+            onBack={() => setPlayingItem(null)}
+            onSettings={() => { }}
+            isFavorite={playingItem ? favoritesStore.isFavorite(playingItem.id) : false}
+            onToggleFavorite={() => {
+              if (playingItem) {
+                favoritesStore.toggleFavorite(playingItem)
+              }
+            }}
+            hintViewed={false}
+            onHint={() => { }}
+            showSettingsButton={false}
+            showFavoriteButton={true}
+            showHintButton={false}
+            showCTA={false}
+          />
+        </SafeAreaView>
       </Modal>
     </View>
   )

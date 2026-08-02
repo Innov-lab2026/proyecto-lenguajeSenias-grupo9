@@ -121,13 +121,13 @@ export function FeedbackModal({
         </View>
       )}
 
-      <View className="w-full gap-3 mt-4">
+      <View className="w-full gap-3 mt-4 items-center">
         {isCorrect ? (
-          <Button label="Siguiente" onPress={onNext} />
+          <Button label="Siguiente" onPress={onNext} className="w-1/2" />
         ) : (
           <>
-            <Button label="Reintentar" onPress={onRetry} variant="primary" />
-            <Button label="Volver" onPress={onExit} variant="white" className="border-2 border-primary" />
+            <Button label="Reintentar" onPress={onRetry} variant="primary" className="w-1/2" />
+            <Button label="Volver" onPress={onExit} variant="white" className="w-1/2 border-2 border-primary" />
           </>
         )}
       </View>

@@ -180,7 +180,7 @@ export function LessonSummary({ result, isPending, nextLevel, contentKey, onClos
         <Button
           label={buttonLabel}
           onPress={onContinue}
-          className="z-30 w-56" // Usamos el ancho estándar (w-1/2 self-center) y garantizamos el nivel de zIndex
+          className="z-30 w-1/2" // Usamos el ancho estándar (w-1/2 self-center) y garantizamos el nivel de zIndex
           disabled={isPending}
         />
       </View>

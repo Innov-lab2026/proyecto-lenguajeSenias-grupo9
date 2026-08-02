@@ -94,10 +94,7 @@ export default function LetterScreen() {
         {/* Header */}
         <View className="flex-row items-center justify-between w-full">
           <View className="flex-1">
-            <Text className="font-nunito text-2xl font-bold text-ink">Letra {letter ?? '?'}</Text>
-            <Text className="font-nunito text-xs text-muted">
-              {'Mirá el video para aprender la seña. Después, ¡practicá vos!'}
-            </Text>
+            <Text className="font-nunito text-3xl text-center font-bold text-ink">Letra {letter ?? '?'}</Text>
           </View>
         </View>
 
@@ -136,6 +133,14 @@ export default function LetterScreen() {
               </Text>
             </VideoFrame>
           )}
+        </View>
+
+        <View className="flex-row items-center justify-between w-full">
+          <View className="flex-1">
+            <Text className="font-nunito text-center text-lg">
+              {'Mirá el video para aprender la seña.'}
+            </Text>
+          </View>
         </View>
 
       </View>
@@ -218,14 +223,14 @@ export default function LetterScreen() {
           <LessonFooter
             ctaLabel=""
             ctaDisabled={false}
-            onNext={() => {}}
+            onNext={() => { }}
             showBack={true}
             onBack={() => setShowPractice(false)}
-            onSettings={() => {}}
+            onSettings={() => { }}
             isFavorite={false}
-            onToggleFavorite={() => {}}
+            onToggleFavorite={() => { }}
             hintViewed={false}
-            onHint={() => {}}
+            onHint={() => { }}
             showSettingsButton={false}
             showFavoriteButton={false}
             showHintButton={false}

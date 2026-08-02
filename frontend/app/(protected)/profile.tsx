@@ -64,6 +64,7 @@ export default function ProfileScreen() {
   const [savingAvatar, setSavingAvatar] = useState(false)
   const [showLogoutModal, setShowLogoutModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [showAvatarModal, setShowAvatarModal] = useState(false)
   const [deleteStep, setDeleteStep] = useState(1)
   const [deletingAccount, setDeletingAccount] = useState(false)
   const isMuted = usePreferencesStore((s) => s.isMuted)
@@ -218,7 +219,7 @@ export default function ProfileScreen() {
             </View>
             <Pressable
               className="absolute bottom-0 right-0 bg-[#A3D0FC] w-10 h-10 rounded-full items-center justify-center border-4 border-white shadow-sm"
-              onPress={() => void pickAvatar()}
+              onPress={() => setShowAvatarModal(true)}
               disabled={savingAvatar}
             >
               <Ionicons name="pencil" size={16} color="#1F2937" />
@@ -228,11 +229,6 @@ export default function ProfileScreen() {
           <Text className="font-nunito text-3xl font-bold text-ink mt-4 mb-2 text-center">
             {fullName}
           </Text>
-          {profile?.avatar_url && (
-            <Pressable onPress={() => void removeAvatar()} className="mt-1">
-              <Text className="font-nunito text-sm font-bold text-red-600">Eliminar foto</Text>
-            </Pressable>
-          )}
         </View>
       </View>
 
@@ -490,6 +486,57 @@ export default function ProfileScreen() {
                 </View>
               </>
             )}
+          </View>
+        </View>
+      </Modal>
+
+      {/* Modal para Editar Foto de Perfil */}
+      <Modal
+        visible={showAvatarModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowAvatarModal(false)}
+      >
+        <View className="flex-1 bg-black/50 items-center justify-center px-6">
+          <View className="w-full max-w-[340px] bg-white rounded-3xl p-6 items-center shadow-lg border border-black/5">
+            <Text className="font-nunito text-xl font-bold text-ink text-center mb-6 mt-2 leading-relaxed">
+              Editar foto de perfil
+            </Text>
+
+            <View className="w-full gap-3 mb-4 items-center">
+              <Button
+                label="Cambiar foto"
+                variant="primary"
+                onPress={() => {
+                  setShowAvatarModal(false)
+                  void pickAvatar()
+                }}
+                disabled={savingAvatar}
+                className="w-1/2 h-12"
+                textClassName="text-sm"
+              />
+              {profile?.avatar_url ? (
+                <Button
+                  label="Borrar foto"
+                  variant="white"
+                  onPress={() => {
+                    setShowAvatarModal(false)
+                    void removeAvatar()
+                  }}
+                  disabled={savingAvatar}
+                  className="w-1/2 h-12 border border-red-200"
+                  textClassName="text-sm text-red-600 font-bold"
+                />
+              ) : null}
+            </View>
+
+            <Button
+              label="Cancelar"
+              variant="white"
+              onPress={() => setShowAvatarModal(false)}
+              className="w-1/2 border border-gray-200 mt-2"
+              textClassName="text-sm"
+            />
           </View>
         </View>
       </Modal>

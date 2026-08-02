@@ -21,7 +21,7 @@ export interface LessonSummaryConfig {
 }
 
 /** Azul oscuro para las lecciones que cierran un módulo. */
-const FOOTER_BG_CIERRE = '#3B7DD8'
+const FOOTER_BG_CIERRE = '#1F2937'
 
 export const LESSON_SUMMARY_CONFIG: Record<string, LessonSummaryConfig> = {
   'm1-l1': { title: '¡Excelente trabajo!', subtitle: 'Completaste tu primera lección' },

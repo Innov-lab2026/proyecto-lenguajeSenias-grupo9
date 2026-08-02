@@ -31,7 +31,7 @@ export function FeedbackCompleteModal({ visible, onContinue }: FeedbackCompleteM
         {/* Espacio para estructurar mejor el footer */}
       </View>
 
-      <Button label="Continuar" onPress={onContinue} className="w-56 z-30" />
+      <Button label="Continuar" onPress={onContinue} className="w-1/2 z-30" />
     </View>
   )
 

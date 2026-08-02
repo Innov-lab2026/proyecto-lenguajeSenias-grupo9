@@ -71,29 +71,33 @@ export default function AlphabetScreen() {
 
   return (
     <View className="flex-1 bg-background">
-      <View className="flex-1 max-w-4xl mx-auto w-full" onLayout={(event) => setContentWidth(event.nativeEvent.layout.width)}>
-        {/* Encabezado azul con imagen nubeblanca_abc.svg */}
-        <View
-          className="w-full bg-[#4A90E2] items-center justify-end pb-5 relative"
-          style={{ paddingTop: insets.top + 14 }}
+      {/* Encabezado azul con imagen nubeblanca_abc.svg */}
+      <View
+        className="w-full bg-[#4A90E2] items-center justify-end pb-5 relative"
+        style={{ paddingTop: insets.top + 14, zIndex: 10 }}
+      >
+        <Image
+          source={require('@/assets/images/abecedario/nubeblanca_abc.svg')}
+          className="absolute top-0 bottom-0"
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 120,
+            zIndex: 1,
+          }}
+          contentFit="fill"
+        />
+        <Text
+          className="font-nunito text-3xl font-bold text-white text-center relative mt-10"
+          style={{ zIndex: 10 }}
         >
-          <Image
-            source={require('@/assets/images/abecedario/nubeblanca_abc.svg')}
-            className="absolute top-0 bottom-0"
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              height: 120,
-            }}
-            contentFit="fill"
-          />
-          <Text className="font-nunito text-3xl font-bold text-white text-center z-10 relative mt-10">
-            Abecedario
-          </Text>
-        </View>
+          Abecedario
+        </Text>
+      </View>
 
+      <View className="flex-1 max-w-4xl mx-auto w-full" onLayout={(event) => setContentWidth(event.nativeEvent.layout.width)}>
         {/* Grilla con fondo blanco y esquinas superiores redondeadas con padding superior e inferior */}
         <View
           className="flex-1 bg-background rounded-t-4xl -mt-0 pt-8 pb-4"
@@ -153,8 +157,8 @@ export default function AlphabetScreen() {
 
       <PauseModal
         visible={pausedLetter !== null}
-        title="Pausa"
-        message={`Pausaste la práctica de la letra ${pausedLetter}. ¿Querés continuar con ella o elegir otra?`}
+        title="Práctica pausada"
+        message={`Pausaste la práctica de la letra ${pausedLetter}. ¿Querés continuar o elegir otra?`}
         closeLabel="Continuar"
         exitLabel="Elegir otra"
         onClose={() => {

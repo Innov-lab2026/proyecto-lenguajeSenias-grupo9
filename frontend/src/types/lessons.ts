@@ -136,14 +136,14 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
       {
         id: 'm1-l1-content-1',
         type: 'content',
-        contentTitle: '¿Cómo estás?',
+        contentTitle: 'Observá la siguiente seña.\n¿Cómo estás?',
         subtitle: '¿Cómo estás?',
         videoId: V.COMO_ESTAS,
       },
       {
         id: 'm1-l1-content-2',
         type: 'content',
-        contentTitle: '¿Cómo te llamás?',
+        contentTitle: 'Observá la siguiente seña.\n¿Cómo te llamás?',
         subtitle: '¿Cómo te llamás?',
         videoId: V.COMO_TE_LLAMAS,
       },
@@ -155,7 +155,7 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
         // identificar la PALABRA que representa, no "el video" — eso implicaría
         // varios videos para comparar, y acá sólo hay uno.
         subtitle: 'Quiz: Presentaciones',
-        question: '¿Qué palabra representa esta seña?',
+        question: '¿Qué representa la seña?',
         options: ['¿Cómo estás?', '¿Cómo te llamás?'],
         videoIds: {
           '¿Cómo estás?': V.COMO_ESTAS,
@@ -264,27 +264,30 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
         id: 'm1-l5-content-1',
         type: 'content',
         subtitle: 'Charla: Presentaciones',
-        contentTitle: 'Conversar',
-        // ⚠️ Relleno provisorio: falta grabar la conversación completa.
-        videoId: V.HOLA_COMO_ESTAS,
+        contentTitle: 'Observá las siguientes 3 palabras para continuar.',
+        options: ['Bien', 'Más o menos', '¿cómo te llamás?'],
+        videoIds: {
+          'Bien': V.BIEN,
+          'Más o menos': V.MAS_O_MENOS,
+          '¿cómo te llamás?': V.COMO_TE_LLAMAS,
+        },
       },
       {
         id: 'm1-l5-dialogue',
         type: 'dialogue',
         subtitle: 'Completar charla: Presentaciones',
         question: 'Completá la conversación arrastrando cada palabra a su lugar.',
-        // ⚠️ Relleno provisorio (ver arriba).
         videoId: V.HOLA_COMO_ESTAS,
-        options: ['¿cómo te llamás?', 'Bien', 'De nada', 'Adiós', 'Por favor'],
+        options: ['¿cómo te llamás?', 'Bien', 'De nada', 'Adiós', 'Por favor', 'Más o menos'],
         dialogue: [
-          { speaker: 'Ana', text: 'Hola, [blank].' },
+          { speaker: 'Pedro', text: 'Hola, [blank].' },
           { speaker: 'Juan', text: 'Hola, soy Juan. ¿Y vos?' },
-          { speaker: 'Ana', text: 'Ana. ¿Cómo estás?' },
+          { speaker: 'Pedro', text: 'Pedro. ¿Cómo estás?' },
           { speaker: 'Juan', text: '[blank], gracias.' },
-          { speaker: 'Ana', text: '[blank].' },
+          { speaker: 'Pedro', text: '[blank].' },
         ],
         // Las respuestas van en el orden en que aparecen los [blank].
-        correctAnswer: '¿cómo te llamás?|Bien|De nada',
+        correctAnswer: '¿cómo te llamás?|Bien|Más o menos',
       },
     ],
   },
@@ -426,9 +429,9 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
         videoId: V.ME_PRESTAS_TELEFONO,
         options: ['Hola, ¿cómo te llamás?', 'Hola, ¿cómo estás?', 'teléfono', 'Gracias', 'Luz', 'Adiós'],
         dialogue: [
-          { speaker: 'Ana', text: '[blank].' },
-          { speaker: 'Ana', text: 'Me prestás un [blank] por favor.' },
-          { speaker: 'Ana', text: '[blank] ¡Chau!' },
+          { speaker: 'Pedro', text: '[blank].' },
+          { speaker: 'Pedro', text: 'Me prestás un [blank] por favor.' },
+          { speaker: 'Pedro', text: '[blank] ¡Chau!' },
         ],
         // Las respuestas van en el orden en que aparecen los [blank].
         correctAnswer: 'Hola, ¿cómo estás?|teléfono|Gracias',

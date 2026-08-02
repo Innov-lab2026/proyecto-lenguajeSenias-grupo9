@@ -93,7 +93,7 @@ export function useLessonEngine({ lessonId, lessonNumber, contentKey }: UseLesso
   const [showSettings, setShowSettings] = useState(false)
   const [showHint, setShowHint] = useState(false)
   const [hintViewed, setHintViewed] = useState<Record<number, boolean>>({})
-  
+
   const favoritesStore = useFavoritesStore()
   useEffect(() => {
     favoritesStore.loadFavorites()
@@ -130,6 +130,7 @@ export function useLessonEngine({ lessonId, lessonNumber, contentKey }: UseLesso
       const targetStepIds = [
         'm1-l2-content-interactive',
         'm1-l4-content-interactive',
+        'm1-l5-content-1',
         'm2-l2-content-interactive',
         'm2-l4-content-interactive',
       ]
@@ -422,7 +423,7 @@ export function useLessonEngine({ lessonId, lessonNumber, contentKey }: UseLesso
 
   const toggleFavorite = () => {
     if (!currentStep?.id) return
-    
+
     let title = 'Ejercicio'
     let moduleNumber = 1
     const match = contentKey?.match(/m(\d+)-l(\d+)/)

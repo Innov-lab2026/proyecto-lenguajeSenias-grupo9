@@ -46,7 +46,7 @@ export function LessonFooter({
   return (
     <View className="bg-background">
       {showCTA && (
-        <View className="px-4 pt-2 pb-3 mx-auto w-full max-w-sm">
+        <View className="px-4 pt-2 pb-3 mx-auto w-1/2">
           <Button label={ctaLabel} onPress={onNext} disabled={ctaDisabled} />
         </View>
       )}
