@@ -3,10 +3,10 @@
   "name": "CarpiSeñas",
   "short_name": "CarpiSeñas",
   "description": "Aprendé Lengua de Señas Argentina jugando",
-  "start_url": "/abrir/",
+  "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "orientation": "portrait",
+  "orientation": "any",
   "background_color": "#F8FAFC",
   "theme_color": "#4A90E2",
   "lang": "es-AR",
@@ -29,12 +29,5 @@
       "type": "image/png",
       "purpose": "maskable"
     }
-  ],
-  "related_applications": [
-    {
-      "platform": "webapp",
-      "url": "https://carpisenias.vercel.app/manifest.json"
-    }
-  ],
-  "prefer_related_applications": false
+  ]
 }

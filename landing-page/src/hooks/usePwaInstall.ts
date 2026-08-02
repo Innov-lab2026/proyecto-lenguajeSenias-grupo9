@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState, useSyncExternalStore } from 'react'
+import { APP_URL } from '../constants/app'
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>
@@ -32,7 +33,7 @@ function markInstalled() {
   try {
     localStorage.setItem(STORAGE_KEY, '1')
   } catch {
-    // ignore quota / private mode
+    // ignore
   }
   emit()
 }
@@ -45,7 +46,6 @@ function isStandaloneDisplay(): boolean {
   return media || iosStandalone
 }
 
-/** Arrancar lo antes posible para no perder beforeinstallprompt. */
 export function startPwaInstallListener() {
   if (listening || typeof window === 'undefined') return
   listening = true
@@ -66,6 +66,12 @@ export function startPwaInstallListener() {
   window.addEventListener('appinstalled', () => {
     markInstalled()
   })
+
+  if ('serviceWorker' in navigator) {
+    void navigator.serviceWorker.register('/sw.js').catch(() => {
+      // Sin SW igual puede instalarse en Chrome modernos
+    })
+  }
 }
 
 function subscribe(listener: Listener) {
@@ -74,7 +80,6 @@ function subscribe(listener: Listener) {
   return () => listeners.delete(listener)
 }
 
-/** Snapshots primitivos: un objeto nuevo en cada getSnapshot rompe useSyncExternalStore. */
 function getHasPrompt() {
   return deferredPrompt !== null
 }
@@ -87,41 +92,42 @@ function getFalse() {
   return false
 }
 
+/** Descarga un acceso directo (.url) a la app — no navega la pestaña actual. */
+export function downloadAppShortcut() {
+  const body = `[InternetShortcut]\r\nURL=${APP_URL}\r\n`
+  const blob = new Blob([body], { type: 'application/internet-shortcut' })
+  const href = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = href
+  a.download = 'CarpiSeñas.url'
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  URL.revokeObjectURL(href)
+}
+
 /**
- * Prompt nativo de instalación PWA en la landing (mismo origen / Netlify).
+ * Prompt nativo del navegador (manifest / beforeinstallprompt).
+ * Nunca redirige a Vercel.
  */
 export function usePwaInstall() {
   const hasPrompt = useSyncExternalStore(subscribe, getHasPrompt, getFalse)
   const storedInstalled = useSyncExternalStore(subscribe, getInstalled, getFalse)
 
   const [ready, setReady] = useState(false)
-  const [relatedInstalled, setRelatedInstalled] = useState(false)
 
   useEffect(() => {
     startPwaInstallListener()
     setReady(true)
-
-    const nav = navigator as Navigator & {
-      getInstalledRelatedApps?: () => Promise<Array<{ platform: string }>>
-    }
-    if (typeof nav.getInstalledRelatedApps !== 'function') return
-
-    let cancelled = false
-    void nav
-      .getInstalledRelatedApps()
-      .then((apps) => {
-        if (!cancelled && apps.length > 0) setRelatedInstalled(true)
-      })
-      .catch(() => {
-        // API no disponible
-      })
-    return () => {
-      cancelled = true
-    }
   }, [])
 
   const install = useCallback(async () => {
+    // Esperar un toque por si el evento llega tarde
+    if (!deferredPrompt) {
+      await new Promise((r) => setTimeout(r, 400))
+    }
     if (!deferredPrompt) return { ok: false as const, reason: 'unavailable' as const }
+
     const promptEvent = deferredPrompt
     await promptEvent.prompt()
     const { outcome } = await promptEvent.userChoice
@@ -133,13 +139,12 @@ export function usePwaInstall() {
       : { ok: false as const, reason: 'dismissed' as const }
   }, [])
 
-  const isInstalled = storedInstalled || relatedInstalled
-
   return {
     ready,
-    canInstall: ready && hasPrompt && !isInstalled,
-    isInstalled,
+    canInstall: ready && hasPrompt && !storedInstalled,
+    isInstalled: storedInstalled,
     hasPrompt,
     install,
+    markInstalled,
   }
 }
