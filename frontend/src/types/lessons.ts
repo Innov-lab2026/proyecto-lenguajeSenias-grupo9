@@ -306,11 +306,11 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
         videoId: V.HOLA_COMO_ESTAS,
         options: ['¿cómo te llamás?', 'Bien', 'De nada', 'Adiós', 'Por favor', 'Más o menos'],
         dialogue: [
-          { speaker: 'Pedro', text: 'Hola, [blank].' },
-          { speaker: 'Juan', text: 'Hola, soy Juan. ¿Y vos?' },
-          { speaker: 'Pedro', text: 'Pedro. ¿Cómo estás?' },
-          { speaker: 'Juan', text: '[blank], gracias.' },
-          { speaker: 'Pedro', text: '[blank].' },
+          { speaker: 'Pedro', text: 'Hola, [blank]' },
+          { speaker: 'Juan', text: 'Hola, soy Juan. Un gusto. ¿Cómo estás?' },
+          { speaker: 'Pedro', text: '[blank]. ¿Y vos?' },
+          { speaker: 'Juan', text: '[blank]. Después te cuento.' },
+          { speaker: 'Pedro', text: 'Dale, chau.' },
         ],
         // Las respuestas van en el orden en que aparecen los [blank].
         correctAnswer: '¿cómo te llamás?|Bien|Más o menos',
