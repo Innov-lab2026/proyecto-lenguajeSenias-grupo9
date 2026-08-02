@@ -12,6 +12,12 @@ interface DraggableWordProps {
    * posición de cada blank.
    */
   onDrop: (word: string, absoluteX: number, absoluteY: number) => void
+  /**
+   * Se llama al levantar la palabra. Lo usa DialogueExercise para recalcular
+   * dónde está cada blank justo antes del arrastre: el diálogo scrollea, y sus
+   * coordenadas absolutas quedan viejas sin que nada lo avise.
+   */
+  onDragStart?: () => void
   onPress?: (word: string) => void
 }
 
@@ -21,7 +27,13 @@ interface DraggableWordProps {
  * en el Animated.View) para no depender de que className funcione sobre un
  * componente animado — el View interno se encarga de todo el look visual.
  */
-export function DraggableWord({ word, disabled = false, onDrop, onPress }: DraggableWordProps) {
+export function DraggableWord({
+  word,
+  disabled = false,
+  onDrop,
+  onDragStart,
+  onPress,
+}: DraggableWordProps) {
   const translateX = useSharedValue(0)
   const translateY = useSharedValue(0)
   const isDragging = useSharedValue(false)
@@ -30,6 +42,9 @@ export function DraggableWord({ word, disabled = false, onDrop, onPress }: Dragg
     .enabled(!disabled)
     .onStart(() => {
       isDragging.value = true
+      if (onDragStart) {
+        runOnJS(onDragStart)()
+      }
     })
     .onUpdate((event) => {
       translateX.value = event.translationX
