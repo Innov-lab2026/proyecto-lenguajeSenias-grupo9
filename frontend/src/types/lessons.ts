@@ -272,7 +272,7 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
         id: 'm1-l4-matching',
         type: 'matching',
         subtitle: 'Relacionar video y expressión',
-        question: 'Uní cada video con la expresión correcta.',
+        question: 'Uní cada video con la seña correcta.',
         pairs: [
           { videoId: V.POR_FAVOR, word: 'Por favor' },
           { videoId: V.GRACIAS, word: 'Gracias' },
@@ -327,7 +327,7 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
         id: 'm2-l1-composition',
         type: 'composition',
         subtitle: 'Armar frase: Presentaciones',
-        question: 'Formá la pregunta arrastrando cada palabra a su lugar',
+        question: 'Formá la pregunta seleccionando cada palabra en orden',
         // Misma seña que enseña m1-l1: en LSA "¿Cuál es tu nombre?" y "¿Cómo te
         // llamás?" se signan igual. Se reusa el mismo video a propósito — y con
         // él el mismo id en lesson_signs, así la RPC NO vuelve a acreditar la
@@ -442,7 +442,7 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
         id: 'm2-l5-dialogue-1',
         type: 'dialogue-composition',
         subtitle: 'Charla: Pedir prestado',
-        question: 'Comenzá la conversación arrastrando la frase correcta.',
+        question: 'Comenzá la conversación seleccionando la frase correcta.',
         speaker: 'Pedro',
         videoId: V.HOLA_COMO_ESTAS,
         sentence: '[blank]',

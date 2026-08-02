@@ -20,7 +20,7 @@ export function MatchingStep({ step, matchingState, onSelect, muted = false }: M
           opciones (antes al revés: opciones flex-[1.5] contra video flex-1,
           por eso el video se veía chico y las opciones ocupaban de más). */}
       {matchingState.selectedVideo ? (
-        <VideoFrame className="flex-[2] mb-2">
+        <VideoFrame className="flex-1 mb-2">
           <LessonVideo
             key={matchingState.selectedVideo}
             uri={matchingState.selectedVideo}
@@ -29,7 +29,7 @@ export function MatchingStep({ step, matchingState, onSelect, muted = false }: M
           />
         </VideoFrame>
       ) : (
-        <VideoFrame className="flex-[2] mb-2" frameClassName="items-center justify-center px-4">
+        <VideoFrame className="flex-1 mb-2" frameClassName="items-center justify-center px-4">
           <Ionicons name="videocam-outline" size={48} color="#9BA8B1" />
           <Text className="font-nunito text-sm text-muted mt-1 text-center">Seleccioná un video</Text>
         </VideoFrame>
@@ -37,17 +37,21 @@ export function MatchingStep({ step, matchingState, onSelect, muted = false }: M
 
       <Text className="font-nunito text-lg sm:text-xl font-bold text-ink text-center py-4 px-2">{step.question}</Text>
 
-      <View className="flex-row justify-between gap-4 mb-2 w-full max-w-2xl self-center flex-1">
-        {/* Columna de Videos — antes cada opción era flex-1 (se estiraba a
-            ocupar todo el alto de la columna); ahora altura fija (h-12) y
-            centradas como grupo, así no crecen más de lo necesario. */}
+      {/* Las columnas miden lo que ocupan sus opciones (sin `flex-1`): el alto
+          de cada opción es fijo, así que si el contenedor recibía una porción
+          de flex más chica que eso, los botones se derramaban por arriba sobre
+          la consigna y por abajo sobre el footer. Ahora el sobrante lo absorbe
+          el video, que sí puede achicarse. */}
+      <View className="flex-row justify-between gap-4 mb-2 w-full max-w-2xl self-center">
+        {/* Columna de Videos — altura fija por opción (h-10) y centradas como
+            grupo, así no crecen más de lo necesario. */}
         <View className="w-[45%] justify-center gap-2">
           {step.pairs?.map((pair, index) => (
             <Pressable
               key={`video-${index}`}
               onPress={() => pair.videoUrl && onSelect('video', pair.videoUrl)}
               className={cn(
-                'h-12 rounded-2xl border-2 items-center justify-center relative',
+                'h-10 rounded-2xl border-2 items-center justify-center relative',
                 matchingState.selectedVideo === pair.videoUrl
                   ? 'bg-accent/20 border-secondary'
                   : matchingState.completedPairs.has(pair.word)
@@ -78,7 +82,7 @@ export function MatchingStep({ step, matchingState, onSelect, muted = false }: M
               onPress={() => onSelect('word', word)}
               disabled={matchingState.completedPairs.has(word)}
               className={cn(
-                'h-12 rounded-2xl border-2 items-center justify-center px-1',
+                'h-10 rounded-2xl border-2 items-center justify-center px-1',
                 matchingState.selectedWord === word
                   ? 'bg-accent/20 border-secondary'
                   : matchingState.attempts[word] === 'incorrect'

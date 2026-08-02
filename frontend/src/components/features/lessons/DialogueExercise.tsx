@@ -20,6 +20,17 @@ interface WindowRect {
 }
 
 /**
+ * Margen extra alrededor de cada blanco para dar por válido el soltado. El
+ * hueco mide 64x28, muy por debajo del mínimo recomendado para un objetivo
+ * táctil (44-48px de lado), así que exigir que el dedo caiga justo adentro
+ * hacía que la palabra volviera al banco todo el tiempo.
+ *
+ * Sólo agranda la zona de detección: visualmente el blanco no cambia.
+ */
+const DROP_TOLERANCE_X = 24
+const DROP_TOLERANCE_Y = 18
+
+/**
  * Isla 5: completar una conversación arrastrando palabras a los blancos.
  *
  * La detección de "dónde cayó" usa coordenadas ABSOLUTAS de pantalla
@@ -52,21 +63,42 @@ export function DialogueExercise({
     })
   }
 
-  useEffect(() => {
+  const measureAllBlanks = () => {
     Object.keys(blankRefs.current).forEach((key) => measureBlank(Number(key)))
+  }
+
+  // Re-mide después de cada respuesta: completar un blanco reacomoda los demás.
+  // `measureAllBlanks` queda fuera de las dependencias a propósito — se redefine
+  // en cada render y como dependencia dispararía el efecto en bucle. Sólo lee
+  // refs, así que no hay estado viejo que capturar.
+  useEffect(() => {
+    measureAllBlanks()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [answers])
 
   const handleDrop = (word: string, absoluteX: number, absoluteY: number) => {
-    const target = Object.entries(blankRects.current).find(([, rect]) =>
-      absoluteX >= rect.x &&
-      absoluteX <= rect.x + rect.width &&
-      absoluteY >= rect.y &&
-      absoluteY <= rect.y + rect.height,
+    // Candidatos: todos los blancos cuya zona ampliada contiene el punto. Con
+    // la tolerancia, dos blancos vecinos pueden solaparse, así que después se
+    // desempata por cercanía en vez de quedarse con el primero del objeto.
+    const candidates = Object.entries(blankRects.current).filter(
+      ([, rect]) =>
+        absoluteX >= rect.x - DROP_TOLERANCE_X &&
+        absoluteX <= rect.x + rect.width + DROP_TOLERANCE_X &&
+        absoluteY >= rect.y - DROP_TOLERANCE_Y &&
+        absoluteY <= rect.y + rect.height + DROP_TOLERANCE_Y,
     )
-    if (!target) return
+    if (candidates.length === 0) return
 
-    const globalIdx = Number(target[0])
-    onAnswersChange((prev) => ({ ...prev, [globalIdx]: word }))
+    const [closestIdx] = candidates.reduce((closest, candidate) => {
+      const distanceTo = ([, rect]: [string, WindowRect]) => {
+        const dx = absoluteX - (rect.x + rect.width / 2)
+        const dy = absoluteY - (rect.y + rect.height / 2)
+        return dx * dx + dy * dy
+      }
+      return distanceTo(candidate) < distanceTo(closest) ? candidate : closest
+    })
+
+    onAnswersChange((prev) => ({ ...prev, [Number(closestIdx)]: word }))
   }
 
   const clearBlank = (globalIdx: number) => {
@@ -178,6 +210,7 @@ export function DialogueExercise({
               word={option}
               disabled={isUsed}
               onDrop={handleDrop}
+              onDragStart={measureAllBlanks}
               onPress={handlePressWord}
             />
           )
