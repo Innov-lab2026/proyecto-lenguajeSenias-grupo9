@@ -13,6 +13,61 @@ import type { User } from '@/src/types/user'
 // Cierra sesiones de auth pendientes al recargar la pestaña (recomendado por Expo en web).
 WebBrowser.maybeCompleteAuthSession()
 
+/** Causas de fallo con mensaje propio; todo lo demás cae en `unknown`. */
+type GoogleAuthFailure =
+  | 'cancelled'
+  | 'in-progress'
+  | 'network'
+  | 'expired'
+  | 'session-save'
+  | 'unknown'
+
+/**
+ * Los errores de Supabase/Google vienen en inglés y con detalle técnico, así
+ * que al usuario se le muestra un texto propio. Lo importante es que el consejo
+ * coincida con la causa: decirle "probá con otro método" a quien apretó
+ * "Cancelar" en la pantalla de Google no le sirve de nada.
+ */
+const MESSAGE_BY_FAILURE: Record<GoogleAuthFailure, string> = {
+  cancelled: 'Cancelaste el ingreso con Google. Podés volver a intentarlo cuando quieras.',
+  'in-progress': 'Ya hay una ventana de ingreso abierta. Cerrala y volvé a intentar.',
+  network: 'No pudimos conectarnos. Revisá tu conexión e intentá de nuevo.',
+  expired: 'La ventana de ingreso caducó. Volvé a intentarlo.',
+  'session-save':
+    'Entraste con Google, pero no pudimos guardar la sesión en este dispositivo. Intentá de nuevo.',
+  unknown: 'Ocurrió un error. Intentá de nuevo más tarde o probá con otro método.',
+}
+
+/** Error con la causa ya identificada, para que el `catch` no tenga que adivinarla. */
+class GoogleAuthError extends Error {
+  reason: GoogleAuthFailure
+
+  constructor(reason: GoogleAuthFailure, message: string) {
+    super(message)
+    this.name = 'GoogleAuthError'
+    this.reason = reason
+  }
+}
+
+/** Fallos de red: supabase-js los envuelve y en web llegan como TypeError de fetch. */
+function isNetworkError(err: unknown): boolean {
+  if (!(err instanceof Error)) return false
+  if (err.name === 'AuthRetryableFetchError') return true
+
+  const message = err.message.toLowerCase()
+  return (
+    message.includes('network request failed') ||
+    message.includes('failed to fetch') ||
+    message.includes('networkerror')
+  )
+}
+
+function resolveFailure(err: unknown): GoogleAuthFailure {
+  if (err instanceof GoogleAuthError) return err.reason
+  if (isNetworkError(err)) return 'network'
+  return 'unknown'
+}
+
 /** Mapea el usuario de Supabase (Google) al modelo interno de la app. */
 function toGoogleUser(user: SupabaseAuthUser): User {
   const metadata = user.user_metadata ?? {}
@@ -71,6 +126,11 @@ export function useGoogleAuth() {
       // El usuario cerró el popup/navegador: no es un error, no se muestra nada.
       if (result.type === 'cancel' || result.type === 'dismiss') return
 
+      // Quedó otra sesión de auth abierta (típico al tocar dos veces el botón).
+      if (result.type === 'locked') {
+        throw new GoogleAuthError('in-progress', 'ya hay otra sesión de auth en curso')
+      }
+
       if (result.type !== 'success') {
         console.error('[useGoogleAuth] resultado inesperado del navegador:', result)
         throw new Error(`el navegador devolvió un resultado inesperado: ${result.type}`)
@@ -80,14 +140,30 @@ export function useGoogleAuth() {
       const code = returnUrl.searchParams.get('code')
       if (!code) {
         // Cuando el proveedor rechaza el flujo, el detalle viaja en la URL de retorno.
+        const providerErrorCode = returnUrl.searchParams.get('error')
         const providerError =
-          returnUrl.searchParams.get('error_description') ?? returnUrl.searchParams.get('error')
+          returnUrl.searchParams.get('error_description') ?? providerErrorCode
+
+        // `access_denied` es el usuario rechazando el permiso en la pantalla de
+        // Google, no una falla de la app. También lo devuelve Google cuando la
+        // app está en modo prueba y la cuenta no está habilitada como tester.
+        if (providerErrorCode === 'access_denied') {
+          throw new GoogleAuthError('cancelled', providerError ?? 'el usuario rechazó el permiso')
+        }
+
         throw new Error(providerError ?? 'la URL de retorno no incluye el código de autorización')
       }
 
       const { data: sessionData, error: exchangeError } =
         await supabase.auth.exchangeCodeForSession(code)
-      if (exchangeError) throw exchangeError
+      if (exchangeError) {
+        if (isNetworkError(exchangeError)) throw exchangeError
+        // Acá el motivo casi siempre es que el código ya no sirve: se perdió el
+        // code_verifier de PKCE (el flujo terminó en otro origen o se limpió el
+        // storage), el código ya se usó, o caducó por demorar en la pantalla de
+        // Google. En todos esos casos el consejo útil es reintentar de cero.
+        throw new GoogleAuthError('expired', exchangeError.message)
+      }
       if (!sessionData.session) throw new Error('el intercambio de código no devolvió una sesión')
 
       const user = toGoogleUser(sessionData.session.user)
@@ -96,16 +172,28 @@ export function useGoogleAuth() {
       // Supabase ya da el epoch de expiración; el `exp` del JWT es el respaldo.
       const expiresAt = sessionData.session.expires_at ?? getTokenExpiry(token)
 
-      await saveToken(token)
-      await saveRefreshToken(refreshToken)
-      await saveUser(user)
+      // Se distingue del resto a propósito: acá la autenticación con Google YA
+      // salió bien y lo que falla es persistirla (SecureStore en nativo,
+      // localStorage lleno o bloqueado en web). Sin un mensaje propio, el
+      // usuario ve un error genérico después de haber entrado sin problemas.
+      try {
+        await saveToken(token)
+        await saveRefreshToken(refreshToken)
+        await saveUser(user)
+      } catch (storageError) {
+        throw new GoogleAuthError(
+          'session-save',
+          `no se pudo persistir la sesión: ${String(storageError)}`,
+        )
+      }
+
       setSession(user, token, { refreshToken, expiresAt })
       router.replace('/home')
     } catch (err) {
-      // Detalle técnico a consola (para desarrollo); al usuario, un mensaje genérico
-      // accionable — los errores de Supabase/Google vienen en inglés y no le sirven.
+      // El detalle técnico va a consola (para desarrollo); al usuario se le
+      // muestra el mensaje que corresponde a la causa.
       console.error('[useGoogleAuth] falló el login con Google:', err)
-      setError('Ocurrió un error. Intentá de nuevo más tarde o probá con otro método.')
+      setError(MESSAGE_BY_FAILURE[resolveFailure(err)])
     } finally {
       setIsLoading(false)
     }
