@@ -41,7 +41,15 @@ export default function Team() {
                 </div>
 
                 <p className="self-center lg:self-end lg:mr-[10%] text-base font-semibold">
-                    Coordinador: Gustavo Ovejero
+                    Coordinador:{' '}
+                    <a
+                        href="https://www.linkedin.com/in/gustavo-ovejero/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:underline"
+                    >
+                        Gustavo Ovejero
+                    </a>
                 </p>
 
                 <ButtonSuccess className="px-10">Comienza Ya</ButtonSuccess>
