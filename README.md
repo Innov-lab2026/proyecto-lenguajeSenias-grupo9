@@ -84,7 +84,9 @@ Variables (`backend/.env`):
 | `SUPABASE_ANON_KEY` | Clave pública — login/registro |
 | `SUPABASE_SERVICE_ROLE_KEY` | Clave privada — bypassea RLS. **Nunca exponer al cliente** |
 
-Docs de la API en `http://localhost:3000/api-docs` (Swagger, sólo cubre Auth por ahora).
+Docs de la API en `http://localhost:3000/docs` (Swagger). Se generan desde los comentarios JSDoc de
+`backend/src/routes/`, así que **sólo cubren Auth por ahora**: el resto de las rutas todavía no está
+anotado. El listado completo de endpoints está en [`backend/README.md`](backend/README.md).
 
 ### 2. Frontend
 
@@ -140,8 +142,8 @@ cd frontend && npx tsc --noEmit && npm run lint
 cd backend  && npx tsc --noEmit
 ```
 
-**Baseline de lint del frontend: 21 warnings, 0 errores.** Compará contra eso, no contra cero —
-son pre-existentes (imports sin usar y `exhaustive-deps`), están catalogados en la auditoría.
+**Baseline de lint del frontend: 24 warnings, 0 errores.** Compará contra eso, no contra cero — son
+pre-existentes (imports sin usar y `exhaustive-deps`). Si tu cambio suma warnings, revisalo.
 
 ---
 
@@ -151,14 +153,13 @@ El detalle por paquete y por feature:
 
 | Dónde | Qué hay |
 |---|---|
-| [`frontend/README.md`](frontend/README.md) | Onboarding del frontend: estructura de carpetas, convenciones |
+| [`frontend/README.md`](frontend/README.md) | Onboarding del frontend: instalación paso a paso, rutas, estructura, convenciones y tipos de ejercicio |
+| [`backend/README.md`](backend/README.md) | Onboarding del backend: puesta en marcha, listado completo de endpoints, arquitectura por capas, modelo de datos y seguridad |
+| [`landing-page/README.md`](landing-page/README.md) | Landing: stack, estructura y relación con la app |
 | [`frontend/CLAUDE.md`](frontend/CLAUDE.md) | Reglas de código y stack del frontend |
 | [`frontend/DOCS/AUTH_IMPLEMENTATION.md`](frontend/DOCS/AUTH_IMPLEMENTATION.md) | Auth de punta a punta: sesión, refresh, guards |
 | [`frontend/DOCS/LEARNING_SYSTEM_IMPLEMENTATION.md`](frontend/DOCS/LEARNING_SYSTEM_IMPLEMENTATION.md) | Sistema de lecciones y progreso: schema, RPCs, decisiones |
 | [`frontend/DOCS/LESSONS_UI_IMPLEMENTATION.md`](frontend/DOCS/LESSONS_UI_IMPLEMENTATION.md) | UI de la pantalla de lección |
-| [`landing-page/README.md`](landing-page/README.md) | Landing: stack y estructura |
-
-
 
 > ⚠️ Los archivos de `DOCS/` describen bien el **por qué** de cada decisión, pero algunos tienen
 > secciones de "pendientes" desactualizadas (features que ya se implementaron después).
@@ -169,12 +170,56 @@ El detalle por paquete y por feature:
 
 Lo que funciona hoy de punta a punta contra la base real: auth (email + Google), el camino de
 islas del home, las 10 lecciones de los Módulos 1 y 2, el abecedario completo (30 letras con
-video), favoritos, y las recompensas con compra de stickers.
+video), favoritos, y las recompensas con compra de stickers. La app además es **instalable como
+PWA** desde el navegador o desde la landing.
 
 Lo principal que falta:
 
-- **Videos de las dos conversaciones** (`m1-l5` y `m2-l5`): esas lecciones se pueden jugar, pero
-  usan un video de relleno y no acreditan señas. 
+- **Acreditación de señas en las conversaciones** (`m1-l5` y `m2-l5`): las lecciones se juegan con
+  videos reales y dan XP y puntos, pero **acreditan 0 señas**. Falta sembrar sus filas en
+  `lesson_signs`; el detalle de cómo hacerlo está documentado en la propia migración
+  `backend/supabase/migrations/20260730000002_seed_lesson_signs.sql`.
 - **Módulo 3**: sembrado en la base pero sin lecciones — queda bloqueado por diseño.
 - **Testing**: no hay runner instalado en ningún paquete.
 - **Recuperar contraseña**: la pantalla existe, el flujo no está implementado.
+- **Swagger**: sólo Auth está anotado; faltan los JSDoc del resto de las rutas.
+
+---
+
+## Equipo
+
+CarpiSeñas es un proyecto grupal. Los nombres enlazan a LinkedIn.
+
+### 🎯 Coordinación
+
+- **[Gustavo Ovejero](https://www.linkedin.com/in/gustavo-ovejero/)**
+
+### 📊 Data Analytics
+
+Datasets, métricas y visualizaciones para entrenar y mejorar el modelo de reconocimiento de señas.
+
+- **[Matías De Vivo](https://www.linkedin.com/in/matiasdevivo/)** — [GitHub](https://github.com/matiasdevivo)
+- **[Inés Abarrategui](https://www.linkedin.com/in/mariainesabarrateguif/)** — [GitHub](https://github.com/minesaba)
+- **[Julián Outeyral](https://www.linkedin.com/in/julian-outeyral/)** — [GitHub](https://github.com/Outeyral)
+
+### 🎨 Diseño UX/UI
+
+Research, wireframes y prototipos; interfaces accesibles y responsivas.
+
+- **Sol Diessler**
+- **[Belén Coronel](https://www.linkedin.com/in/belencoronel/)** — [GitHub](https://github.com/BeluCoronel)
+- **[Karina Rosa](https://www.linkedin.com/in/karinarosadev)** — [GitHub](https://github.com/karinarosadev)
+
+### 💻 FullStack
+
+La app móvil y web, la API y la base: los tres paquetes de este repo.
+
+- **[Ezequiel Oliver](https://www.linkedin.com/in/ezequiel-oliver/)** — [GitHub](https://github.com/Oliver-92)
+- **[Roberto Bezerra](https://www.linkedin.com/in/rbezerra18/)** — [GitHub](https://github.com/rbezerra18)
+
+### 🧪 Testing QA
+
+Casos de prueba funcionales y de usabilidad sobre cada entrega.
+
+- **[Yamila Martín](https://www.linkedin.com/in/mar%C3%ADa-yamila-mart%C3%ADn-8a071b210/)** — [GitHub](https://github.com/YamiMartin)
+- **[Inés Abarrategui](https://www.linkedin.com/in/mariainesabarrateguif/)** — [GitHub](https://github.com/minesaba)
