@@ -14,7 +14,7 @@ export const teamData = {
         members: [
             { name: "Sol Diessler", linkedin: "", github: "" },
             { name: "Belén Coronel", linkedin: "https://www.linkedin.com/in/belencoronel/", github: "https://github.com/BeluCoronel" },
-            { name: "Karina Rosa", linkedin: "https://www.linkedin.com/in/karinarosadev", github: "" }
+            { name: "Karina Rosa", linkedin: "https://www.linkedin.com/in/karinarosadev", github: "https://github.com/karinarosadev" }
         ]
     },
     frontend: {
