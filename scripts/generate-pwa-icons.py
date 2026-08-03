@@ -1,4 +1,4 @@
-"""Generate crisp transparent paw PWA icons from logoDownload.svg (or fallback)."""
+"""Generate crisp transparent paw assets for PWA + floating button."""
 from __future__ import annotations
 
 import base64
@@ -11,12 +11,11 @@ from PIL import Image
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ASSETS = os.path.join(ROOT, "landing-page", "src", "assets")
 SVG_PATH = os.path.join(ASSETS, "logoDownload.svg")
-PAW_CACHE = os.path.join(ASSETS, "logoDownload-paw.png")
+PAW_BUTTON = os.path.join(ASSETS, "logoDownload-paw.png")
 CARPI_PATH = os.path.join(ASSETS, "carpi.jpg")
 
 
 def load_source_paw() -> Image.Image:
-    """Prefer the high-res PNG embedded in logoDownload.svg."""
     if os.path.isfile(SVG_PATH):
         data = open(SVG_PATH, encoding="utf-8").read()
         m = re.search(r'(?:xlink:)?href="data:image/png;base64,([^"]+)"', data)
@@ -25,17 +24,14 @@ def load_source_paw() -> Image.Image:
             img = Image.open(io.BytesIO(raw)).convert("RGBA")
             print("source: logoDownload.svg embedded PNG", img.size)
             return img
-
-    if os.path.isfile(PAW_CACHE):
-        print("source: logoDownload-paw.png")
-        return Image.open(PAW_CACHE).convert("RGBA")
-
+    if os.path.isfile(PAW_BUTTON):
+        print("source: existing logoDownload-paw.png")
+        return Image.open(PAW_BUTTON).convert("RGBA")
     print("source: carpi.jpg (fallback)")
     return Image.open(CARPI_PATH).convert("RGBA")
 
 
 def remove_dark_background(img: Image.Image) -> Image.Image:
-    """Make near-black / flat dark bg transparent with soft edge."""
     img = img.convert("RGBA")
     pixels = img.load()
     w, h = img.size
@@ -44,18 +40,17 @@ def remove_dark_background(img: Image.Image) -> Image.Image:
             r, g, b, a = pixels[x, y]
             if a == 0:
                 continue
-            # fondo negro / casi negro del export
             if r < 40 and g < 40 and b < 40:
                 pixels[x, y] = (0, 0, 0, 0)
                 continue
-            # suavizar borde oscuro residual
             if r < 55 and g < 55 and b < 55:
                 fade = int(255 * ((max(r, g, b) - 40) / 15))
                 pixels[x, y] = (r, g, b, max(0, min(255, fade)))
     return img
 
 
-def make_square(img: Image.Image, size: int, pad_ratio: float = 0.1) -> Image.Image:
+def make_square(img: Image.Image, size: int, pad_ratio: float) -> Image.Image:
+    """Crop to content, center on transparent square, resize."""
     bbox = img.getbbox()
     cropped = img.crop(bbox) if bbox else img
     cw, ch = cropped.size
@@ -65,7 +60,6 @@ def make_square(img: Image.Image, size: int, pad_ratio: float = 0.1) -> Image.Im
     ox = (canvas.size[0] - cw) // 2
     oy = (canvas.size[1] - ch) // 2
     canvas.paste(cropped, (ox, oy), cropped)
-    # Upscale via LANCZOS from a larger intermediate when shrinking from 1024
     return canvas.resize((size, size), Image.Resampling.LANCZOS)
 
 
@@ -75,38 +69,48 @@ def save_png(img: Image.Image, path: str) -> None:
 
 
 def main() -> None:
-    paw = remove_dark_background(load_source_paw())
+    raw = remove_dark_background(load_source_paw())
 
-    # Cache transparent paw for the floating button UI
-    ui_paw = make_square(paw, 512, pad_ratio=0.06)
-    save_png(ui_paw, PAW_CACHE)
+    # Botón flotante: misma composición que el SVG (sin cropear), a 512px.
+    button_paw = raw.resize((512, 512), Image.Resampling.LANCZOS)
+    save_png(button_paw, PAW_BUTTON)
 
     targets = [
         os.path.join(ROOT, "frontend", "public", "icons"),
         os.path.join(ROOT, "landing-page", "public", "icons"),
     ]
 
-    # Más tamaños = menos pixelado en escritorio / Android
-    sizes = {
+    # Íconos PWA: pata más grande y bien centrada (poco padding)
+    sizes_any = {
         "icon-192.png": 192,
         "icon-512.png": 512,
         "icon-1024.png": 1024,
-        "apple-touch-icon.png": 180,
     }
 
     for folder in targets:
         os.makedirs(folder, exist_ok=True)
-        for name, size in sizes.items():
-            icon = make_square(paw, size, pad_ratio=0.1)
-            out = os.path.join(folder, name)
-            if name == "apple-touch-icon.png":
-                # iOS no soporta transparencia: fondo claro de la marca
-                bg = Image.new("RGBA", (size, size), (248, 250, 252, 255))
-                bg.paste(icon, (0, 0), icon)
-                save_png(bg, out)
-            else:
-                # Pata sola, fondo transparente, sin flecha
-                save_png(icon, out)
+
+        for name, size in sizes_any.items():
+            # pad chico → pata más grande en el ícono
+            icon = make_square(raw, size, pad_ratio=0.04)
+            save_png(icon, os.path.join(folder, name))
+
+        # Apple: fondo claro + pata grande centrada
+        apple_size = 180
+        apple_paw = make_square(raw, apple_size, pad_ratio=0.06)
+        apple = Image.new("RGBA", (apple_size, apple_size), (248, 250, 252, 255))
+        apple.paste(apple_paw, (0, 0), apple_paw)
+        save_png(apple, os.path.join(folder, "apple-touch-icon.png"))
+
+        # Maskable: fondo claro + pata grande (~78% del canvas, centrada)
+        for size in (192, 512, 1024):
+            bg = Image.new("RGBA", (size, size), (248, 250, 252, 255))
+            inner = int(size * 0.78)
+            icon = make_square(raw, inner, pad_ratio=0.02)
+            ox = (size - inner) // 2
+            oy = (size - inner) // 2
+            bg.paste(icon, (ox, oy), icon)
+            save_png(bg, os.path.join(folder, f"icon-maskable-{size}.png"))
 
 
 if __name__ == "__main__":

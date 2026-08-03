@@ -1,10 +1,18 @@
-/* Service worker mínimo: ayuda a que Chrome ofrezca “Instalar app”. */
+/* Service worker mínimo — bump v3 para invalidar caché vieja. */
+const CACHE_BUST = 'carpisenias-pwa-v3'
+
 self.addEventListener('install', (event) => {
   event.waitUntil(self.skipWaiting())
 })
 
 self.addEventListener('activate', (event) => {
-  event.waitUntil(self.clients.claim())
+  event.waitUntil(
+    (async () => {
+      const keys = await caches.keys()
+      await Promise.all(keys.filter((k) => k !== CACHE_BUST).map((k) => caches.delete(k)))
+      await self.clients.claim()
+    })(),
+  )
 })
 
 self.addEventListener('fetch', (event) => {

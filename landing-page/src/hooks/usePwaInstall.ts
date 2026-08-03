@@ -7,8 +7,8 @@ type BeforeInstallPromptEvent = Event & {
 
 type Listener = () => void
 
-/** v2: invalida el flag viejo del fallback .url que abría Vercel. */
-const STORAGE_KEY = 'carpisenias-pwa-installed-v2'
+/** v3: reset flags viejos de pruebas de instalación. */
+const STORAGE_KEY = 'carpisenias-pwa-installed-v3'
 
 let deferredPrompt: BeforeInstallPromptEvent | null = null
 let installedFlag = false
@@ -33,6 +33,7 @@ function markInstalled() {
   try {
     localStorage.setItem(STORAGE_KEY, '1')
     localStorage.removeItem('carpisenias-pwa-installed')
+    localStorage.removeItem('carpisenias-pwa-installed-v2')
   } catch {
     // ignore
   }
@@ -95,7 +96,6 @@ function getFalse() {
 
 /**
  * Prompt nativo del navegador (manifest / beforeinstallprompt).
- * Nunca navega ni descarga archivos .url (eso abría Vercel).
  */
 export function usePwaInstall() {
   const hasPrompt = useSyncExternalStore(subscribe, getHasPrompt, getFalse)
@@ -127,7 +127,6 @@ export function usePwaInstall() {
 
   return {
     ready,
-    /** Solo true cuando el navegador YA puede mostrar el diálogo Instalar. */
     canInstall: ready && hasPrompt && !storedInstalled,
     isInstalled: storedInstalled,
     hasPrompt,

@@ -9,9 +9,7 @@ function isIos(): boolean {
 
 /**
  * Botón flotante de instalación PWA.
- * - Si el navegador ofrece beforeinstallprompt → solo ese diálogo (nada de abrir páginas).
- * - Si no → tip de cómo instalar; nunca navega ni descarga .url.
- * - Se oculta si ya está instalada.
+ * Pata + flecha alineadas al SVG original (viewBox 183×183).
  */
 export default function InstallPWAButton() {
   const { canInstall, isInstalled, install, ready } = usePwaInstall()
@@ -20,7 +18,7 @@ export default function InstallPWAButton() {
 
   useEffect(() => {
     if (!tip) return
-    const t = window.setTimeout(() => setTip(null), 8000)
+    const t = window.setTimeout(() => setTip(null), 10000)
     return () => window.clearTimeout(t)
   }, [tip])
 
@@ -42,14 +40,13 @@ export default function InstallPWAButton() {
         return
       }
 
-      // El navegador todavía no habilitó el instalador nativo
       if (isIos()) {
         setTip('En iPhone/iPad: tocá Compartir → “Agregar a pantalla de inicio”.')
         return
       }
 
       setTip(
-        'Para instalar: en Chrome/Edge abrí el menú ⋮ y elegí “Instalar CarpiSeñas” o “Instalar app”.',
+        'Chrome aún no ofrece reinstalar. En la PC: chrome://apps → quitar CarpiSeñas, o Configuración → Aplicaciones → desinstalar. Después borrá datos del sitio y recargá.',
       )
     } finally {
       setBusy(false)
@@ -75,6 +72,7 @@ export default function InstallPWAButton() {
           disabled:opacity-70
         "
       >
+        {/* Misma geometría que logoDownload.svg: pata a pantalla completa + flecha original */}
         <svg
           className="size-full drop-shadow-[0_8px_18px_rgba(15,23,42,0.28)]"
           viewBox="0 0 183 183"
@@ -84,26 +82,22 @@ export default function InstallPWAButton() {
         >
           <image
             href={pawIcon}
-            x="0"
-            y="0"
             width="183"
             height="183"
-            preserveAspectRatio="xMidYMid meet"
+            preserveAspectRatio="xMidYMid slice"
           />
-          <g transform="translate(0 8)">
-            <g className="pwa-download-arrow">
-              <path
-                d="M89.3706 116.413C90.1516 117.194 91.4179 117.194 92.199 116.413L104.928 103.687C105.709 102.906 105.709 101.639 104.928 100.858C104.147 100.077 102.881 100.077 102.1 100.858L90.7852 112.171L79.4723 100.856C78.6913 100.075 77.425 100.075 76.6439 100.856C75.8628 101.637 75.8627 102.903 76.6437 103.684L89.3706 116.413ZM90.7871 87L88.7871 86.9998L88.7849 114.999L90.7849 114.999L92.7849 114.999L92.7871 87.0002L90.7871 87Z"
-                fill="#1F2937"
-              />
-              <path
-                d="M110 117L106.5 123H79L73 117"
-                stroke="#1F2937"
-                strokeWidth="4"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </g>
+          <g className="pwa-download-arrow">
+            <path
+              d="M89.3706 116.413C90.1516 117.194 91.4179 117.194 92.199 116.413L104.928 103.687C105.709 102.906 105.709 101.639 104.928 100.858C104.147 100.077 102.881 100.077 102.1 100.858L90.7852 112.171L79.4723 100.856C78.6913 100.075 77.425 100.075 76.6439 100.856C75.8628 101.637 75.8627 102.903 76.6437 103.684L89.3706 116.413ZM90.7871 87L88.7871 86.9998L88.7849 114.999L90.7849 114.999L92.7849 114.999L92.7871 87.0002L90.7871 87Z"
+              fill="#1F2937"
+            />
+            <path
+              d="M110 117L106.5 123H79L73 117"
+              stroke="#1F2937"
+              strokeWidth="4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </g>
         </svg>
       </button>
@@ -112,7 +106,7 @@ export default function InstallPWAButton() {
         <div
           role="status"
           className="
-            fixed bottom-[7.5rem] right-5 z-50 max-w-[17rem] md:bottom-[9.5rem]
+            fixed bottom-[7.5rem] right-5 z-50 max-w-[18rem] md:bottom-[9.5rem]
             rounded-2xl bg-[#0f172a] px-4 py-3 text-sm text-white shadow-lg
             animate-[fadeIn_500ms_ease-out]
           "
