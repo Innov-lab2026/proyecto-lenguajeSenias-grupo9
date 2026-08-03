@@ -12,12 +12,12 @@ comentarios, documentación y mensajes de commit).
 ## Capturas
 
 <p align="center">
-  <img src=".github/screenshots/02_Home.webp" width="250" height="460" alt="Home: camino de islas por módulo, con XP, puntos y señas acumuladas" />
-  <img src=".github/screenshots/04_Lesson_completed.webp" width="250" height="460" alt="Pantalla de lección completada, con la recompensa obtenida y el siguiente nivel desbloqueado" />
-  <img src=".github/screenshots/05_Alphabet.webp" width="250" height="460" alt="Abecedario dactilológico, con las letras ya vistas resaltadas" />
-  <img src=".github/screenshots/06_Alphabet_letter_G.webp" width="250" height="460" alt="Detalle de una letra del abecedario, con su video en LSA" />
-  <img src=".github/screenshots/03_Rewards.webp" width="250" height="460" alt="Recompensas: logros por módulo y stickers adquiridos" />
-  <img src=".github/screenshots/01_Profile.webp" width="250" height="460" alt="Perfil del usuario" />
+  <img src=".github/screenshots/02_Home.webp" width="250" height="460" hspace="6" vspace="12" alt="Home: camino de islas por módulo, con XP, puntos y señas acumuladas" />
+  <img src=".github/screenshots/04_Lesson_completed.webp" width="250" height="460" hspace="6" vspace="12" alt="Pantalla de lección completada, con la recompensa obtenida y el siguiente nivel desbloqueado" />
+  <img src=".github/screenshots/05_Alphabet.webp" width="250" height="460" hspace="6" vspace="12" alt="Abecedario dactilológico, con las letras ya vistas resaltadas" />
+  <img src=".github/screenshots/06_Alphabet_letter_G.webp" width="250" height="460" hspace="6" vspace="12" alt="Detalle de una letra del abecedario, con su video en LSA" />
+  <img src=".github/screenshots/03_Rewards.webp" width="250" height="460" hspace="6" vspace="12" alt="Recompensas: logros por módulo y stickers adquiridos" />
+  <img src=".github/screenshots/01_Profile.webp" width="250" height="460" hspace="6" vspace="12" alt="Perfil del usuario" />
 </p>
 
 ---
@@ -179,23 +179,12 @@ El detalle por paquete y por feature:
 
 ---
 
-## Estado y pendientes
+## Estado
 
 Lo que funciona hoy de punta a punta contra la base real: auth (email + Google), el camino de
 islas del home, las 10 lecciones de los Módulos 1 y 2, el abecedario completo (30 letras con
 video), favoritos, y las recompensas con compra de stickers. La app además es **instalable como
 PWA** desde el navegador o desde la landing.
-
-Lo principal que falta:
-
-- **Acreditación de señas en las conversaciones** (`m1-l5` y `m2-l5`): las lecciones se juegan con
-  videos reales y dan XP y puntos, pero **acreditan 0 señas**. Falta sembrar sus filas en
-  `lesson_signs`; el detalle de cómo hacerlo está documentado en la propia migración
-  `backend/supabase/migrations/20260730000002_seed_lesson_signs.sql`.
-- **Módulo 3**: sembrado en la base pero sin lecciones — queda bloqueado por diseño.
-- **Testing**: no hay runner instalado en ningún paquete.
-- **Recuperar contraseña**: la pantalla existe, el flujo no está implementado.
-- **Swagger**: sólo Auth está anotado; faltan los JSDoc del resto de las rutas.
 
 ---
 
