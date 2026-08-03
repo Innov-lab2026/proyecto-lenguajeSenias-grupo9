@@ -49,16 +49,23 @@ def remove_dark_background(img: Image.Image) -> Image.Image:
     return img
 
 
-def make_square(img: Image.Image, size: int, pad_ratio: float) -> Image.Image:
-    """Crop to content, center on transparent square, resize."""
+def make_square(
+    img: Image.Image,
+    size: int,
+    pad_ratio: float,
+    shift_x_ratio: float = 0.0,
+) -> Image.Image:
+    """Crop to content, center on transparent square (optional right shift), resize."""
     bbox = img.getbbox()
     cropped = img.crop(bbox) if bbox else img
     cw, ch = cropped.size
     side = max(cw, ch)
     pad = int(side * pad_ratio)
     canvas = Image.new("RGBA", (side + pad * 2, side + pad * 2), (0, 0, 0, 0))
-    ox = (canvas.size[0] - cw) // 2
+    ox = (canvas.size[0] - cw) // 2 + int(side * shift_x_ratio)
     oy = (canvas.size[1] - ch) // 2
+    ox = max(0, min(ox, canvas.size[0] - cw))
+    oy = max(0, min(oy, canvas.size[1] - ch))
     canvas.paste(cropped, (ox, oy), cropped)
     return canvas.resize((size, size), Image.Resampling.LANCZOS)
 
@@ -80,7 +87,8 @@ def main() -> None:
         os.path.join(ROOT, "landing-page", "public", "icons"),
     ]
 
-    # Íconos PWA: pata más grande y bien centrada (poco padding)
+    # Íconos PWA (NO el botón flotante): leve shift a la derecha para percibirse centrada
+    ICON_SHIFT = 0.035
     sizes_any = {
         "icon-192.png": 192,
         "icon-512.png": 512,
@@ -91,22 +99,19 @@ def main() -> None:
         os.makedirs(folder, exist_ok=True)
 
         for name, size in sizes_any.items():
-            # pad chico → pata más grande en el ícono
-            icon = make_square(raw, size, pad_ratio=0.04)
+            icon = make_square(raw, size, pad_ratio=0.04, shift_x_ratio=ICON_SHIFT)
             save_png(icon, os.path.join(folder, name))
 
-        # Apple: fondo claro + pata grande centrada
         apple_size = 180
-        apple_paw = make_square(raw, apple_size, pad_ratio=0.06)
+        apple_paw = make_square(raw, apple_size, pad_ratio=0.06, shift_x_ratio=ICON_SHIFT)
         apple = Image.new("RGBA", (apple_size, apple_size), (248, 250, 252, 255))
         apple.paste(apple_paw, (0, 0), apple_paw)
         save_png(apple, os.path.join(folder, "apple-touch-icon.png"))
 
-        # Maskable: fondo claro + pata grande (~78% del canvas, centrada)
         for size in (192, 512, 1024):
             bg = Image.new("RGBA", (size, size), (248, 250, 252, 255))
             inner = int(size * 0.78)
-            icon = make_square(raw, inner, pad_ratio=0.02)
+            icon = make_square(raw, inner, pad_ratio=0.02, shift_x_ratio=ICON_SHIFT)
             ox = (size - inner) // 2
             oy = (size - inner) // 2
             bg.paste(icon, (ox, oy), icon)
