@@ -1,9 +1,9 @@
-import carpiArg from '../../assets/images/demo/carpi-arg.webp'
+import carpiArg from '../../assets/images/demo/carpi_sena.webp'
 
 export default function BenefitsIlustration() {
     
     return (
-        <div className="transform scale-125 max-w-sm sm:max-w-none mx-auto sm:mx-0">
+        <div className="transform sm:scale-120 max-w-sm sm:max-w-none mx-auto sm:mx-0">
             <img
                 src={carpiArg}
                 alt="Carpincho usando la camiseta de argentina"
