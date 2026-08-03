@@ -38,6 +38,7 @@ export const teamData = {
         description: "Verificamos la calidad de cada entrega mediante pruebas funcionales y de usabilidad. Diseñamos casos de prueba y reportamos hallazgos para asegurar una experiencia confiable.",
         members: [
             { name: "Yamila Martin", linkedin: "https://www.linkedin.com/in/mar%C3%ADa-yamila-mart%C3%ADn-8a071b210/", github: "https://github.com/YamiMartin" },
+            { name: "Inés Abarrategui", linkedin: "https://www.linkedin.com/in/mariainesabarrateguif/ ", github: "https://github.com/minesaba" },
         ]
     }
 };

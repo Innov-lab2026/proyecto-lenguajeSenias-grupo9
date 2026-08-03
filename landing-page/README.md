@@ -1,8 +1,8 @@
 # 🌟 CarpiSeñas - Landing Page
 
-**CarpiSeñas** es una aplicación interactiva diseñada para acercar la **Lengua de Señas Argentina (LSA)** a personas oyentes de una manera accesible, divertida e inclusiva. A través de la gamificación y el uso de tecnologías modernas, el proyecto busca fomentar el respeto, la empatía y la inclusión a nivel social.
+**CarpiSeñas** es una aplicación interactiva diseñada para acercar la **Lengua de Señas Argentina (LSA)** a personas de una manera accesible, divertida e inclusiva. A través de la gamificación y el uso de tecnologías modernas, el proyecto busca fomentar el respeto, la empatía y la inclusión a nivel social.
 
-🔗 **Sitio desplegado:** [carpisenias.netlify.app](https://carpisenias.netlify.app/)
+🔗 **Sitio desplegado:** [carpilanding.netlify.app](https://carpilanding.netlify.app/)
 
 ---
 
@@ -16,7 +16,23 @@ El proyecto está construido sobre las siguientes tecnologías y herramientas mo
 | **Lenguaje** | [TypeScript](https://www.typescriptlang.org/) | `~6.0.2` | Superconjunto de JavaScript que añade tipado estático estricto. |
 | **Entorno de Desarrollo** | [Vite](https://vite.dev/) | `^8.0.12` | Herramienta de compilación ultrarrápida para desarrollo frontend. |
 | **Estilos (CSS)** | [Tailwind CSS](https://tailwindcss.com/) | `^4.3.0` | Framework de CSS utilitario moderno (v4.3 con plugins nativos de Vite). |
+| **Utilidad de clases** | [tailwind-merge](https://github.com/dcastil/tailwind-merge) | `^3.6.0` | Resuelve conflictos entre clases de Tailwind al componerlas. |
 | **Linter / Estilo** | [ESLint](https://eslint.org/) | `^10.3.0` | Herramienta de análisis estático para garantizar la calidad del código. |
+
+---
+
+## 🔗 Relación con la app
+
+La landing es la puerta de entrada: **todos los CTAs redirigen a la aplicación**, cuya URL está
+centralizada en `src/constants/app.ts` (constante `APP_URL`). Si la app cambia de dominio, se
+modifica en ese único lugar.
+
+Además, la landing ofrece **instalar la app como PWA** sin salir del sitio:
+
+| Pieza | Rol |
+|---|---|
+| `src/hooks/usePwaInstall.ts` | Escucha el evento `beforeinstallprompt` del navegador y expone si la app se puede instalar, si ya está instalada y la función para lanzar el instalador. |
+| `src/components/ui/InstallPWAButton.tsx` | Botón flotante de instalación. Se oculta solo si la app ya está instalada y muestra instrucciones manuales en iOS, donde el navegador no permite el instalador automático. |
 
 ---
 
@@ -42,16 +58,21 @@ landing-page/
     ├── components/             # Componentes React reutilizables organizados por módulo
     │   ├── common/             # Genéricos compartidos (ButtonSuccess, SectionHeader)
     │   ├── demo/               # BenefitsSection, BenefitsContent, BenefitsIllustration,
-    │   │                       #   DemoSection y DemoFeatureCard
+    │   │                       #   DemoSection, DemoFeatureCard, InteractiveDemo y DataDemo
     │   ├── header/             # Navbar, DesktopMenu, MobileMenu, ToggleMenu, LogoText
     │   ├── hero/               # HeroContent y HeroIllustration
     │   ├── project/            # ProjectFeatures y ProjectFeatureCard
-    │   └── team/               # Línea de tiempo del equipo (TeamCard, TeamCurve,
-    │                           #   TeamTail, TeamTimelineItem)
+    │   ├── team/               # Línea de tiempo del equipo (TeamCard, TeamCurve,
+    │   │                       #   TeamTail, TeamTimelineItem)
+    │   └── ui/                 # InstallPWAButton: botón flotante para instalar la app
+    ├── constants/              # Constantes compartidas
+    │   └── app.ts              # APP_URL: destino de todos los CTAs hacia la aplicación
     ├── data/                   # Información estática y mockups
     │   ├── TeamData.js         # Datos del equipo (áreas, integrantes, enlaces)
     │   └── TeamData.d.ts       # Declaración de tipos para TeamData.js
-    ├── hooks/                  # Custom Hooks de React (e.g., useInView)
+    ├── hooks/                  # Custom Hooks de React
+    │   ├── useInView.ts        # Detecta cuándo un elemento entra en pantalla (animaciones)
+    │   └── usePwaInstall.ts    # Maneja la instalación de la app como PWA
     ├── layout/                 # Contenedores y estructuras de diseño (SectionLayout.tsx)
     ├── sections/               # Secciones principales renderizadas en App.tsx
     │   ├── Demo.tsx            # Sección que unifica Beneficios y la Demo de señas
@@ -108,15 +129,14 @@ npm install
   ```
   Permite levantar localmente la versión ya compilada del proyecto.
 
+* **Publicar el sitio:**
+  ```bash
+  npm run deploy
+  ```
+  Compila el proyecto (`predeploy` ejecuta `npm run build`) y publica la carpeta `dist/`
+  mediante `gh-pages`.
+
+> ℹ️ El comando `build` corre `tsc -b` antes de compilar con Vite, así que **un error de tipos
+> detiene el build**. Conviene correr `npm run lint` y `npm run build` antes de publicar.
+
 ---
-
-## 👥 Equipo del Proyecto
-
-CarpiSeñas es posible gracias al trabajo colaborativo de las siguientes áreas:
-
-* **Coordinación General:** Gustavo Ovejero
-* **Data Analytics:** Matías De Vivo, Inés Abarrategui, Julián Outeyral
-* **Diseño UX/UI:** Sol Diessler, Belén Coronel, Karina Rosa
-* **Frontend:** Ezequiel Oliver, María Cerpa, Juan Martínez
-* **Backend:** Elisa Aroya, Araceli Fernández, Mauricio Soto
-* **Testing QA:** María Martín, Julián Salazar
