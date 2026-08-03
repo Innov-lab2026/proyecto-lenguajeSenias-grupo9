@@ -6,16 +6,9 @@
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#000000",
+  "background_color": "#F8FAFC",
   "theme_color": "#4A90E2",
   "lang": "es-AR",
-  "related_applications": [
-    {
-      "platform": "webapp",
-      "url": "https://carpisenias.vercel.app/manifest.json"
-    }
-  ],
-  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/icons/icon-192.png",
@@ -30,7 +23,19 @@
       "purpose": "any"
     },
     {
-      "src": "/icons/icon-512.png",
+      "src": "/icons/icon-1024.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/icon-maskable-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
