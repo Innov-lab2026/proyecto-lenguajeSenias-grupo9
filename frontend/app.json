@@ -29,7 +29,7 @@
       "shortName": "CarpiSeñas",
       "lang": "es",
       "themeColor": "#4A90E2",
-      "backgroundColor": "#000000",
+      "backgroundColor": "#F8FAFC",
       "display": "standalone",
       "orientation": "portrait",
       "startUrl": "/"
