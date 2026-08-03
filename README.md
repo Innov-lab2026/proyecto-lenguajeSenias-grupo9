@@ -9,6 +9,19 @@ comentarios, documentación y mensajes de commit).
 
 ---
 
+## Capturas
+
+<p align="center">
+  <img src=".github/screenshots/02_Home.webp" width="250" height="460" alt="Home: camino de islas por módulo, con XP, puntos y señas acumuladas" />
+  <img src=".github/screenshots/04_Lesson_completed.webp" width="250" height="460" alt="Pantalla de lección completada, con la recompensa obtenida y el siguiente nivel desbloqueado" />
+  <img src=".github/screenshots/05_Alphabet.webp" width="250" height="460" alt="Abecedario dactilológico, con las letras ya vistas resaltadas" />
+  <img src=".github/screenshots/06_Alphabet_letter_G.webp" width="250" height="460" alt="Detalle de una letra del abecedario, con su video en LSA" />
+  <img src=".github/screenshots/03_Rewards.webp" width="250" height="460" alt="Recompensas: logros por módulo y stickers adquiridos" />
+  <img src=".github/screenshots/01_Profile.webp" width="250" height="460" alt="Perfil del usuario" />
+</p>
+
+---
+
 ## Los tres paquetes
 
 Este repo tiene tres proyectos independientes, cada uno con su `package.json`:

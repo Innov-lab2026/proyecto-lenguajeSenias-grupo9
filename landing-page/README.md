@@ -129,13 +129,6 @@ npm install
   ```
   Permite levantar localmente la versión ya compilada del proyecto.
 
-* **Publicar el sitio:**
-  ```bash
-  npm run deploy
-  ```
-  Compila el proyecto (`predeploy` ejecuta `npm run build`) y publica la carpeta `dist/`
-  mediante `gh-pages`.
-
 > ℹ️ El comando `build` corre `tsc -b` antes de compilar con Vite, así que **un error de tipos
 > detiene el build**. Conviene correr `npm run lint` y `npm run build` antes de publicar.
 

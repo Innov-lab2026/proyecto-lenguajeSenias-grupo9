@@ -52,7 +52,7 @@ export default function Team() {
                     </a>
                 </p>
 
-                <ButtonSuccess className="px-10">Comienza Ya</ButtonSuccess>
+                <ButtonSuccess className="px-10">Comenzar Ya</ButtonSuccess>
             </div>
 
         </SectionLayout>

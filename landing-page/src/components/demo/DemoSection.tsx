@@ -18,7 +18,7 @@ export default function DemoSection() {
             <SectionHeader
                 title="Aprendé jugando"
                 text="Desde el abecedario hasta conversaciones cotidianas,
-                    avanzá a tu ritmo mediante juegos y desafíos"
+                    avanzá a tu ritmo mediante juegos y desafíos."
             />
 
             { /* Contenido principal */}
