@@ -11,8 +11,8 @@ export default function Project() {
         >
             <SectionHeader
                 title="¿Qué es CarpiSeñas?"
-                text="Carpiseñas es una App pensada para acercar el Lenguaje de
-                    Señas Argentina a personas oyentes de manera accesible,
+                text="Carpiseñas es una App pensada para acercar la Lengua de
+                    Señas Argentina a personas de manera accesible,
                     divertida e inclusiva."
                 className="my-10"
             />

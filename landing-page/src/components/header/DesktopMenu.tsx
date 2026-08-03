@@ -21,7 +21,7 @@ export default function DesktopMenu({ navLinks }: { navLinks: { name: string, hr
                 </a>
             ))}
 
-            <ButtonSuccess children="Entrar" span={true}/>
+            <ButtonSuccess children="Entrar" span={false}/>
         </nav>
     )
 }
