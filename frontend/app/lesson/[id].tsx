@@ -129,7 +129,7 @@ export default function LessonScreen() {
     'm1-l2-content-interactive',
     'm1-l3-content-interactive',
     'm1-l4-content-interactive',
-    'm1-l5-content-1',
+    'm1-l5-dialogue-1',
     'm2-l1-composition',
     'm2-l2-content-interactive',
     'm2-l3-content-interactive',

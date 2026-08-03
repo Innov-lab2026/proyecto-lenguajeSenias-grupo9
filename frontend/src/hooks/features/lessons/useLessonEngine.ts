@@ -133,7 +133,6 @@ export function useLessonEngine({ lessonId, lessonNumber, contentKey }: UseLesso
         'm1-l3-content-interactive',
         'm1-l3-quiz',
         'm1-l4-content-interactive',
-        'm1-l5-content-1',
         'm2-l2-content-interactive',
         'm2-l4-content-interactive',
       ]

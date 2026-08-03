@@ -286,34 +286,76 @@ export const LESSON_CONTENT: Record<string, Lesson> = {
     title: 'Conversar',
     description: 'Combiná las señas aprendidas para mantener una conversación.',
     steps: [
+      // Misma estructura que m2-l5: la conversación se arma de a una frase por
+      // pantalla (`dialogue-composition`, se completa tocando la opción) y
+      // cierra con la charla entera reproduciendo los videos en secuencia.
       {
-        id: 'm1-l5-content-1',
-        type: 'content',
+        id: 'm1-l5-dialogue-1',
+        type: 'dialogue-composition',
         subtitle: 'Charla: Presentaciones',
-        contentTitle: 'Observá las tres señas antes de continuar.',
-        options: ['Bien', 'Más o menos', '¿cómo te llamás?'],
-        videoIds: {
-          'Bien': V.BIEN,
-          'Más o menos': V.MAS_O_MENOS,
-          '¿cómo te llamás?': V.COMO_TE_LLAMAS,
-        },
+        question: 'Comenzá la conversación seleccionando la frase correcta.',
+        speaker: 'Pedro',
+        videoId: V.COMO_TE_LLAMAS,
+        // "Hola." con punto y no con coma: la opción arranca en mayúscula, y
+        // "Hola, ¿Cómo te llamás?" quedaría mal escrito.
+        sentence: 'Hola. [blank]',
+        options: ['¿Cómo estás?', '¿Cómo te llamás?'],
+        correctAnswer: '¿Cómo te llamás?',
+        // Un hueco con una frase de varias palabras: sin esto se partiría por
+        // espacios y al reintentar se borraría la respuesta aunque fuera correcta.
+        correctParts: ['¿Cómo te llamás?'],
       },
       {
-        id: 'm1-l5-dialogue',
-        type: 'dialogue',
-        subtitle: 'Completar charla: Presentaciones',
-        question: 'Completá la conversación arrastrando cada expresión a su lugar.',
-        videoId: V.HOLA_COMO_ESTAS,
-        options: ['¿cómo te llamás?', 'Bien', 'De nada', 'Adiós', 'Por favor', 'Más o menos'],
+        id: 'm1-l5-dialogue-2',
+        type: 'dialogue-composition',
+        subtitle: 'Charla: Presentaciones',
+        question: 'Continuá la conversación seleccionando la frase correcta.',
+        speaker: 'Juan',
+        videoId: V.COMO_ESTAS,
+        sentence: 'Hola, soy Juan. Un gusto. [blank]',
+        options: ['¿Cómo te llamás?', '¿Cómo estás?', '¿Y vos?'],
+        correctAnswer: '¿Cómo estás?',
+        correctParts: ['¿Cómo estás?'],
+      },
+      {
+        id: 'm1-l5-dialogue-3',
+        type: 'dialogue-composition',
+        subtitle: 'Charla: Presentaciones',
+        question: 'Respondé la pregunta seleccionando la seña correcta.',
+        speaker: 'Pedro',
+        videoId: V.BIEN,
+        sentence: '[blank]. ¿Y vos?',
+        options: ['Más o menos', 'Bien', 'Mal'],
+        correctAnswer: 'Bien',
+        // Una palabra sin espacios: sin esto se partiría letra por letra (el
+        // modo de los ejercicios de deletreo) y no coincidiría con la opción.
+        correctParts: ['Bien'],
+      },
+      {
+        id: 'm1-l5-dialogue-4',
+        type: 'dialogue-composition',
+        subtitle: 'Charla: Presentaciones',
+        question: 'Terminá la conversación seleccionando la seña correcta.',
+        speaker: 'Juan',
+        videoId: V.MAS_O_MENOS,
+        sentence: '[blank]. Después te cuento.',
+        options: ['Más o menos', 'Bien', 'Mal'],
+        correctAnswer: 'Más o menos',
+        correctParts: ['Más o menos'],
+      },
+      {
+        id: 'm1-l5-dialogue-5',
+        type: 'dialogue-sequence',
+        subtitle: 'Charla: Presentaciones',
+        question: 'Observá la conversación completa.',
+        videoSequenceIds: [V.COMO_TE_LLAMAS, V.COMO_ESTAS, V.BIEN, V.MAS_O_MENOS],
+        // Una línea por video, en el mismo orden que `videoSequenceIds`.
         dialogue: [
-          { speaker: 'Pedro', text: 'Hola, [blank]' },
+          { speaker: 'Pedro', text: 'Hola. ¿Cómo te llamás?' },
           { speaker: 'Juan', text: 'Hola, soy Juan. Un gusto. ¿Cómo estás?' },
-          { speaker: 'Pedro', text: '[blank]. ¿Y vos?' },
-          { speaker: 'Juan', text: '[blank]. Después te cuento.' },
-          { speaker: 'Pedro', text: 'Dale, chau.' },
+          { speaker: 'Pedro', text: 'Bien. ¿Y vos?' },
+          { speaker: 'Juan', text: 'Más o menos. Después te cuento.' },
         ],
-        // Las respuestas van en el orden en que aparecen los [blank].
-        correctAnswer: '¿cómo te llamás?|Bien|Más o menos',
       },
     ],
   },

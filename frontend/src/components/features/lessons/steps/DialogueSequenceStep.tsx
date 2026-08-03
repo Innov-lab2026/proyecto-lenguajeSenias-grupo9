@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons'
 import type { LessonStep } from '@/src/types/lessons'
 import { LessonVideo } from '@/src/components/features/lessons/LessonVideo'
 import { VideoFrame } from '@/src/components/features/lessons/VideoFrame'
+import { cn } from '@/src/utils/cn'
 
 interface DialogueSequenceStepProps {
   step: LessonStep
@@ -20,6 +21,13 @@ export function DialogueSequenceStep({
   const urls = step.videoSequenceUrls || []
   const [currentIdx, setCurrentIdx] = useState(0)
   const currentUrl = urls[currentIdx]
+
+  // Mismo criterio de color que DialogueExercise: el primer hablante en
+  // aparecer va en azul, el segundo en naranja — por orden de aparición, no
+  // por nombre, así funciona para cualquier par de hablantes.
+  const uniqueSpeakers = Array.from(
+    new Set((step.dialogue ?? []).map((line) => line.speaker.toLowerCase())),
+  )
 
   // `resolveStepVideos` descarta en silencio los ids que no están en el catálogo:
   // si no quedó ninguno, el step no tiene nada que reproducir.
@@ -82,23 +90,33 @@ export function DialogueSequenceStep({
           {step.question || 'Observá la conversación completa.'}
         </Text>
 
-        {/* Diálogo Completo (no interactivo, globos estáticos) */}
-        <View className="items-center justify-center w-full px-2">
-          {step.dialogue?.map((line, lineIdx) => {
-            return (
-              <View
-                key={lineIdx}
-                className="p-2.5 rounded-2xl border bg-[#EAF8FF] border-[#BEE3F8] self-center items-start min-w-[70%] max-w-[85%]"
-              >
-                <Text className="font-nunito text-xs font-bold text-secondary mb-1">
-                  {line.speaker}
-                </Text>
-                <Text className="font-nunito text-sm md:text-base text-ink">
+        {/* Diálogo completo en un único recuadro (no interactivo): una
+            transcripción de la charla, no un globo por línea. Cada línea
+            conserva el nombre de su hablante, coloreado. */}
+        <View className="w-full px-2">
+          <View className="p-3 rounded-2xl border bg-[#EAF8FF] border-[#BEE3F8] w-full max-w-[90%] self-center gap-1.5">
+            {step.dialogue?.map((line, lineIdx) => {
+              const isFirstSpeaker = uniqueSpeakers.indexOf(line.speaker.toLowerCase()) === 0
+
+              // Nombre y texto en un solo renglón (antes en dos): en pantallas
+              // bajas el video es lo que necesita el espacio, no la transcripción.
+              // Un <Text> anidado permite que el nombre mantenga su color propio
+              // dentro de la misma línea que el resto del texto.
+              return (
+                <Text key={lineIdx} className="font-nunito text-sm md:text-base text-ink">
+                  <Text
+                    className={cn(
+                      'font-bold',
+                      isFirstSpeaker ? 'text-secondary' : 'text-[#D97706]',
+                    )}
+                  >
+                    {line.speaker}:{' '}
+                  </Text>
                   {line.text}
                 </Text>
-              </View>
-            )
-          })}
+              )
+            })}
+          </View>
         </View>
       </View>
     </View>

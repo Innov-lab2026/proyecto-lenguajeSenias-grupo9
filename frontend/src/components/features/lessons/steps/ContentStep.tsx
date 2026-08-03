@@ -72,7 +72,6 @@ export function ContentStep({ step, selectedOption, onSelectOption, onWatched, m
                 step.id === 'm1-l2-content-interactive' ||
                   step.id === 'm1-l3-content-interactive' ||
                   step.id === 'm1-l4-content-interactive' ||
-                  step.id === 'm1-l5-content-1' ||
                   step.id === 'm2-l2-content-interactive' ||
                   step.id === 'm2-l4-content-interactive'
                   ? 'flex-row'
