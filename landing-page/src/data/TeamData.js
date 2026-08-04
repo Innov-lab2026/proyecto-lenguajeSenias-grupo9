@@ -12,7 +12,7 @@ export const teamData = {
         title: "Diseño UX/UI",
         description: "Diseñamos interfaces accesibles y responsivas enfocadas en usabilidad y aprendizaje visual. Realizamos research, wireframes y prototipos para optimizar la experiencia dentro de la plataforma LSA.",
         members: [
-            { name: "Sol Diessler", linkedin: "", github: "" },
+            { name: "Sol Diessler", linkedin: "https://www.linkedin.com/in/sol-diessler", github: "https://github.com/soldiessler" },
             { name: "Belén Coronel", linkedin: "https://www.linkedin.com/in/belencoronel/", github: "https://github.com/BeluCoronel" },
             { name: "Karina Rosa", linkedin: "https://www.linkedin.com/in/karinarosadev", github: "https://github.com/karinarosadev" }
         ]

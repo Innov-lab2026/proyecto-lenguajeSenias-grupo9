@@ -208,7 +208,7 @@ Datasets, métricas y visualizaciones para entrenar y mejorar el modelo de recon
 
 Research, wireframes y prototipos; interfaces accesibles y responsivas.
 
-- **Sol Diessler**
+- **[Sol Diessler](https://www.linkedin.com/in/sol-diessler)** — [GitHub](https://github.com/soldiessler)
 - **[Belén Coronel](https://www.linkedin.com/in/belencoronel/)** — [GitHub](https://github.com/BeluCoronel)
 - **[Karina Rosa](https://www.linkedin.com/in/karinarosadev)** — [GitHub](https://github.com/karinarosadev)
 
