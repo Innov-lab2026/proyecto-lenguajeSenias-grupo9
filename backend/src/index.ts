@@ -50,6 +50,16 @@ app.get('/', (req, res) => {
   res.json({ message: 'LSA API running' })
 })
 
+/**
+ * Diagnóstico temporal para confirmar `trust proxy` en Vercel: pegarle desde dos
+ * redes distintas (wifi de casa vs datos móviles) y comparar `ip`. Si difiere,
+ * el rate limiter está contando por IP real y no por el hop interno de Vercel.
+ * Sacar esta ruta una vez confirmado.
+ */
+app.get('/api/_debug/ip', (req, res) => {
+  res.json({ ip: req.ip, xForwardedFor: req.headers['x-forwarded-for'] })
+})
+
 setupSwagger(app)
 
 if (process.env.NODE_ENV !== 'production') {
