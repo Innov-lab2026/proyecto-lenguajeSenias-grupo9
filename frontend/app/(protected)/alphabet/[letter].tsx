@@ -42,11 +42,15 @@ export default function LetterScreen() {
   }
 
   const favoritesStore = useFavoritesStore()
+  // Referencia estable (no cambia entre renders) para poder declararla como
+  // dependencia real sin que el efecto se re-dispare en cada mutación del
+  // store — `favoritesStore` completo sí cambia de referencia en cada `set()`.
+  const loadFavorites = useFavoritesStore((s) => s.loadFavorites)
 
   // Hidratar favoritos al montar
   useEffect(() => {
-    favoritesStore.loadFavorites()
-  }, [])
+    loadFavorites()
+  }, [loadFavorites])
 
   const isFavorite = letter ? favoritesStore.isFavorite('letter-' + letter) : false
 
