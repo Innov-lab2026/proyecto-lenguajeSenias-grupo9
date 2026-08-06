@@ -7,7 +7,10 @@ export const loginService = async (email: string, password: string) => {
     password
   })
 
-  if (error) throw new Error(error.message)
+  // Se propaga el error de Supabase tal cual (no envuelto en un Error genérico)
+  // para no perder `.code`/`.status`, que el controller usa para distinguir
+  // credenciales inválidas de una caída del servicio.
+  if (error) throw error
 
   return data
 }
@@ -27,7 +30,7 @@ export const registerService = async (email: string, password: string, first_nam
     }
   })
 
-  if (error) throw new Error(error.message)
+  if (error) throw error
 
   return data
 }
@@ -48,6 +51,6 @@ export const deleteAccountService = async (userId: string) => {
   }
 
   const { error } = await supabaseAdmin.auth.admin.deleteUser(userId)
-  if (error) throw new Error(error.message)
+  if (error) throw error
 }
 

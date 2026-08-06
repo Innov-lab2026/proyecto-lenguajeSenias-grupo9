@@ -9,6 +9,7 @@ import { TextField } from "@/src/components/common/TextField"
 import { BirthDateField } from "@/src/components/features/auth/BirthDateField"
 import { Select } from "@/src/components/common/Select"
 import { GENDER_OPTIONS } from "@/src/constants/gender"
+import { GENDER_API_VALUE, GENDER_FROM_API_VALUE, type Gender } from "@/src/types/auth"
 import { useLogout } from "@/src/hooks/features/auth/useLogout"
 import { useProfile } from "@/src/hooks/features/profile/useProfile"
 import { useUpdateProfile } from "@/src/hooks/features/profile/useUpdateProfile"
@@ -83,7 +84,7 @@ export default function ProfileScreen() {
     const parts = (profile?.full_name || [user?.firstName, user?.lastName].filter(Boolean).join(" ") || "Usuario").split(" ")
     setFirstName(parts[0] || "")
     setLastName(parts.slice(1).join(" "))
-    setGender(profile?.gender || undefined)
+    setGender(profile?.gender ? GENDER_FROM_API_VALUE[profile.gender] : undefined)
     setBirthDate(profile?.birth_date ? profile.birth_date.split("-").reverse().join("/") : "")
   }, [profile?.birth_date, profile?.full_name, profile?.gender, user?.firstName, user?.lastName])
 
@@ -111,7 +112,7 @@ export default function ProfileScreen() {
       const birthDateIso = birthDate ? birthDate.split("/").reverse().join("-") : undefined
       await updateProfile.mutateAsync({
         full_name: fullName,
-        gender,
+        gender: gender ? GENDER_API_VALUE[gender as Gender] : undefined,
         birth_date: birthDateIso
       })
       setEditingPersonal(false)

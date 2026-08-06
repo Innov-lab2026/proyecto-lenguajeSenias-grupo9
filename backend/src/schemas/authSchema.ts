@@ -43,5 +43,19 @@ export const registerSchema = z.object({
     .max(100, 'País inválido'),
 })
 
+export const updateCredentialsSchema = z
+  .object({
+    currentPassword: z
+      .string({ error: 'La contraseña actual es requerida' })
+      .min(1, 'La contraseña actual es requerida'),
+    email: z.email({ error: 'Correo inválido' }).optional(),
+    password: z.string().min(8, 'La nueva contraseña debe tener al menos 8 caracteres').optional(),
+  })
+  .refine((data) => data.email || data.password, {
+    message: 'Indicá un email o una contraseña nueva.',
+    path: ['email'],
+  })
+
 export type LoginInput = z.infer<typeof loginSchema>
 export type RegisterInput = z.infer<typeof registerSchema>
+export type UpdateCredentialsInput = z.infer<typeof updateCredentialsSchema>
