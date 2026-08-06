@@ -1,4 +1,4 @@
-import { View, Text, Pressable, ScrollView, Alert, Modal, ActivityIndicator } from 'react-native'
+import { View, Text, Pressable, ScrollView, Modal, ActivityIndicator } from 'react-native'
 import { useState, useEffect } from 'react'
 import { Image } from 'expo-image'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -26,21 +26,6 @@ export function FavoritesList() {
   useEffect(() => {
     favoritesStore.loadFavorites()
   }, [])
-
-  const handleToggleFavorite = (id: string, title: string) => {
-    Alert.alert(
-      '¿Quitar de favoritos?',
-      `Se eliminará "${title}" de tu lista.`,
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Quitar',
-          style: 'destructive',
-          onPress: () => favoritesStore.removeFavorite(id)
-        }
-      ]
-    )
-  }
 
   const isLoading =
     modulesQuery.isPending ||

@@ -1,16 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
-import { ScrollView, Text, View } from 'react-native'
+import { ScrollView, View } from 'react-native'
 import { Image } from 'expo-image'
 import Svg, { Path } from 'react-native-svg'
 import Animated, {
   useAnimatedStyle,
   withSpring,
   useSharedValue,
-  useDerivedValue,
-  interpolate,
   FadeIn,
   FadeOut,
-  runOnJS
 } from 'react-native-reanimated'
 import { Island } from './Island'
 import { getIslandRatio } from './islands'
@@ -279,18 +276,16 @@ export function IslandPath({ module, moduleNumber, onIslandPress }: IslandPathPr
               />
             </Svg>
 
-            {width && (
-              <Animated.View
-                style={[
-                  {
-                    position: 'absolute',
-                  },
-                  animatedCarpiStyle
-                ]}
-              >
-                <CarpiAvatar size={56} />
-              </Animated.View>
-            )}
+            <Animated.View
+              style={[
+                {
+                  position: 'absolute',
+                },
+                animatedCarpiStyle
+              ]}
+            >
+              <CarpiAvatar size={56} />
+            </Animated.View>
 
             {islandNumbers.map((n) => {
               const center = centers[n - 1]

@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react'
-import { Pressable, Text, View, Modal, ActivityIndicator, Platform } from 'react-native'
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
+import { Text, View, Modal, ActivityIndicator, Platform } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { Ionicons } from '@expo/vector-icons'
-import { Button } from '@/src/components/common/Button'
 import { LessonFooter } from '@/src/components/features/lessons/LessonFooter'
 import { HintModal } from '@/src/components/features/lessons/HintModal'
 import { PauseModal } from '@/src/components/features/lessons/PauseModal'
@@ -15,11 +14,9 @@ import { useCompleteLetter } from '@/src/hooks/features/alphabet/useCompleteLett
 import { useFavoritesStore } from '@/src/store/favoritesStore'
 import { usePreferencesStore } from '@/src/store/preferencesStore'
 import { WebView } from 'react-native-webview'
-import { Image } from 'expo-image'
 
 export default function LetterScreen() {
   const router = useRouter()
-  const insets = useSafeAreaInsets()
   const params = useLocalSearchParams<{ letter?: string }>()
   const letter = Array.isArray(params.letter) ? params.letter[0] : params.letter
   const [showPractice, setShowPractice] = useState(false)

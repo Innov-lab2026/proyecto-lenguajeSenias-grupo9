@@ -1,7 +1,4 @@
 import Svg, { G, Path, ClipPath, Rect, Defs } from 'react-native-svg'
-import Animated, { useAnimatedProps } from 'react-native-reanimated'
-
-const AnimatedG = Animated.createAnimatedComponent(G)
 
 interface CarpiAvatarProps {
   size?: number
@@ -13,8 +10,6 @@ interface CarpiAvatarProps {
  * Se utiliza en la Home para mostrar el progreso.
  */
 export function CarpiAvatar({ size = 56, style }: CarpiAvatarProps) {
-  const scale = size / 56
-
   return (
     <Svg width={size} height={size * (40/56)} viewBox="0 0 56 40" fill="none" style={style}>
       <G clipPath="url(#clip0_1765_17059)">
