@@ -1,14 +1,10 @@
 import { Request, Response } from 'express'
 import { deleteAccountService, loginService, registerService } from '../services/authService'
 import { supabase, supabaseAdmin } from '../config/supabaseClient'
+import type { LoginInput, RegisterInput } from '../schemas/authSchema'
 
-export const login = async (req: Request, res: Response) => {
+export const login = async (req: Request<{}, {}, LoginInput>, res: Response) => {
   const { email, password } = req.body
-
-  if (!email || !password) {
-    res.status(400).json({ error: 'Email y password son requeridos' })
-    return
-  }
 
   try {
     const data = await loginService(email, password)
@@ -30,13 +26,8 @@ export const login = async (req: Request, res: Response) => {
   }
 }
 
-export const register = async (req: Request, res: Response) => {
+export const register = async (req: Request<{}, {}, RegisterInput>, res: Response) => {
   const { email, password, first_name, last_name, birth_date, gender, country } = req.body
-
-  if (!email || !password || !first_name || !last_name || !birth_date || !country) {
-    res.status(400).json({ error: 'Email, password, nombre, apellido, fecha de nacimiento y país son requeridos' })
-    return
-  }
 
   try {
     const data = await registerService(email, password, first_name, last_name, new Date(birth_date), gender, country)
