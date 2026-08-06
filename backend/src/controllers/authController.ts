@@ -1,14 +1,16 @@
 import { Request, Response } from 'express'
 import { deleteAccountService, loginService, registerService } from '../services/authService'
 import { supabase, supabaseAdmin } from '../config/supabaseClient'
+import type { LoginInput, RegisterInput, UpdateCredentialsInput } from '../schemas/authSchema'
+import {
+  resolveDeleteAccountError,
+  resolveLoginError,
+  resolveRegisterError,
+  resolveUpdateCredentialsError,
+} from '../utils/authErrorResponse'
 
-export const login = async (req: Request, res: Response) => {
+export const login = async (req: Request<{}, {}, LoginInput>, res: Response) => {
   const { email, password } = req.body
-
-  if (!email || !password) {
-    res.status(400).json({ error: 'Email y password son requeridos' })
-    return
-  }
 
   try {
     const data = await loginService(email, password)
@@ -25,18 +27,14 @@ export const login = async (req: Request, res: Response) => {
         expires_in: data.session?.expires_in
       }
     })
-  } catch (error: any) {
-    res.status(401).json({ error: error.message })
+  } catch (error) {
+    const { status, message } = resolveLoginError(error)
+    res.status(status).json({ error: message })
   }
 }
 
-export const register = async (req: Request, res: Response) => {
+export const register = async (req: Request<{}, {}, RegisterInput>, res: Response) => {
   const { email, password, first_name, last_name, birth_date, gender, country } = req.body
-
-  if (!email || !password || !first_name || !last_name || !birth_date || !country) {
-    res.status(400).json({ error: 'Email, password, nombre, apellido, fecha de nacimiento y país son requeridos' })
-    return
-  }
 
   try {
     const data = await registerService(email, password, first_name, last_name, new Date(birth_date), gender, country)
@@ -51,21 +49,15 @@ export const register = async (req: Request, res: Response) => {
         country: data.user?.user_metadata?.country
       }
     })
-  } catch (error: any) {
-    res.status(400).json({ error: error.message })
+  } catch (error) {
+    const { status, message } = resolveRegisterError(error)
+    res.status(status).json({ error: message })
   }
 }
 
-export const updateCredentials = async (req: Request, res: Response) => {
+export const updateCredentials = async (req: Request<{}, {}, UpdateCredentialsInput>, res: Response) => {
   const { currentPassword, email, password } = req.body
   const user = (req as any).user
-
-  if (!currentPassword || (!email && !password)) {
-    return res.status(400).json({ error: 'La contraseña actual y un cambio son requeridos.' })
-  }
-  if (password && password.length < 8) {
-    return res.status(400).json({ error: 'La nueva contraseña debe tener al menos 8 caracteres.' })
-  }
 
   const { error: verificationError } = await supabase.auth.signInWithPassword({
     email: user.email,
@@ -77,7 +69,10 @@ export const updateCredentials = async (req: Request, res: Response) => {
     ...(email ? { email } : {}),
     ...(password ? { password } : {}),
   })
-  if (error) return res.status(400).json({ error: error.message })
+  if (error) {
+    const { status, message } = resolveUpdateCredentialsError(error)
+    return res.status(status).json({ error: message })
+  }
 
   return res.status(200).json({ message: 'Datos de seguridad actualizados.', user: { email: data.user.email } })
 }
@@ -87,7 +82,8 @@ export const deleteAccount = async (req: Request, res: Response) => {
     const userId = (req as any).user.id
     await deleteAccountService(userId)
     return res.status(200).json({ message: 'Cuenta eliminada correctamente.' })
-  } catch (error: any) {
-    return res.status(500).json({ error: error.message })
+  } catch (error) {
+    const { status, message } = resolveDeleteAccountError(error)
+    return res.status(status).json({ error: message })
   }
 }

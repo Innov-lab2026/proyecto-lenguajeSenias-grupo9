@@ -1,6 +1,8 @@
 import { Router } from 'express'
 import { deleteAccount, login, register, updateCredentials } from '../controllers/authController'
 import { authMiddleware } from '../middleware/auth'
+import { validateBody } from '../middleware/validate'
+import { loginSchema, registerSchema, updateCredentialsSchema } from '../schemas/authSchema'
 
 const router = Router()
 
@@ -35,7 +37,7 @@ const router = Router()
  *              schema:
  *                 $ref: '#/components/schemas/LoginResponse'
  */
-router.post('/login', login)
+router.post('/login', validateBody(loginSchema), login)
 
 
 /**
@@ -89,8 +91,8 @@ router.post('/login', login)
  *              schema:
  *                  $ref: '#/components/schemas/RegisterResponse'
  */
-router.post('/register', register)
-router.patch('/credentials', authMiddleware, updateCredentials)
+router.post('/register', validateBody(registerSchema), register)
+router.patch('/credentials', authMiddleware, validateBody(updateCredentialsSchema), updateCredentials)
 router.delete('/account', authMiddleware, deleteAccount)
 
 export default router

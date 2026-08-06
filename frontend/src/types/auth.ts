@@ -14,6 +14,11 @@ export const GENDER_API_VALUE: Record<Gender, string> = {
   otro: 'Otro',
 }
 
+/** Inverso de `GENDER_API_VALUE`: del valor que devuelve el backend al valor interno del form. */
+export const GENDER_FROM_API_VALUE: Record<string, Gender> = Object.fromEntries(
+  GENDER_VALUES.map((value) => [GENDER_API_VALUE[value], value]),
+)
+
 export interface LoginRequest {
   email: string
   password: string
