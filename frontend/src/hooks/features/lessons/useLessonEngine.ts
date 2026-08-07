@@ -95,9 +95,13 @@ export function useLessonEngine({ lessonId, lessonNumber, contentKey }: UseLesso
   const [hintViewed, setHintViewed] = useState<Record<number, boolean>>({})
 
   const favoritesStore = useFavoritesStore()
+  // Referencia estable (no cambia entre renders) para poder declararla como
+  // dependencia real sin que el efecto se re-dispare en cada mutación del
+  // store — `favoritesStore` completo sí cambia de referencia en cada `set()`.
+  const loadFavorites = useFavoritesStore((s) => s.loadFavorites)
   useEffect(() => {
-    favoritesStore.loadFavorites()
-  }, [])
+    loadFavorites()
+  }, [loadFavorites])
   const favorites = new Set(favoritesStore.items.map((i) => i.id))
 
   const [watchedOptions, setWatchedOptions] = useState<Record<number, Set<string>>>({})

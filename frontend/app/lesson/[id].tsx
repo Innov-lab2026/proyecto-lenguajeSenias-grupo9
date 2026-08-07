@@ -11,7 +11,6 @@ import { CompositionStep } from '@/src/components/features/lessons/steps/Composi
 import { DialogueCompositionStep } from '@/src/components/features/lessons/steps/DialogueCompositionStep'
 import { DialogueSequenceStep } from '@/src/components/features/lessons/steps/DialogueSequenceStep'
 import { DialogueExercise } from '@/src/components/features/lessons/DialogueExercise'
-import { LessonVideo } from '@/src/components/features/lessons/LessonVideo'
 import { LessonSummary } from '@/src/components/features/lessons/LessonSummary'
 import { LessonHeader } from '@/src/components/features/lessons/LessonHeader'
 import { LessonFooter } from '@/src/components/features/lessons/LessonFooter'
@@ -23,7 +22,6 @@ import { FeedbackCompleteModal } from '@/src/components/features/lessons/Feedbac
 import { useLessonEngine } from '@/src/hooks/features/lessons/useLessonEngine'
 import { useStats } from '@/src/hooks/features/lessons/useStats'
 import { useCompletedLessons } from '@/src/hooks/features/lessons/useCompletedLessons'
-import { useFavoritesStore } from '@/src/store/favoritesStore'
 import { LESSON_SHELL } from '@/src/constants/lessons'
 import { cn } from '@/src/utils/cn'
 
@@ -74,11 +72,17 @@ export default function LessonScreen() {
   const [wasAlreadyCompleted, setWasAlreadyCompleted] = useState<boolean | null>(null)
 
   useEffect(() => {
-    if (completedLessonsQuery.data && wasAlreadyCompleted === null) {
+    if (wasAlreadyCompleted !== null) return
+
+    if (completedLessonsQuery.data) {
       const isCompleted = completedLessonsQuery.data.some((c) => c.lesson_id === id)
       setWasAlreadyCompleted(isCompleted)
+    } else if (completedLessonsQuery.isError) {
+      // Sin la foto no podemos saber si ya estaba completada; se asume que no
+      // en vez de dejar al usuario trabado en el loading de abajo para siempre.
+      setWasAlreadyCompleted(false)
     }
-  }, [completedLessonsQuery.data, id, wasAlreadyCompleted])
+  }, [completedLessonsQuery.data, completedLessonsQuery.isError, id, wasAlreadyCompleted])
 
   const {
     lesson,
@@ -172,6 +176,20 @@ export default function LessonScreen() {
   }
 
   if (showSummary) {
+    // Todavía no sabemos si esta lección ya estaba completada antes de este
+    // intento (la foto de wasAlreadyCompleted no llegó) — esperamos en vez de
+    // asumir, para no mostrar la pantalla de recompensa por error.
+    if (wasAlreadyCompleted === null) {
+      return (
+        <View
+          className="flex-1 bg-background items-center justify-center"
+          style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
+        >
+          <ActivityIndicator size="large" color="#5F9BA4" />
+        </View>
+      )
+    }
+
     if (wasAlreadyCompleted) {
       return (
         <FeedbackCompleteModal
@@ -187,7 +205,6 @@ export default function LessonScreen() {
         isPending={isSaving}
         nextLevel={nextLevel}
         contentKey={contentKey}
-        onClose={exitLesson}
         onContinue={() => !isSaving && exitLesson()}
         insets={insets}
       />

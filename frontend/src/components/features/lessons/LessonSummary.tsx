@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Pressable, Text, View } from 'react-native'
+import { Text, View } from 'react-native'
 import { Image } from 'expo-image'
-import { Ionicons } from '@expo/vector-icons'
 import { Button } from '@/src/components/common/Button'
 import { StatItem } from '@/src/components/features/home/stats'
 import { LESSON_SUMMARY_CONFIG } from '@/src/constants/lessons'
@@ -16,7 +15,6 @@ interface LessonSummaryProps {
   nextLevel: number | null
   /** `lessons.content_key`: elige los textos y el color de cierre de la lección. */
   contentKey?: string | null
-  onClose: () => void
   onContinue: () => void
   insets: { top: number; bottom: number }
 }
@@ -48,7 +46,7 @@ const WAVE_HEIGHT = 80 + WAVE_OVERLAP
 const LOCK_OVERLAP = 56
 
 /** Pantalla de resumen al terminar la lección: recompensa del server + desbloqueo del próximo nivel. */
-export function LessonSummary({ result, isPending, nextLevel, contentKey, onClose, onContinue, insets }: LessonSummaryProps) {
+export function LessonSummary({ result, isPending, nextLevel, contentKey, onContinue, insets }: LessonSummaryProps) {
   // El server responde success:false cuando la lección ya estaba completada:
   // no hay recompensa nueva que mostrar, sólo se reconoce la revisita.
   const alreadyCompleted = result != null && !result.success

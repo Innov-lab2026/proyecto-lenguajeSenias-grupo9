@@ -1,4 +1,4 @@
-import { View, Text, Pressable, ScrollView, Alert, Modal, ActivityIndicator } from 'react-native'
+import { View, Text, Pressable, ScrollView, Modal, ActivityIndicator } from 'react-native'
 import { useState, useEffect } from 'react'
 import { Image } from 'expo-image'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -15,6 +15,10 @@ import { usePreferencesStore } from '@/src/store/preferencesStore'
 /** Componente de lista de favoritos: agrupa favoritos por módulos (y su estado de bloqueo) y abecedario. */
 export function FavoritesList() {
   const favoritesStore = useFavoritesStore()
+  // Referencia estable (no cambia entre renders) para poder declararla como
+  // dependencia real sin que el efecto se re-dispare en cada mutación del
+  // store — `favoritesStore` completo sí cambia de referencia en cada `set()`.
+  const loadFavorites = useFavoritesStore((s) => s.loadFavorites)
   const isMuted = usePreferencesStore((s) => s.isMuted)
   const [playingItem, setPlayingItem] = useState<FavoriteItem | null>(null)
 
@@ -24,23 +28,8 @@ export function FavoritesList() {
 
   // Hidratar favoritos al montar
   useEffect(() => {
-    favoritesStore.loadFavorites()
-  }, [])
-
-  const handleToggleFavorite = (id: string, title: string) => {
-    Alert.alert(
-      '¿Quitar de favoritos?',
-      `Se eliminará "${title}" de tu lista.`,
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Quitar',
-          style: 'destructive',
-          onPress: () => favoritesStore.removeFavorite(id)
-        }
-      ]
-    )
-  }
+    loadFavorites()
+  }, [loadFavorites])
 
   const isLoading =
     modulesQuery.isPending ||
